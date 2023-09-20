@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "module": "CommonJS", //指定生成哪个模块系统代码： "None"， "CommonJS"， "AMD"， "System"， "UMD"， "ES6"或 "ES2015"。
+    "target": "ES5", //指定ECMAScript目标版本 "ES3"（默认）， "ES5"， "ES6"/ "ES2015"， "ES2016"， "ES2017"或 "ESNext"。
+    "sourceMap": false, //生成相应的 .map文件
+    "allowJs": true,
+    "skipLibCheck": false, //忽略所有的声明文件（ *.d.ts）的类型检查。
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true, //允许从没有设置默认导出的模块中默认导入。这并不影响代码的输出，仅为了类型检查。
+    "strict": false, //启用所有严格类型检查选项。
+    "forceConsistentCasingInFileNames": true, //禁止对同一个文件的不一致的引用。
+    "noFallthroughCasesInSwitch": true, //报告switch语句的fallthrough错误。（即，不允许switch的case语句贯穿）
+    "noUnusedLocals": false, //若有未使用的局部变量则抛错。
+    "noUnusedParameters": false, //若有未使用的参数则抛错
+    "noEmit": false, //不生成输出文件。
+    "moduleResolution": "Node",
+    "baseUrl": "./",
+    "resolveJsonModule": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "types": ["node"]
+  },
+  "include": [
+    "src",
+    "./package.json"
+  ],
+  "exclude": ["node_modules"]
+}
