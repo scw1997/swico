@@ -1,11 +1,8 @@
 import getBaseConfig from './webpack.base';
-import { getFormatDefineVars, getPort, initConfig, ProjectConfigType } from '../utils/tools';
+import { getPort, initConfig, GlobalData } from '../utils/tools';
 import path from 'path';
-import webpack from 'webpack';
 import { merge } from 'webpack-merge';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-
-export default async function (options: ProjectConfigType) {
+export default async function (options: GlobalData) {
     const { projectPath, customConfig } = options || {};
     const baseConfig = getBaseConfig({ ...options, env: 'dev' });
     //获取可用端口
@@ -15,6 +12,7 @@ export default async function (options: ProjectConfigType) {
         //打包后文件路径
         // @ts-ignore
         mode: 'development',
+        stats: 'errors-only',
         devtool: 'eval-cheap-module-source-map', // development
         devServer: {
             //使用HTML5 History API时，index.html可能需要提供页面来代替任何404响应。
@@ -36,6 +34,6 @@ export default async function (options: ProjectConfigType) {
                 directory: path.join(projectPath, '/public')
             }
         },
-        plugins: [...(customConfig.dev.plugins ?? [])]
+        plugins: [...(customConfig.dev?.plugins ?? [])]
     });
 }

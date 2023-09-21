@@ -1,6 +1,6 @@
 {
   "name": "secywo-template-cli",
-  "version": "0.9.1",
+  "version": "0.9.3",
   "description": "secywo template cli",
   "main": "index.js",
   "keywords": [
@@ -69,7 +69,7 @@
     "less-loader": "10.0.1",
     "lint-staged": "10.0.0",
     "mini-css-extract-plugin": "2.4.2",
-    "ora": "7.0.1",
+    "ora": "5.4.1",
     "portfinder": "1.0.32",
     "postcss-loader": "6.1.1",
     "postcss-preset-env": "7.4.3",

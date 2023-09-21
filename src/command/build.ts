@@ -2,14 +2,15 @@ import webpack from 'webpack';
 import getBuildConfig from '../config/webpack.prod';
 import { getProjectConfig } from '../utils/tools';
 import chalk from 'chalk';
-
+import ora from 'ora';
+const spinner = ora();
 // 执行start本地启动
 export default async function () {
     const projectConfig = await getProjectConfig();
-    const { entryPath, templatePath, projectPath, cliConfig } = projectConfig;
-    const buildConfig = getBuildConfig({ entryPath, templatePath, projectPath, cliConfig });
+    const { entryPath, templatePath, projectPath, customConfig } = projectConfig;
+    const buildConfig = getBuildConfig({ entryPath, templatePath, projectPath, customConfig });
     const compiler = webpack(buildConfig as any);
-
+    spinner.start('Building...');
     compiler.run((err, stats) => {
         // [Stats Object](#stats-object)
         if (err) {
@@ -36,13 +37,13 @@ export default async function () {
                 console.log(`- ${chalk.yellow.bold(item.stack)} \n`);
             });
         }
-
-        compiler.close((closeErr) => {
-            if (closeErr) {
-                console.log(`- ${chalk.bold('There are some errors：')} \n`);
-
-                console.log(`- ${chalk.red.bold(closeErr.toString())} \n`);
-            }
-        });
+        spinner.succeed(`${chalk.green.bold('Building complete')} \n`);
+        // compiler.close((closeErr) => {
+        //     if (closeErr) {
+        //         console.log(`- ${chalk.bold('There are some errors：')} \n`);
+        //
+        //         console.log(`- ${chalk.red.bold(closeErr.toString())} \n`);
+        //     }
+        // });
     });
 }

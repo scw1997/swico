@@ -3,21 +3,19 @@ import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import BundleAnalyzer from 'webpack-bundle-analyzer';
 import TerserPlugin from 'terser-webpack-plugin';
 import CopyPlugin from 'copy-webpack-plugin';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
 import fs from 'fs';
-import { initConfig, ProjectConfigType } from '../utils/tools';
-import webpack from 'webpack';
+import { initConfig, GlobalData } from '../utils/tools';
 import { merge } from 'webpack-merge';
 
 const BundleAnalyzerPlugin = BundleAnalyzer.BundleAnalyzerPlugin;
 const isAnalyze = process.env.ANALYZ === 'true';
 
-export default function (options: ProjectConfigType) {
+export default function (options: GlobalData) {
     const { projectPath, customConfig, templatePath } = options || {};
 
     const baseConfig = getCommonConfig({ ...options, env: 'prod' });
-    const consoleAvailable = customConfig.prod.console ?? initConfig.console;
+    const consoleAvailable = customConfig.prod?.console ?? initConfig.console;
     //处理public文件夹（静态资源）
     const isCopyPathExist = fs.existsSync(path.join(projectPath, '/public'));
 
@@ -29,6 +27,14 @@ export default function (options: ProjectConfigType) {
             hints: false //不显示性能警告信息
         },
         mode: 'production',
+        stats: {
+            preset: 'errors-only',
+            chunks: true,
+            assets: true,
+            outputPath: true,
+            assetsSort: '!size',
+            chunksSort: '!size'
+        },
         devtool: 'nosources-source-map', // production
         optimization: {
             //减少 entry chunk 体积，提高性能。
@@ -103,7 +109,7 @@ export default function (options: ProjectConfigType) {
                   ]
                 : []),
 
-            ...(custPrdConfig.plugins ?? [])
+            ...(customConfig.prod?.plugins ?? [])
         ]
     });
 }

@@ -1,16 +1,16 @@
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import { getFormatDefineVars, initConfig, ProjectConfigType } from '../utils/tools';
+import { getFormatDefineVars, initConfig, GlobalData } from '../utils/tools';
 import WebpackBar from 'webpackbar';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import webpack from 'webpack';
 
-export default function ({ projectPath, entryPath, env, customConfig }: ProjectConfigType) {
+export default function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
     const customBaseConfig = customConfig.base || {};
     //处理alias 自定义配置
-    const getCustAliasConfig = () => {
+    const getCustomAliasConfig = () => {
         const { alias } = customBaseConfig;
         const custAliasConfig = {};
         if (alias) {
@@ -188,7 +188,7 @@ export default function ({ projectPath, entryPath, env, customConfig }: ProjectC
             extensions: ['.ts', '.tsx', '.js', '.jsx'],
             alias: {
                 '@': path.join(projectPath, '/src'),
-                ...getCustAliasConfig()
+                ...getCustomAliasConfig()
             }
         },
         plugins: [
