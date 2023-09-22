@@ -23,7 +23,8 @@ const handleWatch = (projectPath, devServer) => {
             ],
             {
                 interval: 500,
-                binaryInterval: 500
+                binaryInterval: 500,
+                ignoreInitial: true
             }
         )
         .on('all', async (path, stats) => {

@@ -29,12 +29,12 @@ export const getProjectConfig: () => Promise<GlobalData> = async () => {
     // 当前命令行选择的目录(即项目根路径)
     const cwd = process.cwd();
     //secywo 配置文件路径
-    const configDir = path.resolve(cwd, './config');
+    const configDir = path.join(cwd, '/config');
     // 脚手架对应的配置文件信息
     const configPath = {
-        dev: path.resolve(configDir, './secywo.dev.ts'),
-        prod: path.resolve(configDir, './secywo.prod.ts'),
-        base: path.resolve(configDir, './secywo.ts')
+        dev: path.join(configDir, '/secywo.dev.ts'),
+        prod: path.join(configDir, '/secywo.prod.ts'),
+        base: path.join(configDir, '/secywo.ts')
     };
 
     const customConfig = {} as GlobalData['customConfig'];
@@ -51,9 +51,9 @@ export const getProjectConfig: () => Promise<GlobalData> = async () => {
     }
 
     //webpack入口文件
-    const entryPath = path.resolve(cwd, './src/index.tsx');
+    const entryPath = path.join(cwd, '/src/index.tsx');
     //webpack html template
-    const templatePath = path.resolve(cwd, './src/index.ejs');
+    const templatePath = path.join(cwd, '/src/index.ejs');
 
     return {
         projectPath: cwd,
