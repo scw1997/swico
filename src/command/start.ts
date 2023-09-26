@@ -1,7 +1,7 @@
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import getStartConfig from '../config/webpack.dev';
-import { getProjectConfig } from '../utils/tools';
+import { getPort, getProjectConfig } from '../utils/tools';
 import ora from 'ora';
 import chokidar from 'chokidar';
 import path from 'path';
@@ -54,7 +54,7 @@ const handleWatch = (projectPath, devServer) => {
         });
 };
 
-let availablePort = envPort || 3000; //若是更新重启的情况，则用缓存的端口，不用新端口
+let availablePort; //若是更新重启的情况，则用缓存的端口，不用新端口
 const restartServer = () => {
     const result = spawn.sync('cross-env', [`PORT=${availablePort}`, 'secywo', 'start'], {
         stdio: 'inherit'
@@ -69,13 +69,18 @@ const restartServer = () => {
 
 // 执行start本地启动
 export default async function start() {
+    //获取可用端口（优先使用重启时的传递的port环境变量）
+    availablePort = envPort ?? (await getPort());
     const projectConfig = await getProjectConfig();
     const { projectPath } = projectConfig;
     const startConfig = await getStartConfig(projectConfig);
     const compiler = webpack(startConfig as any);
     //启动服务
-    // @ts-ignore
-    const devServer = new WebpackDevServer(startConfig.devServer, compiler);
+    const devServer = new WebpackDevServer(
+        // @ts-ignore
+        { ...startConfig.devServer, port: availablePort },
+        compiler
+    );
 
     try {
         await devServer.start();

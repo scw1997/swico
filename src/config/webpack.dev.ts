@@ -1,12 +1,12 @@
 import getBaseConfig from './webpack.base';
-import { getPort, initConfig, GlobalData } from '../utils/tools';
+import { initConfig, GlobalData } from '../utils/tools';
 import path from 'path';
 import { merge } from 'webpack-merge';
+import EslintPlugin from 'eslint-webpack-plugin';
+
 export default async function (options: GlobalData) {
     const { projectPath, customConfig } = options || {};
     const baseConfig = await getBaseConfig({ ...options, env: 'dev' });
-    //获取可用端口
-    const port = await getPort();
 
     return merge(baseConfig, {
         //打包后文件路径
@@ -19,7 +19,6 @@ export default async function (options: GlobalData) {
             historyApiFallback: {
                 index: `${baseConfig.output.publicPath}index.html`
             },
-            port, //端口
             client: {
                 progress: false, //显示进度条
                 //警告不会覆盖页面
@@ -34,6 +33,18 @@ export default async function (options: GlobalData) {
                 directory: path.join(projectPath, '/public')
             }
         },
-        plugins: [...(customConfig.dev?.plugins ?? [])]
+        plugins: [
+            new EslintPlugin({
+                context: path.join(projectPath, '/src'),
+                extensions: ['tsx', 'ts', 'js', 'jsx'],
+                // 开启缓存
+                cache: true
+                // 指定缓存目录
+                // cacheLocation: path.resolve(__dirname, '../node_modules/.cache/eslintCache'),
+                // 开启多进程和进程数量（可能服务卡死）
+                // threads: coreNum
+            }),
+            ...(customConfig.dev?.plugins ?? [])
+        ]
     });
 }
