@@ -7,14 +7,15 @@ import path from 'path';
 import fs from 'fs';
 import { initConfig, GlobalData } from '../utils/tools';
 import { merge } from 'webpack-merge';
+import getBaseConfig from './webpack.base';
 
 const BundleAnalyzerPlugin = BundleAnalyzer.BundleAnalyzerPlugin;
 const isAnalyze = process.env.ANALYZ === 'true';
 
-export default function (options: GlobalData) {
+export default async function (options: GlobalData) {
     const { projectPath, customConfig, templatePath } = options || {};
 
-    const baseConfig = getCommonConfig({ ...options, env: 'prod' });
+    const baseConfig = await getBaseConfig({ ...options, env: 'prod' });
     const consoleAvailable = customConfig.prod?.console ?? initConfig.console;
     //处理public文件夹（静态资源）
     const isCopyPathExist = fs.existsSync(path.join(projectPath, '/public'));

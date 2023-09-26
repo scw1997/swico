@@ -4,7 +4,7 @@ import path from 'path';
 import { merge } from 'webpack-merge';
 export default async function (options: GlobalData) {
     const { projectPath, customConfig } = options || {};
-    const baseConfig = getBaseConfig({ ...options, env: 'dev' });
+    const baseConfig = await getBaseConfig({ ...options, env: 'dev' });
     //获取可用端口
     const port = await getPort();
 

@@ -8,7 +8,12 @@ const spinner = ora();
 export default async function () {
     const projectConfig = await getProjectConfig();
     const { entryPath, templatePath, projectPath, customConfig } = projectConfig;
-    const buildConfig = getBuildConfig({ entryPath, templatePath, projectPath, customConfig });
+    const buildConfig = await getBuildConfig({
+        entryPath,
+        templatePath,
+        projectPath,
+        customConfig
+    });
     const compiler = webpack(buildConfig as any);
     spinner.start('Building...');
     compiler.run((err, stats) => {

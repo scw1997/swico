@@ -6,7 +6,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import webpack from 'webpack';
 
-export default function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
+export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
     const customBaseConfig = customConfig.base || {};
     //处理alias 自定义配置
@@ -25,7 +25,7 @@ export default function ({ projectPath, entryPath, env, customConfig }: GlobalDa
     //处理自定义变量设置
     const defineVars = customConfig?.base?.define ?? {};
     if (Object.keys(defineVars).length !== 0) {
-        basicPlugins.push(new webpack.DefinePlugin(getFormatDefineVars(defineVars)));
+        basicPlugins.push(new webpack.DefinePlugin(await getFormatDefineVars(defineVars)));
     }
     return {
         //入口文件路径，必须为js
@@ -192,6 +192,7 @@ export default function ({ projectPath, entryPath, env, customConfig }: GlobalDa
             }
         },
         plugins: [
+            ...basicPlugins,
             new HtmlWebpackPlugin({
                 //不使用默认html文件，使用自己定义的html模板并自动引入打包后的js/css
                 template: path.join(projectPath, '/src/index.ejs'),

@@ -71,10 +71,14 @@ export const getPort = () => {
     });
 };
 
-export const getFormatDefineVars = (defineVarsConfigObj) => {
+export const getFormatDefineVars = async (defineVarsConfigObj) => {
     const formatObj = {};
     for (const [key, value] of Object.entries(defineVarsConfigObj)) {
-        formatObj[key] = JSON.stringify(value);
+        if (typeof value === 'function') {
+            formatObj[key] = JSON.stringify(await Promise.resolve(value()));
+        } else {
+            formatObj[key] = JSON.stringify(value);
+        }
     }
     return formatObj;
 };
