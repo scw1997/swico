@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import portFinder from 'portfinder';
+import ora from 'ora';
+import chalk from 'chalk';
+const spinner = ora();
 
 interface CliConfigFields {
     plugins?: any[];
@@ -44,8 +47,35 @@ export const getProjectConfig: () => Promise<GlobalData> = async () => {
         const curConfigFilePath = configPath[key];
         const exists = fs.existsSync(curConfigFilePath);
         //存在则读取
-
         if (exists) {
+            const configObj = (await import(curConfigFilePath)).default;
+            const configFields = Object.keys(configObj);
+            //对不支持的配置项字段进行报错提示
+            let supportedFieldList, configFileName;
+            switch (key) {
+                case 'base':
+                    supportedFieldList = ['plugins', 'publicPath', 'alias', 'define'];
+                    configFileName = 'secywo.ts';
+                    break;
+                case 'dev':
+                    supportedFieldList = ['plugins', 'proxy'];
+                    configFileName = 'secywo.dev.ts';
+                    break;
+                case 'prod':
+                    supportedFieldList = ['plugins', 'console'];
+                    configFileName = 'secywo.prod.ts';
+            }
+
+            const unSupportedField = configFields.find(
+                (field) => !supportedFieldList.includes(field)
+            );
+            if (configFields.length > 0 && unSupportedField) {
+                const msgText = `The secywo configuration file '${chalk.blue(
+                    configFileName
+                )}' does not support the field '${chalk.red(unSupportedField)}' `;
+                spinner.fail(msgText);
+                process.exit();
+            }
             customConfig[key] = (await import(curConfigFilePath)).default;
         }
     }
