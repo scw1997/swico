@@ -1,4 +1,3 @@
-import getCommonConfig from './webpack.base';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import BundleAnalyzer from 'webpack-bundle-analyzer';
 import TerserPlugin from 'terser-webpack-plugin';
