@@ -21,7 +21,7 @@ export default async function (options: GlobalData) {
             },
             client: {
                 progress: false, //显示进度条
-                //警告不会覆盖页面
+                //错误，警告不会覆盖页面
                 overlay: false
             },
             proxy: customConfig?.dev?.proxy ?? initConfig.proxy,
