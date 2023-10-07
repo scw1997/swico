@@ -6,6 +6,6 @@
 
 使用文档：
 
-- [secywo](https://www.npmjs.com/package/secywo)
+- [secywo源码地址](https://gitee.com/fanlaBoy/secywo)
 - [secywo-template源码地址](https://gitee.com/fanlaBoy/secywo-template)
 
