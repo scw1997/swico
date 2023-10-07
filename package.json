@@ -1,6 +1,6 @@
 {
   "name": "secywo-template-cli",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "secywo template cli",
   "main": "index.js",
   "keywords": [
@@ -39,6 +39,7 @@
     "@babel/preset-env": "7.15.8",
     "@babel/preset-react": "7.14.5",
     "@babel/runtime": "7.15.4",
+
     "@commitlint/cli": "15.0.0",
     "@commitlint/config-conventional": "15.0.0",
     "@types/react": "18.2.0",

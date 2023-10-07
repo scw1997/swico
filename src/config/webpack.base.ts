@@ -23,9 +23,10 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
     const publicPath = customBaseConfig.publicPath || initConfig.publicPath;
     const basicPlugins = [];
     //处理自定义变量设置
-    const defineVars = customConfig?.base?.define ?? {};
-    if (Object.keys(defineVars).length !== 0) {
-        basicPlugins.push(new webpack.DefinePlugin(await getFormatDefineVars(defineVars)));
+    const defineConfigData = customConfig?.base?.define ?? {};
+    const formatObj = await getFormatDefineVars(defineConfigData);
+    if (Object.keys(formatObj).length !== 0) {
+        basicPlugins.push(new webpack.DefinePlugin(formatObj));
     }
     return {
         //入口文件路径，必须为js

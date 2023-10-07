@@ -101,14 +101,15 @@ export const getPort = () => {
     });
 };
 
-export const getFormatDefineVars = async (defineVarsConfigObj) => {
+export const getFormatDefineVars = async (defineVarsConfigData) => {
     const formatObj = {};
-    for (const [key, value] of Object.entries(defineVarsConfigObj)) {
-        if (typeof value === 'function') {
-            formatObj[key] = JSON.stringify(await Promise.resolve(value()));
-        } else {
-            formatObj[key] = JSON.stringify(value);
-        }
+    let obj = defineVarsConfigData;
+    //支持函数/async函数或返回promise
+    if (typeof defineVarsConfigData === 'function') {
+        obj = await Promise.resolve(defineVarsConfigData());
+    }
+    for (const [key, value] of Object.entries(obj)) {
+        formatObj[key] = JSON.stringify(value);
     }
     return formatObj;
 };
