@@ -212,9 +212,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 typescript: {
                     diagnosticOptions: {
                         semantic: true,
-                        syntactic: true,
-                        declaration: true,
-                        global: true
+                        syntactic: true
                     }
                 }
             }),
