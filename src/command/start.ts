@@ -47,10 +47,12 @@ const handleWatch = (projectPath, devServer) => {
             binaryInterval: 500,
             ignoreInitial: true
         })
-        .on('add', async () => {
-            await devServer.stop();
-            await tsTypingsWatcher.close();
-            restartServer();
+        .on('all', async (eventName, path, stats) => {
+            if (['add', 'unlink'].includes(eventName)) {
+                await devServer.stop();
+                await tsTypingsWatcher.close();
+                restartServer();
+            }
         });
 };
 
