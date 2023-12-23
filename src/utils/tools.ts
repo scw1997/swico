@@ -15,6 +15,7 @@ interface CliConfigFields {
 }
 
 export interface GlobalData {
+    templateType?:'vue'|'react' //模板类型
     projectPath: string; //模板项目根路径
     entryPath: string; //入口文件路径
     templatePath: string; //html模板文件路径
@@ -28,7 +29,7 @@ export interface GlobalData {
 }
 
 //获取开发者的自定义项目配置和相关参数
-export const getProjectConfig: () => Promise<GlobalData> = async () => {
+export const getProjectConfig: (templateType?:'vue'|'react') => Promise<GlobalData> = async (templateType) => {
     // 当前命令行选择的目录(即项目根路径)
     const cwd = process.cwd();
     //secywo 配置文件路径
@@ -81,7 +82,7 @@ export const getProjectConfig: () => Promise<GlobalData> = async () => {
     }
 
     //webpack入口文件
-    const entryPath = path.join(cwd, '/src/index.tsx');
+    const entryPath = path.join(cwd, templateType==='vue'?'/src/index.ts':'/src/index.tsx');
     //webpack html template
     const templatePath = path.join(cwd, '/src/index.ejs');
 
@@ -89,7 +90,8 @@ export const getProjectConfig: () => Promise<GlobalData> = async () => {
         projectPath: cwd,
         entryPath,
         templatePath,
-        customConfig
+        customConfig,
+        templateType:templateType??'react'
     };
 };
 

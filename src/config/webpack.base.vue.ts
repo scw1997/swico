@@ -6,7 +6,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import webpack from 'webpack';
 
-export default async function ({ projectPath, entryPath, env, customConfig,templateType }: GlobalData) {
+export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
     const customBaseConfig = customConfig.base || {};
     //处理alias 自定义配置
@@ -47,7 +47,7 @@ export default async function ({ projectPath, entryPath, env, customConfig,templ
         module: {
             rules: [
                 {
-                    test: /\.ts$/,
+                    test: /\.(tsx|ts)$/,
                     exclude: /node_modules/,
                     use: [
                         'thread-loader', //多进程打包，建议只用于耗时较长的loader前面
@@ -55,7 +55,9 @@ export default async function ({ projectPath, entryPath, env, customConfig,templ
                             loader: 'babel-loader?cacheDirectory=true',
                             options: {
                                 presets: [
-                                    '@babel/preset-env'
+                                    '@babel/preset-env',
+                                    //react17以后不需要再引入react
+                                    ['@babel/preset-react', { runtime: 'automatic' }]
                                 ],
                                 plugins: [
                                     '@babel/plugin-transform-runtime',

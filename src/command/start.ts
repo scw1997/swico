@@ -7,7 +7,7 @@ import chokidar from 'chokidar';
 import path from 'path';
 import chalk from 'chalk';
 import spawn from 'cross-spawn';
-const envPort = process.env.PORT;
+const {PORT:envPort,TEMPLATE} = process.env;
 
 const spinner = ora();
 
@@ -73,7 +73,8 @@ const restartServer = () => {
 export default async function start() {
     //获取可用端口（优先使用重启时的传递的port环境变量）
     availablePort = envPort ?? (await getPort());
-    const projectConfig = await getProjectConfig();
+    // @ts-ignore
+    const projectConfig = await getProjectConfig(TEMPLATE);
     const { projectPath } = projectConfig;
     const startConfig = await getStartConfig(projectConfig);
     const compiler = webpack(startConfig as any);
