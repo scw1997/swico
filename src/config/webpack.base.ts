@@ -5,6 +5,7 @@ import WebpackBar from 'webpackbar';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import webpack from 'webpack';
+import {VueLoaderPlugin} from 'vue-loader';
 
 export default async function ({ projectPath, entryPath, env, customConfig,templateType }: GlobalData) {
     //开发者的自定义配置
@@ -28,6 +29,11 @@ export default async function ({ projectPath, entryPath, env, customConfig,templ
     if (Object.keys(formatObj).length !== 0) {
         basicPlugins.push(new webpack.DefinePlugin(formatObj));
     }
+    if(templateType==='vue'){
+        basicPlugins.push(    // vue-loader插件
+            new VueLoaderPlugin()
+        );
+    }
     return {
         //入口文件路径，必须为js
         entry: entryPath,
@@ -46,33 +52,72 @@ export default async function ({ projectPath, entryPath, env, customConfig,templ
         },
         module: {
             rules: [
-                {
-                    test: /\.ts$/,
-                    exclude: /node_modules/,
-                    use: [
-                        'thread-loader', //多进程打包，建议只用于耗时较长的loader前面
-                        {
-                            loader: 'babel-loader?cacheDirectory=true',
-                            options: {
-                                presets: [
-                                    '@babel/preset-env'
-                                ],
-                                plugins: [
-                                    '@babel/plugin-transform-runtime',
-                                    '@babel/plugin-proposal-class-properties'
-                                ]
+                ...(templateType==='vue'?[
+                    {
+                        test: /\.ts$/,
+                        exclude: /node_modules/,
+                        use: [
+                            'thread-loader', //多进程打包，建议只用于耗时较长的loader前面
+                            {
+                                loader: 'babel-loader?cacheDirectory=true',
+                                options: {
+                                    presets: [
+                                        '@babel/preset-env'
+                                    ],
+                                    plugins: [
+                                        '@babel/plugin-transform-runtime'
+                                    ]
+                                }
+                            },
+                            {
+                                loader: 'ts-loader',
+                                options: {
+                                    //配置了thread-loader必须加这个选项,否则报错
+                                    //开启此选项会默认忽略ts类型检查校验且编译时不报类型错误，需配合fork-ts-checker-webpack-plugin使用
+                                    happyPackMode: true
+                                }
                             }
-                        },
-                        {
-                            loader: 'ts-loader',
-                            options: {
-                                //配置了thread-loader必须加这个选项,否则报错
-                                //开启此选项会默认忽略ts类型检查校验且编译时不报类型错误，需配合fork-ts-checker-webpack-plugin使用
-                                happyPackMode: true
+                        ]
+                    },    {
+                        test: /\.vue$/,
+                        use: [
+                            {
+                                loader: 'vue-loader'
                             }
-                        }
-                    ]
-                },
+                        ],
+                        include: /src/
+                    }
+                ]:
+                    [{
+                        test: /\.(tsx|ts)$/,
+                        exclude: /node_modules/,
+                        use: [
+                            'thread-loader', //多进程打包，建议只用于耗时较长的loader前面
+                            {
+                                loader: 'babel-loader?cacheDirectory=true',
+                                options: {
+                                    presets: [
+                                        '@babel/preset-env',
+                                        //react17以后不需要再引入react
+                                        ['@babel/preset-react', { runtime: 'automatic' }]
+                                    ],
+                                    plugins: [
+                                        '@babel/plugin-transform-runtime',
+                                        '@babel/plugin-proposal-class-properties'
+                                    ]
+                                }
+                            },
+                            {
+                                loader: 'ts-loader',
+                                options: {
+                                    //配置了thread-loader必须加这个选项,否则报错
+                                    //开启此选项会默认忽略ts类型检查校验且编译时不报类型错误，需配合fork-ts-checker-webpack-plugin使用
+                                    happyPackMode: true
+                                }
+                            }
+                        ]
+                    }]),
+
 
                 {
                     oneOf: [
