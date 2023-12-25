@@ -7,7 +7,7 @@ import chokidar from 'chokidar';
 import path from 'path';
 import chalk from 'chalk';
 import spawn from 'cross-spawn';
-const {PORT:envPort,TEMPLATE} = process.env;
+const { PORT: envPort, TEMPLATE } = process.env;
 
 const spinner = ora();
 

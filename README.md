@@ -7,5 +7,6 @@
 使用文档：
 
 - [secywo源码地址](https://gitee.com/fanlaBoy/secywo)
-- [secywo-template源码地址](https://gitee.com/fanlaBoy/secywo-template)
+- [secywo-template-react源码地址](https://gitee.com/fanlaBoy/secywo-template-react)
+- [secywo-template-vue源码地址](https://gitee.com/fanlaBoy/secywo-template-vue)
 
