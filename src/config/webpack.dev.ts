@@ -5,7 +5,7 @@ import { merge } from 'webpack-merge';
 import EslintPlugin from 'eslint-webpack-plugin';
 
 export default async function (options: GlobalData) {
-    const { projectPath, customConfig,templateType } = options || {};
+    const { projectPath, customConfig, templateType } = options || {};
     const baseConfig = await getBaseConfig({ ...options, env: 'dev' });
 
     return merge(baseConfig, {
@@ -20,6 +20,7 @@ export default async function (options: GlobalData) {
                 index: `${baseConfig.output.publicPath}index.html`
             },
             client: {
+                logging: 'error',
                 progress: false, //显示进度条
                 //错误，警告不会覆盖页面
                 overlay: false
@@ -36,7 +37,8 @@ export default async function (options: GlobalData) {
         plugins: [
             new EslintPlugin({
                 context: path.join(projectPath, '/src'),
-                extensions: templateType==='vue'?['vue', 'ts', 'js']:['tsx', 'ts', 'js', 'jsx'],
+                extensions:
+                    templateType === 'vue' ? ['vue', 'ts', 'js'] : ['tsx', 'ts', 'js', 'jsx'],
                 // 开启缓存
                 cache: true
                 // 指定缓存目录
