@@ -5,7 +5,6 @@ import WebpackBar from 'webpackbar';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import webpack from 'webpack';
-import { VueLoaderPlugin } from 'vue-loader';
 
 export default async function ({
     projectPath,
@@ -36,10 +35,13 @@ export default async function ({
         basicPlugins.push(new webpack.DefinePlugin(formatObj));
     }
     if (templateType === 'vue') {
-        basicPlugins.push(
-            // vue-loader插件
-            new VueLoaderPlugin()
-        );
+        import('vue-loader').then((res) => {
+            const { VueLoaderPlugin } = res;
+            basicPlugins.push(
+                // vue-loader插件
+                new VueLoaderPlugin()
+            );
+        });
     }
     return {
         //入口文件路径，必须为js
