@@ -4,19 +4,10 @@ import { getFormatDefineVars, initConfig, GlobalData } from '../utils/tools';
 import WebpackBar from 'webpackbar';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-import getVueBaseConfig from './webpack.base.vue';
 import webpack from 'webpack';
+import { VueLoaderPlugin } from 'vue-loader';
 
-export default async function ({
-    projectPath,
-    entryPath,
-    env,
-    customConfig,
-    templateType
-}: GlobalData) {
-    if (templateType === 'vue') {
-        return await getVueBaseConfig({ projectPath, entryPath, env, customConfig } as GlobalData);
-    }
+export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
     const customBaseConfig = customConfig.base || {};
     //处理alias 自定义配置
@@ -58,22 +49,15 @@ export default async function ({
         module: {
             rules: [
                 {
-                    test: /\.(tsx|ts)$/,
+                    test: /\.ts$/,
                     exclude: /node_modules/,
                     use: [
                         'thread-loader', //多进程打包，建议只用于耗时较长的loader前面
                         {
                             loader: 'babel-loader?cacheDirectory=true',
                             options: {
-                                presets: [
-                                    '@babel/preset-env',
-                                    //react17以后不需要再引入react
-                                    ['@babel/preset-react', { runtime: 'automatic' }]
-                                ],
-                                plugins: [
-                                    '@babel/plugin-transform-runtime',
-                                    '@babel/plugin-proposal-class-properties'
-                                ]
+                                presets: ['@babel/preset-env'],
+                                plugins: ['@babel/plugin-transform-runtime']
                             }
                         },
                         {
@@ -86,6 +70,16 @@ export default async function ({
                         }
                     ]
                 },
+                {
+                    test: /\.vue$/,
+                    use: [
+                        {
+                            loader: 'vue-loader'
+                        }
+                    ],
+                    include: /src/
+                },
+
                 {
                     oneOf: [
                         {
@@ -204,6 +198,7 @@ export default async function ({
         },
         plugins: [
             ...basicPlugins,
+            new VueLoaderPlugin(),
             new HtmlWebpackPlugin({
                 //不使用默认html文件，使用自己定义的html模板并自动引入打包后的js/css
                 template: path.join(projectPath, '/src/index.ejs'),
