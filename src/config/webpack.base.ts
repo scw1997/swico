@@ -4,7 +4,7 @@ import { getFormatDefineVars, initConfig, GlobalData } from '../utils/tools';
 import WebpackBar from 'webpackbar';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-import getVueBaseConfig from './webpack.base.vue';
+
 import webpack from 'webpack';
 
 export default async function ({
@@ -15,6 +15,7 @@ export default async function ({
     templateType
 }: GlobalData) {
     if (templateType === 'vue') {
+        const getVueBaseConfig = (await import('./webpack.base.vue')).default;
         return await getVueBaseConfig({ projectPath, entryPath, env, customConfig } as GlobalData);
     }
     //开发者的自定义配置
