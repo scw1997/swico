@@ -190,7 +190,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             ]
         },
         resolve: {
-            extensions: ['.ts', '.tsx', '.js', '.jsx'],
+            extensions: ['.ts', '.js', '.vue'],
             alias: {
                 '@': path.join(projectPath, '/src'),
                 ...getCustomAliasConfig()
