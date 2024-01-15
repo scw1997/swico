@@ -37,8 +37,7 @@ export default async function (options: GlobalData) {
         plugins: [
             new EslintPlugin({
                 context: path.join(projectPath, '/src'),
-                extensions:
-                    templateType === 'vue' ? ['vue', 'ts', 'js'] : ['tsx', 'ts', 'js', 'jsx'],
+                extensions: templateType === 'vue' ? ['vue', 'ts', 'js'] : ['tsx', 'ts', 'js'],
                 // 开启缓存
                 cache: true
                 // 指定缓存目录

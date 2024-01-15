@@ -197,7 +197,7 @@ export default async function ({
             ]
         },
         resolve: {
-            extensions: ['.ts', '.tsx', '.js', '.jsx'],
+            extensions: ['.ts', '.tsx', '.js'],
             alias: {
                 '@': path.join(projectPath, '/src'),
                 ...getCustomAliasConfig()
