@@ -12,7 +12,7 @@ const BundleAnalyzerPlugin = BundleAnalyzer.BundleAnalyzerPlugin;
 const isAnalyze = process.env.ANALYZ === 'true';
 
 export default async function (options: GlobalData) {
-    const { projectPath, customConfig, templatePath } = options || {};
+    const { projectPath, customConfig, templatePath } = options;
 
     const baseConfig = await getBaseConfig({ ...options, env: 'prod' });
     const consoleAvailable = customConfig.prod?.console ?? initConfig.console;

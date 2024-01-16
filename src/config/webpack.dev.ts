@@ -5,7 +5,7 @@ import { merge } from 'webpack-merge';
 import EslintPlugin from 'eslint-webpack-plugin';
 
 export default async function (options: GlobalData) {
-    const { projectPath, customConfig, templateType } = options || {};
+    const { projectPath, customConfig, templateType } = options;
     const baseConfig = await getBaseConfig({ ...options, env: 'dev' });
 
     return merge(baseConfig, {
