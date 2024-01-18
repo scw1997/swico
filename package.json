@@ -1,6 +1,6 @@
 {
   "name": "secywo-template-cli",
-  "version": "0.10.9",
+  "version": "0.10.10",
   "description": "secywo template cli",
   "main": "index.js",
   "keywords": [
@@ -27,7 +27,7 @@
   "author": "scw",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "7.15.5",
+    "@babel/core": "7.18.6",
     "@babel/plugin-proposal-class-properties": "7.14.5",
     "@babel/plugin-transform-runtime": "7.15.8",
     "@babel/preset-env": "7.15.8",
@@ -59,7 +59,7 @@
     "eslint-plugin-react-hooks": "4.3.0",
     "eslint-plugin-vue": "^9.19.2",
     "eslint-webpack-plugin": "4.0.0",
-    "fork-ts-checker-webpack-plugin": "8.0.0",
+    "fork-ts-checker-webpack-plugin": "9.0.2",
     "html-loader": "2.1.2",
     "html-webpack-plugin": "5.3.2",
     "husky": "7.0.4",
