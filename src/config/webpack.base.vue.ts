@@ -193,6 +193,8 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             extensions: ['.ts', '.js', '.vue'],
             alias: {
                 '@': path.join(projectPath, '/src'),
+                // 兼容 支持vue模板语法
+                vue: 'vue/dist/vue.esm-bundler.js',
                 ...getCustomAliasConfig()
             }
         },

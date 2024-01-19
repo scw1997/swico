@@ -13,7 +13,8 @@ export default async function (options: GlobalData) {
         // @ts-ignore
         mode: 'development',
         stats: 'errors-only',
-        devtool: 'eval-cheap-module-source-map', // development
+        devtool:
+            templateType === 'vue' ? 'cheap-module-source-map' : 'eval-cheap-module-source-map', // development
         devServer: {
             //使用HTML5 History API时，index.html可能需要提供页面来代替任何404响应。
             historyApiFallback: {
