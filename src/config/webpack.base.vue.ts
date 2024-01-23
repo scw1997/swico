@@ -193,7 +193,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             extensions: ['.ts', '.js', '.vue'],
             alias: {
                 '@': path.join(projectPath, '/src'),
-                // 兼容 支持vue模板语法
+                // 兼容 支持vue运行时Options语法
                 vue: 'vue/dist/vue.esm-bundler.js',
                 ...getCustomAliasConfig()
             }
@@ -201,6 +201,12 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         plugins: [
             ...basicPlugins,
             new VueLoaderPlugin(),
+            //正在运行 Vue 的 esm-bundler 构建，它希望这些编译时的功能标志通过 bundler 配置全局注入，以便在生产包中获得更好的摇树优化
+            new webpack.DefinePlugin({
+                __VUE_OPTIONS_API__: true,
+                __VUE_PROD_DEVTOOLS__: false,
+                __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false
+            }),
             new HtmlWebpackPlugin({
                 //不使用默认html文件，使用自己定义的html模板并自动引入打包后的js/css
                 template: path.join(projectPath, '/src/index.ejs'),
