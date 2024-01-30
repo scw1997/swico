@@ -33,7 +33,8 @@ export default async function (options: GlobalData) {
             static: {
                 //提供静态文件服务的路径
                 directory: path.join(projectPath, '/public')
-            }
+            },
+            server: customConfig.dev.https === true ? 'https' : 'http'
         },
         plugins: [
             new EslintPlugin({
