@@ -51,32 +51,24 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 {
                     test: /\.ts$/,
                     exclude: /node_modules/,
-                    use: [
-                        'thread-loader', //多进程打包，建议只用于耗时较长的loader前面
-                        {
-                            loader: 'babel-loader?cacheDirectory=true',
-                            options: {
-                                presets: ['@babel/preset-env'],
-                                plugins: ['@babel/plugin-transform-runtime']
-                            }
-                        },
-                        {
-                            loader: 'ts-loader',
-                            options: {
-                                //配置了thread-loader必须加这个选项,否则报错
-                                //开启此选项会默认忽略ts类型检查校验且编译时不报类型错误，需配合fork-ts-checker-webpack-plugin使用
-                                happyPackMode: true
+                    use: {
+                        loader: 'swc-loader',
+                        options: {
+                            jsc: {
+                                parser: {
+                                    syntax: 'typescript',
+                                    tsx: false,
+                                    decorators: true,
+                                    dynamicImport: true
+                                },
+                                target: 'es2016'
                             }
                         }
-                    ]
+                    }
                 },
                 {
                     test: /\.vue$/,
-                    use: [
-                        {
-                            loader: 'vue-loader'
-                        }
-                    ],
+                    loader: 'vue-loader',
                     include: /src/
                 },
 
@@ -86,7 +78,6 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                             test: /\.module\.css$/,
                             use: [
                                 env === 'dev' ? 'style-loader' : MiniCssExtractPlugin.loader,
-                                MiniCssExtractPlugin.loader,
                                 {
                                     loader: 'css-loader',
                                     options: {
@@ -107,19 +98,51 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                         },
                         {
                             test: /\.css$/,
-                            use: [
-                                env === 'dev' ? 'style-loader' : MiniCssExtractPlugin.loader,
-                                'css-loader',
+                            oneOf: [
+                                // 这里匹配 `<style module>`
                                 {
-                                    loader: 'postcss-loader',
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['autoprefixer']]
+                                    resourceQuery: /module/,
+                                    use: [
+                                        'vue-style-loader',
+                                        {
+                                            loader: 'css-loader',
+                                            options: {
+                                                modules: {
+                                                    localIdentName:
+                                                        'moduleStyle_[local]_[contenthash:8]'
+                                                }
+                                            }
+                                        },
+                                        {
+                                            loader: 'postcss-loader',
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
                                         }
-                                    }
+                                    ]
+                                },
+                                // 这里匹配普通的 `<style>` 或 `<style scoped>`
+                                {
+                                    use: [
+                                        env === 'dev'
+                                            ? 'vue-style-loader'
+                                            : MiniCssExtractPlugin.loader,
+                                        'css-loader',
+                                        {
+                                            loader: 'postcss-loader',
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
+                                        }
+                                    ]
                                 }
                             ]
                         },
+
                         {
                             test: /\.module\.less$/,
 
@@ -147,22 +170,56 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                         },
                         {
                             test: /\.less$/,
-                            use: [
-                                env === 'dev' ? 'style-loader' : MiniCssExtractPlugin.loader,
-                                'css-loader',
+
+                            oneOf: [
+                                // 这里匹配 `<style module>`
                                 {
-                                    loader: 'postcss-loader',
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['autoprefixer']]
-                                        }
-                                    }
+                                    resourceQuery: /module/,
+                                    use: [
+                                        'vue-style-loader',
+                                        {
+                                            loader: 'css-loader',
+                                            options: {
+                                                modules: {
+                                                    localIdentName:
+                                                        'moduleStyle_[local]_[contenthash:8]'
+                                                }
+                                            }
+                                        },
+                                        {
+                                            loader: 'postcss-loader',
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
+                                        },
+                                        'less-loader'
+                                    ]
                                 },
-                                'less-loader'
+                                // 这里匹配普通的 `<style>` 或 `<style scoped>`
+                                {
+                                    use: [
+                                        env === 'dev'
+                                            ? 'vue-style-loader'
+                                            : MiniCssExtractPlugin.loader,
+                                        'css-loader',
+                                        {
+                                            loader: 'postcss-loader',
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
+                                        },
+                                        'less-loader'
+                                    ]
+                                }
                             ]
                         },
+
                         {
-                            test: /\.(jpg|png|gif|webp|bmp|jpeg)$/,
+                            test: /\.(jpg|png|gif|webp|bmp|jpeg|svg)$/,
                             type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择
                             generator: {
                                 filename: 'images/[name]_[hash][ext]' // 独立的配置
@@ -170,8 +227,8 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                         },
                         // 字体文件
                         {
-                            test: /\.(otf|eot|woff2?|ttf|svg)$/i,
-                            type: 'asset',
+                            test: /\.(otf|eot|woff2?|ttf)$/i,
+                            type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择
                             generator: {
                                 filename: 'fonts/[name]_[hash][ext]'
                             }
@@ -190,7 +247,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             ]
         },
         resolve: {
-            extensions: ['.ts', '.js', '.vue'],
+            extensions: ['.ts', '.js', '.vue', '.json'],
             alias: {
                 '@': path.join(projectPath, '/src'),
                 // 兼容 支持vue运行时Options语法
@@ -203,9 +260,9 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             new VueLoaderPlugin(),
             //正在运行 Vue 的 esm-bundler 构建，它希望这些编译时的功能标志通过 bundler 配置全局注入，以便在生产包中获得更好的摇树优化
             new webpack.DefinePlugin({
-                __VUE_OPTIONS_API__: true,
-                __VUE_PROD_DEVTOOLS__: false,
-                __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false
+                __VUE_OPTIONS_API__: true, //启用选项式 API 支持
+                __VUE_PROD_DEVTOOLS__: false, //在生产环境中禁用开发者工具支持
+                __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false //禁用生产环境构建下激活 (hydration) 不匹配的详细警告
             }),
             new HtmlWebpackPlugin({
                 //不使用默认html文件，使用自己定义的html模板并自动引入打包后的js/css
@@ -237,7 +294,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             new WebpackBar({
                 name: 'Secywo',
                 color: '#82B2FD',
-                profile: true
+                profile: false
             }),
             ...(customBaseConfig.plugins || initConfig.plugins)
         ]

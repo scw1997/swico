@@ -1,12 +1,20 @@
-import getBaseConfig from './webpack.base';
+import getReactBaseConfig from './webpack.base.react';
 import { initConfig, GlobalData } from '../utils/tools';
 import path from 'path';
 import { merge } from 'webpack-merge';
 import EslintPlugin from 'eslint-webpack-plugin';
 
 export default async function (options: GlobalData) {
-    const { projectPath, customConfig, templateType } = options;
-    const baseConfig = await getBaseConfig({ ...options, env: 'dev' });
+    const { projectPath, customConfig, templateType, entryPath, env } = options;
+    //根据模板类型按需引入配置
+    const getBaseConfig = (
+        await import(templateType === 'vue' ? './webpack.base.vue' : './webpack.base.react')
+    ).default;
+
+    const baseConfig = await getBaseConfig({
+        ...options,
+        env: 'dev'
+    } as GlobalData);
 
     return merge(baseConfig, {
         //打包后文件路径

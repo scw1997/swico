@@ -6,15 +6,24 @@ import path from 'path';
 import fs from 'fs';
 import { initConfig, GlobalData } from '../utils/tools';
 import { merge } from 'webpack-merge';
-import getBaseConfig from './webpack.base';
+import getBaseConfig from './webpack.base.react';
 
 const BundleAnalyzerPlugin = BundleAnalyzer.BundleAnalyzerPlugin;
-const isAnalyze = process.env.ANALYZ === 'true';
+const isAnalyze = process.env.ANALYZE === 'true';
 
 export default async function (options: GlobalData) {
-    const { projectPath, customConfig, templatePath } = options;
+    const { projectPath, customConfig, templateType } = options;
 
-    const baseConfig = await getBaseConfig({ ...options, env: 'prod' });
+    //根据模板类型按需引入配置
+    const getBaseConfig = (
+        await import(templateType === 'vue' ? './webpack.base.vue' : './webpack.base.react')
+    ).default;
+
+    const baseConfig = await getBaseConfig({
+        ...options,
+        env: 'prod'
+    } as GlobalData);
+
     const consoleAvailable = customConfig.prod?.console ?? initConfig.console;
     //处理public文件夹（静态资源）
     const isCopyPathExist = fs.existsSync(path.join(projectPath, '/public'));
@@ -48,7 +57,7 @@ export default async function (options: GlobalData) {
                         preset: 'advanced' // cssnano https://cssnano.co/docs/optimisations/
                     }
                 }),
-                //webpack5默认压缩js，但是用了css-miniizer，需要手动压缩js
+                //webpack5默认压缩js，但是用了css-minimizer，需要手动压缩js
                 new TerserPlugin({
                     test: /\.js$/,
                     terserOptions: {

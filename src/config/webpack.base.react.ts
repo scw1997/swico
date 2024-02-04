@@ -14,10 +14,6 @@ export default async function ({
     customConfig,
     templateType
 }: GlobalData) {
-    if (templateType === 'vue') {
-        const getVueBaseConfig = (await import('./webpack.base.vue')).default;
-        return await getVueBaseConfig({ projectPath, entryPath, env, customConfig } as GlobalData);
-    }
     //开发者的自定义配置
     const customBaseConfig = customConfig.base || {};
     //处理alias 自定义配置
@@ -61,31 +57,27 @@ export default async function ({
                 {
                     test: /\.(tsx|ts)$/,
                     exclude: /node_modules/,
-                    use: [
-                        'thread-loader', //多进程打包，建议只用于耗时较长的loader前面
-                        {
-                            loader: 'babel-loader?cacheDirectory=true',
-                            options: {
-                                presets: [
-                                    '@babel/preset-env',
-                                    //react17以后不需要再引入react
-                                    ['@babel/preset-react', { runtime: 'automatic' }]
-                                ],
-                                plugins: [
-                                    '@babel/plugin-transform-runtime',
-                                    '@babel/plugin-proposal-class-properties'
-                                ]
-                            }
-                        },
-                        {
-                            loader: 'ts-loader',
-                            options: {
-                                //配置了thread-loader必须加这个选项,否则报错
-                                //开启此选项会默认忽略ts类型检查校验且编译时不报类型错误，需配合fork-ts-checker-webpack-plugin使用
-                                happyPackMode: true
+                    use: {
+                        loader: 'swc-loader',
+                        options: {
+                            jsc: {
+                                parser: {
+                                    syntax: 'typescript',
+                                    tsx: true,
+                                    decorators: true,
+                                    dynamicImport: true
+                                },
+                                transform: {
+                                    react: {
+                                        runtime: 'automatic', // 使用自动的 JSX 运行时
+                                        useBuiltins: true,
+                                        importSource: 'react' // 指定从哪里自动引入JSX创建函数，对于 React 项目，这里应该是 "react"
+                                    }
+                                },
+                                target: 'es2016'
                             }
                         }
-                    ]
+                    }
                 },
                 {
                     oneOf: [
@@ -169,7 +161,7 @@ export default async function ({
                             ]
                         },
                         {
-                            test: /\.(jpg|png|gif|webp|bmp|jpeg)$/,
+                            test: /\.(jpg|png|gif|webp|bmp|jpeg|svg)$/,
                             type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择
                             generator: {
                                 filename: 'images/[name]_[hash][ext]' // 独立的配置
@@ -177,8 +169,8 @@ export default async function ({
                         },
                         // 字体文件
                         {
-                            test: /\.(otf|eot|woff2?|ttf|svg)$/i,
-                            type: 'asset',
+                            test: /\.(otf|eot|woff2?|ttf)$/i,
+                            type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择
                             generator: {
                                 filename: 'fonts/[name]_[hash][ext]'
                             }
@@ -197,7 +189,7 @@ export default async function ({
             ]
         },
         resolve: {
-            extensions: ['.ts', '.tsx', '.js'],
+            extensions: ['.ts', '.tsx', '.js', '.json'],
             alias: {
                 '@': path.join(projectPath, '/src'),
                 ...getCustomAliasConfig()
@@ -235,7 +227,7 @@ export default async function ({
             new WebpackBar({
                 name: 'Secywo',
                 color: '#82B2FD',
-                profile: true
+                profile: false
             }),
             ...(customBaseConfig.plugins || initConfig.plugins)
         ]
