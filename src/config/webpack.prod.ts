@@ -6,7 +6,6 @@ import path from 'path';
 import fs from 'fs';
 import { initConfig, GlobalData } from '../utils/tools';
 import { merge } from 'webpack-merge';
-import getBaseConfig from './webpack.base.react';
 
 const BundleAnalyzerPlugin = BundleAnalyzer.BundleAnalyzerPlugin;
 const isAnalyze = process.env.ANALYZE === 'true';
@@ -27,7 +26,12 @@ export default async function (options: GlobalData) {
     const consoleAvailable = customConfig.prod?.console ?? initConfig.console;
 
     //处理public文件夹（静态资源）
-    const isCopyPathExist = fs.existsSync(path.join(projectPath, '/public'));
+    const isPublicDirExist = fs.existsSync(path.join(projectPath, '/public'));
+    //处理其他自定义复制输出目录的文件
+    const copyConfig = customConfig.prod?.copy ?? initConfig.copy;
+
+    //自定义的sourcemap生成方式
+    const customDevtool = customConfig.prod.devtool ?? customConfig.base.devtool;
 
     return merge(baseConfig, {
         // @ts-ignore
@@ -45,7 +49,7 @@ export default async function (options: GlobalData) {
             assetsSort: '!size',
             chunksSort: '!size'
         },
-        devtool: 'nosources-source-map', // production
+        devtool: customDevtool ?? 'nosources-source-map', // production
         optimization: {
             //减少 entry chunk 体积，提高性能。
             runtimeChunk: true,
@@ -89,10 +93,13 @@ export default async function (options: GlobalData) {
         },
         plugins: [
             //复制静态资源文件
-            ...(isCopyPathExist
+            ...(isPublicDirExist || copyConfig.length > 0
                 ? [
                       new CopyPlugin({
-                          patterns: [path.join(projectPath, '/public')]
+                          patterns: [
+                              ...(isPublicDirExist ? [path.join(projectPath, '/public')] : []),
+                              ...copyConfig
+                          ]
                       })
                   ]
                 : []),

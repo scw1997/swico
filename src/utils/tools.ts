@@ -13,6 +13,9 @@ interface CliConfigFields {
     alias?: Record<string, any>; //定义import映射
     proxy?: Record<string, any>; //devServer中用到的proxy代理
     https?: boolean; //是否使用https开发服务器
+    copy?: Array<string | { from: string; to: string }>; //复制指定文件(夹)到指定目录
+    devtool?: string; //设置 sourcemap 生成方式
+    externals?: any; //置哪些模块不打包，转而在index.ejs中通过 <script> 或其他方式引入
 }
 
 export interface GlobalData {
@@ -23,9 +26,12 @@ export interface GlobalData {
     env?: 'dev' | 'prod'; //当前调用环境
     customConfig: {
         //脚手架自定义配置
-        base: Pick<CliConfigFields, 'plugins' | 'publicPath' | 'alias' | 'define'>; //公共通用
-        dev: Pick<CliConfigFields, 'plugins' | 'proxy' | 'https'>; //开发环境专用
-        prod: Pick<CliConfigFields, 'plugins' | 'console'>; //生产环境专用
+        base: Pick<
+            CliConfigFields,
+            'plugins' | 'publicPath' | 'alias' | 'define' | 'devtool' | 'externals'
+        >; //公共通用
+        dev: Pick<CliConfigFields, 'plugins' | 'proxy' | 'https' | 'devtool'>; //开发环境专用
+        prod: Pick<CliConfigFields, 'plugins' | 'console' | 'copy' | 'devtool'>; //生产环境专用
     };
 }
 
@@ -58,15 +64,22 @@ export const getProjectConfig: (templateType?: 'vue' | 'react') => Promise<Globa
             let supportedFieldList, configFileName;
             switch (key) {
                 case 'base':
-                    supportedFieldList = ['plugins', 'publicPath', 'alias', 'define'];
+                    supportedFieldList = [
+                        'plugins',
+                        'publicPath',
+                        'alias',
+                        'define',
+                        'devtool',
+                        'externals'
+                    ];
                     configFileName = 'secywo.ts';
                     break;
                 case 'dev':
-                    supportedFieldList = ['plugins', 'proxy', 'https'];
+                    supportedFieldList = ['plugins', 'proxy', 'https', 'devtool'];
                     configFileName = 'secywo.dev.ts';
                     break;
                 case 'prod':
-                    supportedFieldList = ['plugins', 'console'];
+                    supportedFieldList = ['plugins', 'console', 'copy', 'devtool'];
                     configFileName = 'secywo.prod.ts';
             }
 
@@ -124,5 +137,6 @@ export const initConfig: CliConfigFields = {
     console: true,
     plugins: [],
     publicPath: '/',
-    proxy: undefined
+    proxy: undefined,
+    copy: []
 };

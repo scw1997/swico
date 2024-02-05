@@ -207,6 +207,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 ...getCustomAliasConfig()
             }
         },
+        externals: customConfig.base.externals,
         plugins: [
             ...basicPlugins,
             new VueLoaderPlugin(),

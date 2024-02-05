@@ -16,12 +16,17 @@ export default async function (options: GlobalData) {
         env: 'dev'
     } as GlobalData);
 
+    //自定义的sourcemap生成方式
+    const customDevtool = customConfig.dev.devtool ?? customConfig.base.devtool;
+
     return merge(baseConfig, {
         // @ts-ignore
         mode: 'development',
         stats: 'errors-only',
         devtool:
-            templateType === 'vue' ? 'cheap-module-source-map' : 'eval-cheap-module-source-map', // development
+            templateType === 'vue'
+                ? customDevtool ?? 'cheap-module-source-map'
+                : customDevtool ?? 'eval-cheap-module-source-map', // development
         devServer: {
             //使用HTML5 History API时，index.html可能需要提供页面来代替任何404响应。
             historyApiFallback: {

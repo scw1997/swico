@@ -4,7 +4,6 @@ import { getFormatDefineVars, initConfig, GlobalData } from '../utils/tools';
 import WebpackBar from 'webpackbar';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-
 import webpack from 'webpack';
 
 export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
@@ -188,6 +187,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 ...getCustomAliasConfig()
             }
         },
+        externals: customConfig.base.externals,
         plugins: [
             ...basicPlugins,
             new HtmlWebpackPlugin({
