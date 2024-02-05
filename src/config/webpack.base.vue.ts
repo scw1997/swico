@@ -51,20 +51,22 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 {
                     test: /\.ts$/,
                     exclude: /node_modules/,
-                    use: {
-                        loader: 'swc-loader',
-                        options: {
-                            jsc: {
-                                parser: {
-                                    syntax: 'typescript',
-                                    tsx: false,
-                                    decorators: true,
-                                    dynamicImport: true
-                                },
-                                target: 'es5'
+                    use: [
+                        {
+                            loader: 'swc-loader',
+                            options: {
+                                jsc: {
+                                    parser: {
+                                        syntax: 'typescript',
+                                        tsx: false,
+                                        decorators: true,
+                                        dynamicImport: true
+                                    },
+                                    target: 'es5'
+                                }
                             }
                         }
-                    }
+                    ]
                 },
                 {
                     test: /\.vue$/,

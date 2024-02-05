@@ -76,17 +76,23 @@ export default async function (options: GlobalData) {
                 })
             ],
             splitChunks: {
-                // include all types of chunks
-                chunks: 'all',
-                // 重复打包问题
+                chunks: 'all', //将多入口文件共享的模块提取到公共块
+                // 定义缓存组，如将第三方库打包到单独的文件。解决重复打包问题
                 cacheGroups: {
+                    // 抽取第三方模块
                     vendors: {
-                        // node_modules里的代码
                         test: /[\\/]node_modules[\\/]/,
+                        priority: -10,
                         chunks: 'all',
-                        // name: 'vendors', //一定不要定义固定的name
-                        priority: 10, // 优先级
-                        enforce: true
+                        reuseExistingChunk: true
+                    },
+                    // 抽取
+                    commons: {
+                        minSize: 0, // 抽取的chunk最小大小
+                        minChunks: 2, // 最小引用数
+                        priority: -20,
+                        chunks: 'all',
+                        reuseExistingChunk: true
                     }
                 }
             }

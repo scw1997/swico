@@ -50,27 +50,29 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 {
                     test: /\.(tsx|ts)$/,
                     exclude: /node_modules/,
-                    use: {
-                        loader: 'swc-loader',
-                        options: {
-                            jsc: {
-                                parser: {
-                                    syntax: 'typescript',
-                                    tsx: true,
-                                    decorators: true,
-                                    dynamicImport: true
-                                },
-                                transform: {
-                                    react: {
-                                        runtime: 'automatic', // 使用自动的 JSX 运行时
-                                        useBuiltins: true,
-                                        importSource: 'react' // 指定从哪里自动引入JSX创建函数，对于 React 项目，这里应该是 "react"
-                                    }
-                                },
-                                target: 'es5'
+                    use: [
+                        {
+                            loader: 'swc-loader',
+                            options: {
+                                jsc: {
+                                    parser: {
+                                        syntax: 'typescript',
+                                        tsx: true,
+                                        decorators: true,
+                                        dynamicImport: true
+                                    },
+                                    transform: {
+                                        react: {
+                                            runtime: 'automatic', // 使用自动的 JSX 运行时
+                                            useBuiltins: true,
+                                            importSource: 'react' // 指定从哪里自动引入JSX创建函数，对于 React 项目，这里应该是 "react"
+                                        }
+                                    },
+                                    target: 'es5'
+                                }
                             }
                         }
-                    }
+                    ]
                 },
                 {
                     oneOf: [

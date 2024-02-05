@@ -19,7 +19,6 @@ export default async function () {
     const compiler = webpack(buildConfig as any);
     spinner.start('Building...');
     compiler.run((err, stats) => {
-        // [Stats Object](#stats-object)
         if (err) {
             console.log(`- ${chalk.red.bold(err.stack || err)} \n`);
             spinner.stop();
@@ -46,13 +45,5 @@ export default async function () {
             spinner.stop();
         }
         spinner.succeed(`${chalk.green.bold('Building complete')} \n`);
-
-        // compiler.close((closeErr) => {
-        //     if (closeErr) {
-        //         console.log(`- ${chalk.bold('There are some errors：')} \n`);
-        //
-        //         console.log(`- ${chalk.red.bold(closeErr.toString())} \n`);
-        //     }
-        // });
     });
 }
