@@ -61,7 +61,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                     decorators: true,
                                     dynamicImport: true
                                 },
-                                target: 'es2016'
+                                target: 'es5'
                             }
                         }
                     }

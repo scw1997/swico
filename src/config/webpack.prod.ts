@@ -25,6 +25,7 @@ export default async function (options: GlobalData) {
     } as GlobalData);
 
     const consoleAvailable = customConfig.prod?.console ?? initConfig.console;
+
     //处理public文件夹（静态资源）
     const isCopyPathExist = fs.existsSync(path.join(projectPath, '/public'));
 
@@ -55,6 +56,7 @@ export default async function (options: GlobalData) {
                     parallel: true // 启动多线程压缩
                 }),
                 //webpack5默认压缩js，但是用了css-minimizer，需要手动压缩js
+
                 new TerserPlugin({
                     test: /\.js$/,
                     parallel: true, //多进程
@@ -65,10 +67,6 @@ export default async function (options: GlobalData) {
                             drop_console: !consoleAvailable, //是否删除console
                             // eslint-disable-next-line camelcase
                             drop_debugger: true // 是否删除deubgger语句
-                        },
-
-                        output: {
-                            comments: false // 是否保留注释
                         }
                     }
                 })
