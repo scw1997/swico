@@ -17,7 +17,6 @@ export default async function (options: GlobalData) {
     } as GlobalData);
 
     return merge(baseConfig, {
-        //打包后文件路径
         // @ts-ignore
         mode: 'development',
         stats: 'errors-only',
@@ -37,7 +36,7 @@ export default async function (options: GlobalData) {
             proxy: customConfig?.dev?.proxy ?? initConfig.proxy,
             compress: true, //启动gzip压缩
             hot: true, //热更新
-            open: false, //自动打开浏览器,
+            open: false, //是否自动打开浏览器,
             static: {
                 //提供静态文件服务的路径
                 directory: path.join(projectPath, '/public')

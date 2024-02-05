@@ -7,13 +7,7 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 
 import webpack from 'webpack';
 
-export default async function ({
-    projectPath,
-    entryPath,
-    env,
-    customConfig,
-    templateType
-}: GlobalData) {
+export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
     const customBaseConfig = customConfig.base || {};
     //处理alias 自定义配置
@@ -74,7 +68,7 @@ export default async function ({
                                         importSource: 'react' // 指定从哪里自动引入JSX创建函数，对于 React 项目，这里应该是 "react"
                                     }
                                 },
-                                target: 'es2016'
+                                target: 'es5'
                             }
                         }
                     }
@@ -85,7 +79,6 @@ export default async function ({
                             test: /\.module\.css$/,
                             use: [
                                 env === 'dev' ? 'style-loader' : MiniCssExtractPlugin.loader,
-                                MiniCssExtractPlugin.loader,
                                 {
                                     loader: 'css-loader',
                                     options: {
@@ -137,7 +130,7 @@ export default async function ({
                                     loader: 'postcss-loader',
                                     options: {
                                         postcssOptions: {
-                                            plugins: [['autoprefixer']]
+                                            plugins: [['postcss-preset-env', 'autoprefixer']]
                                         }
                                     }
                                 },

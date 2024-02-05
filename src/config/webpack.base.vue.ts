@@ -75,28 +75,6 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 {
                     oneOf: [
                         {
-                            test: /\.module\.css$/,
-                            use: [
-                                env === 'dev' ? 'style-loader' : MiniCssExtractPlugin.loader,
-                                {
-                                    loader: 'css-loader',
-                                    options: {
-                                        modules: {
-                                            localIdentName: 'moduleStyle_[local]_[contenthash:8]'
-                                        }
-                                    }
-                                },
-                                {
-                                    loader: 'postcss-loader',
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['autoprefixer']]
-                                        }
-                                    }
-                                }
-                            ]
-                        },
-                        {
                             test: /\.css$/,
                             oneOf: [
                                 // 这里匹配 `<style module>`
@@ -140,32 +118,6 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                         }
                                     ]
                                 }
-                            ]
-                        },
-
-                        {
-                            test: /\.module\.less$/,
-
-                            use: [
-                                env === 'dev' ? 'style-loader' : MiniCssExtractPlugin.loader,
-                                {
-                                    loader: 'css-loader',
-                                    options: {
-                                        modules: {
-                                            localIdentName: 'moduleStyle_[local]_[contenthash:8]'
-                                        }
-                                    }
-                                },
-
-                                {
-                                    loader: 'postcss-loader',
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['autoprefixer']]
-                                        }
-                                    }
-                                },
-                                'less-loader'
                             ]
                         },
                         {

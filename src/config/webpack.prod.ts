@@ -52,24 +52,23 @@ export default async function (options: GlobalData) {
             minimizer: [
                 //压缩css
                 new CssMinimizerPlugin({
-                    parallel: true, // 启动多线程压缩
-                    minimizerOptions: {
-                        preset: 'advanced' // cssnano https://cssnano.co/docs/optimisations/
-                    }
+                    parallel: true // 启动多线程压缩
                 }),
                 //webpack5默认压缩js，但是用了css-minimizer，需要手动压缩js
                 new TerserPlugin({
                     test: /\.js$/,
+                    parallel: true, //多进程
+                    minify: TerserPlugin.swcMinify, //配合swc使用
                     terserOptions: {
                         compress: {
                             // eslint-disable-next-line camelcase
-                            drop_console: !consoleAvailable, //删除console
+                            drop_console: !consoleAvailable, //是否删除console
                             // eslint-disable-next-line camelcase
-                            drop_debugger: true // 删除deubgger语句
+                            drop_debugger: true // 是否删除deubgger语句
                         },
 
                         output: {
-                            comments: false // 删除注释
+                            comments: false // 是否保留注释
                         }
                     }
                 })
@@ -91,7 +90,6 @@ export default async function (options: GlobalData) {
             }
         },
         plugins: [
-            new CssMinimizerPlugin(),
             //复制静态资源文件
             ...(isCopyPathExist
                 ? [
