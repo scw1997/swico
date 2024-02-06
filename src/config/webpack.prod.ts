@@ -1,11 +1,10 @@
-import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import BundleAnalyzer from 'webpack-bundle-analyzer';
-import TerserPlugin from 'terser-webpack-plugin';
 import CopyPlugin from 'copy-webpack-plugin';
 import path from 'path';
 import fs from 'fs';
 import { initConfig, GlobalData } from '../utils/tools';
 import { merge } from 'webpack-merge';
+import { EsbuildPlugin } from 'esbuild-loader';
 
 const BundleAnalyzerPlugin = BundleAnalyzer.BundleAnalyzerPlugin;
 const isAnalyze = process.env.ANALYZE === 'true';
@@ -55,24 +54,12 @@ export default async function (options: GlobalData) {
             runtimeChunk: true,
             minimize: true,
             minimizer: [
-                //压缩css
-                new CssMinimizerPlugin({
-                    parallel: true // 启动多线程压缩
-                }),
-                //webpack5默认压缩js，但是用了css-minimizer，需要手动压缩js
-
-                new TerserPlugin({
-                    test: /\.js$/,
-                    parallel: true, //多进程
-                    minify: TerserPlugin.swcMinify, //配合swc使用
-                    terserOptions: {
-                        compress: {
-                            // eslint-disable-next-line camelcase
-                            drop_console: !consoleAvailable, //是否删除console
-                            // eslint-disable-next-line camelcase
-                            drop_debugger: true // 是否删除deubgger语句
-                        }
-                    }
+                new EsbuildPlugin({
+                    target: 'es2015',
+                    css: true, // 压缩css
+                    minify: true,
+                    // @ts-ignore  //是否删除所有console和debugger
+                    drop: [...(!consoleAvailable ? ['console'] : []), 'debugger']
                 })
             ],
             splitChunks: {

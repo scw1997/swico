@@ -5,7 +5,6 @@ import WebpackBar from 'webpackbar';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import webpack from 'webpack';
-
 export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
     const customBaseConfig = customConfig.base || {};
@@ -48,9 +47,16 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         module: {
             rules: [
                 {
-                    test: /\.(tsx|ts)$/,
+                    test: /\.(tsx|ts|jsx)$/,
                     exclude: /node_modules/,
                     use: [
+                        {
+                            loader: 'esbuild-loader',
+                            options: {
+                                target: 'es2015',
+                                minify: true
+                            }
+                        },
                         {
                             loader: 'swc-loader',
                             options: {
@@ -68,7 +74,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                             importSource: 'react' // 指定从哪里自动引入JSX创建函数，对于 React 项目，这里应该是 "react"
                                         }
                                     },
-                                    target: 'es5'
+                                    target: 'es2015'
                                 }
                             }
                         }
@@ -183,7 +189,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             ]
         },
         resolve: {
-            extensions: ['.ts', '.tsx', '.js', '.json'],
+            extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
             alias: {
                 '@': path.join(projectPath, '/src'),
                 ...getCustomAliasConfig()
@@ -206,6 +212,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 },
                 hash: true //对html引用的js文件添加hash戳
             }),
+
             new ForkTsCheckerWebpackPlugin({
                 typescript: {
                     diagnosticOptions: {
@@ -214,6 +221,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                     }
                 }
             }),
+
             new MiniCssExtractPlugin({
                 filename: env === 'dev' ? 'css/[name].css' : 'css/[name].[contenthash].css',
                 ignoreOrder: true
