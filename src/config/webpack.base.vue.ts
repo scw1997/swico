@@ -53,19 +53,10 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                     loader: 'vue-loader',
                     exclude: /node_modules/
                 },
-                //vue-loader 处理过后 script 的代码会传给 esbuild-loader，但是 esbuild 无法根据 .vue 文件来绝定自己要使用哪个 loader，所以必须显式告诉 esbuild 使用 js loader
                 {
-                    test: /\.ts$/,
+                    test: /\.(ts|js)$/,
                     exclude: /node_modules/,
                     use: [
-                        {
-                            loader: 'esbuild-loader',
-                            options: {
-                                target: 'es2015',
-                                loader: 'ts',
-                                minify: true
-                            }
-                        },
                         {
                             loader: 'swc-loader',
                             options: {
@@ -73,34 +64,6 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                     parser: {
                                         syntax: 'typescript',
                                         tsx: false,
-                                        decorators: true,
-                                        dynamicImport: true
-                                    },
-                                    target: 'es2015'
-                                }
-                            }
-                        }
-                    ]
-                },
-
-                {
-                    test: /\.js$/,
-                    exclude: /node_modules/,
-                    use: [
-                        {
-                            loader: 'esbuild-loader',
-                            options: {
-                                target: 'es2015',
-                                loader: 'js',
-                                minify: true
-                            }
-                        },
-                        {
-                            loader: 'swc-loader',
-                            options: {
-                                jsc: {
-                                    parser: {
-                                        syntax: 'ecmascript',
                                         decorators: true,
                                         dynamicImport: true
                                     },

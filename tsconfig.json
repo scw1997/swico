@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "removeComments": true, //去掉注释
     "experimentalDecorators": true,
     "module": "CommonJS", //指定生成哪个模块系统代码： "None"， "CommonJS"， "AMD"， "System"， "UMD"， "ES6"或 "ES2015"。
     "target": "ES5", //指定ECMAScript目标版本 "ES3"（默认）， "ES5"， "ES6"/ "ES2015"， "ES2016"， "ES2017"或 "ESNext"。

@@ -51,13 +51,6 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                     exclude: /node_modules/,
                     use: [
                         {
-                            loader: 'esbuild-loader',
-                            options: {
-                                target: 'es2015',
-                                minify: true
-                            }
-                        },
-                        {
                             loader: 'swc-loader',
                             options: {
                                 jsc: {
