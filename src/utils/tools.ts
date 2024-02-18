@@ -15,7 +15,7 @@ interface CliConfigFields {
     https?: boolean; //是否使用https开发服务器
     copy?: Array<string | { from: string; to: string }>; //复制指定文件(夹)到指定目录
     devtool?: string; //设置 sourcemap 生成方式
-    externals?: any; //置哪些模块不打包，转而在index.ejs中通过 <script> 或其他方式引入
+    externals?: any; //设置哪些模块不打包，转而在index.ejs中通过 <script> 或其他方式引入
 }
 
 export interface GlobalData {

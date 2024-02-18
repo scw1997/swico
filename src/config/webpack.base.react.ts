@@ -29,7 +29,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
     }
 
     return {
-        //入口文件路径，必须为js
+        //入口文件路径
         entry: entryPath,
         //打包后文件路径
         output: {
