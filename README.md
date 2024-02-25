@@ -1,12 +1,8 @@
 # secywo-template-cli
 
-#### 介绍
+## 介绍
 
-附属于secywo的用于控制secywo-template模板启动运行和打包构建的脚手架
+前端脚手架`secywo`的核心实现部分，主要用于处理开发模板的启动，构建等运行过程。
 
-使用文档：
-
-- [secywo源码地址](https://gitee.com/fanlaBoy/secywo)
-- [secywo-template-react源码地址](https://gitee.com/fanlaBoy/secywo-template-react)
-- [secywo-template-vue源码地址](https://gitee.com/fanlaBoy/secywo-template-vue)
+详见：[SECYWO 官方文档](https://fanlaboy.gitee.io/secywo-docs/)
 
