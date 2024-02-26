@@ -1,6 +1,6 @@
 {
   "name": "secywo-template-cli",
-  "version": "0.12.6",
+  "version": "1.0.0",
   "description": "secywo template cli",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
