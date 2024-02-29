@@ -90,6 +90,8 @@ export default async function start() {
         await devServer.start();
         handleWatch(projectPath, devServer);
     } catch (e) {
-        spinner.fail(`There are some errors:${e.toString()}`);
+        const strErr = e.toString();
+        spinner.fail(`${chalk.bold('There are some errors：')}\n`);
+        console.error(`- ${chalk.red.bold(strErr)} \n`);
     }
 }
