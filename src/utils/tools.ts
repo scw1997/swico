@@ -6,6 +6,7 @@ import chalk from 'chalk';
 const spinner = ora();
 
 interface CliConfigFields {
+    npmType: 'npm' | 'pnpm' | 'yarn'; //包管理工具
     plugins?: any[]; //webpack插件
     publicPath?: string; //非根路径部署所需要定义的base路径
     console?: boolean; //是否需要保留console
@@ -28,7 +29,7 @@ export interface GlobalData {
         //脚手架自定义配置
         base: Pick<
             CliConfigFields,
-            'plugins' | 'publicPath' | 'alias' | 'define' | 'devtool' | 'externals'
+            'plugins' | 'publicPath' | 'alias' | 'define' | 'devtool' | 'externals' | 'npmType'
         >; //公共通用
         dev: Pick<CliConfigFields, 'plugins' | 'proxy' | 'https' | 'devtool'>; //开发环境专用
         prod: Pick<CliConfigFields, 'plugins' | 'console' | 'copy' | 'devtool'>; //生产环境专用
@@ -70,7 +71,8 @@ export const getProjectConfig: (templateType?: 'vue' | 'react') => Promise<Globa
                         'alias',
                         'define',
                         'devtool',
-                        'externals'
+                        'externals',
+                        'npmType'
                     ];
                     configFileName = 'secywo.ts';
                     break;
@@ -87,12 +89,20 @@ export const getProjectConfig: (templateType?: 'vue' | 'react') => Promise<Globa
                 (field) => !supportedFieldList.includes(field)
             );
             if (configFields.length > 0 && unSupportedField) {
-                const msgText = `The secywo configuration file '${chalk.blue(
+                const msgText = `\n The secywo configuration file '${chalk.blue(
                     configFileName
                 )}' does not support the field '${chalk.red(unSupportedField)}' `;
                 spinner.fail(msgText);
                 process.exit();
             }
+            //对不支持的npmType值进行提示
+            if (key === 'base' && !['npm', 'pnpm', 'yarn'].includes(configObj['npmType'])) {
+                spinner.fail(
+                    `\n The field '${chalk.blue('npmType')}' does  not support the value '${chalk.red(configObj['npmType'])}',The value can be 'npm','pnpm', or 'yarn' `
+                );
+                process.exit();
+            }
+
             customConfig[key] = (await import(curConfigFilePath)).default;
         }
     }
@@ -134,6 +144,7 @@ export const getFormatDefineVars = async (defineVarsConfigData) => {
 
 //部分secywo配置项的初始默认值
 export const initConfig: CliConfigFields = {
+    npmType: 'npm',
     console: true,
     plugins: [],
     publicPath: '/',

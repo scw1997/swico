@@ -7,10 +7,10 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import webpack from 'webpack';
 export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
-    const customBaseConfig = customConfig.base || {};
+    const customBaseConfig = customConfig.base;
     //处理alias 自定义配置
     const getCustomAliasConfig = () => {
-        const { alias } = customBaseConfig;
+        const { alias } = customBaseConfig || {};
         const custAliasConfig = {};
         if (alias) {
             Object.keys(alias).forEach((key) => {
@@ -19,7 +19,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         }
         return custAliasConfig;
     };
-    const publicPath = customBaseConfig.publicPath || initConfig.publicPath;
+    const publicPath = customBaseConfig?.publicPath || initConfig.publicPath;
     const basicPlugins = [];
     //处理自定义变量设置
     const defineConfigData = customConfig?.base?.define ?? {};
@@ -225,7 +225,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 color: '#82B2FD',
                 profile: false
             }),
-            ...(customBaseConfig.plugins || initConfig.plugins)
+            ...(customBaseConfig?.plugins || initConfig.plugins)
         ]
     };
 }
