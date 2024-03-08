@@ -6,7 +6,7 @@ import chalk from 'chalk';
 const spinner = ora();
 
 interface CliConfigFields {
-    npmType: 'npm' | 'pnpm' | 'yarn'; //包管理工具
+    npmType: 'npm' | 'pnpm'; //包管理工具
     plugins?: any[]; //webpack插件
     publicPath?: string; //非根路径部署所需要定义的base路径
     console?: boolean; //是否需要保留console
@@ -96,9 +96,9 @@ export const getProjectConfig: (templateType?: 'vue' | 'react') => Promise<Globa
                 process.exit();
             }
             //对不支持的npmType值进行提示
-            if (key === 'base' && !['npm', 'pnpm', 'yarn'].includes(configObj['npmType'])) {
+            if (key === 'base' && !['npm', 'pnpm'].includes(configObj['npmType'])) {
                 spinner.fail(
-                    `\n The field '${chalk.blue('npmType')}' does  not support the value '${chalk.red(configObj['npmType'])}',The value can be 'npm','pnpm', or 'yarn' `
+                    `\n The field '${chalk.blue('npmType')}' does  not support the value '${chalk.red(configObj['npmType'])}',The value can be 'npm' or 'pnpm' `
                 );
                 process.exit();
             }
