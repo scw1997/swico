@@ -3,7 +3,9 @@ import path from 'path';
 import portFinder from 'portfinder';
 import ora from 'ora';
 import chalk from 'chalk';
+import { createElement, FC, lazy, Suspense, useEffect, useState } from 'react';
 const spinner = ora();
+import React from 'react'
 
 interface CliConfigFields {
     npmType: 'npm' | 'pnpm'; //包管理工具
@@ -108,9 +110,21 @@ export const getProjectConfig: (templateType?: 'vue' | 'react') => Promise<Globa
     }
 
     //webpack入口文件
-    const entryPath = path.join(cwd, templateType === 'vue' ? '/src/index.ts' : '/src/index.tsx');
+    const entryPath = path.resolve(__dirname, templateType === 'vue' ? '../template/vue/index.js' : '../template/react/index.js');
     //webpack html template
     const templatePath = path.join(cwd, '/src/index.ejs');
+
+    const router = (await import(path.resolve(cwd, './config/router.ts'))).default;
+    const formatRouter = router.map(item=>{
+        const {path,component} = item
+        return {path,element:
+                                    <Suspense fallback={'loading'}>
+                                        {createElement(lazy(component))}
+                                    </Suspense>
+        }
+    })
+    console.log('formatRouter',formatRouter)
+    rewriteSecywoConfigFile(formatRouter)
 
     return {
         projectPath: cwd,
@@ -119,6 +133,22 @@ export const getProjectConfig: (templateType?: 'vue' | 'react') => Promise<Globa
         customConfig,
         templateType: templateType ?? 'react'
     };
+};
+
+const rewriteSecywoConfigFile = (formatRouter) => {
+    return new Promise((resolve, reject) => {
+        const textData = `
+export default ${formatRouter.toString()}
+
+`;
+        fs.writeFile(path.resolve(__dirname,'../template/react/router.js'), textData, 'utf8', (err) => {
+            if (err) {
+                return reject('An error occurred during the npm configuration.');
+            }
+            resolve(null);
+        });
+    });
+
 };
 
 //获取随机可用的接口（解决devServer接口占用报错的问题）

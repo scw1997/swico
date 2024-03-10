@@ -28,6 +28,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         basicPlugins.push(new webpack.DefinePlugin(formatObj));
     }
 
+
     return {
         //入口文件路径
         entry: entryPath,

@@ -14,7 +14,7 @@ export default async function () {
         templatePath,
         projectPath,
         customConfig,
-        templateType
+        templateType,
     });
     const compiler = webpack(buildConfig as any);
     spinner.start('Building...');
