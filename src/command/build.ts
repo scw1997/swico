@@ -1,6 +1,6 @@
 import webpack from 'webpack';
 import getBuildConfig from '../config/webpack.prod';
-import { getProjectConfig, GlobalData } from '../utils/tools';
+import { getProjectConfig, GlobalData } from '../utils/config';
 import chalk from 'chalk';
 import ora from 'ora';
 const spinner = ora();
@@ -14,7 +14,7 @@ export default async function () {
         templatePath,
         projectPath,
         customConfig,
-        templateType,
+        templateType
     });
     const compiler = webpack(buildConfig as any);
     spinner.start('Building...');

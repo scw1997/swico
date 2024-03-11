@@ -1,5 +1,5 @@
 import getReactBaseConfig from './webpack.base.react';
-import { initConfig, GlobalData } from '../utils/tools';
+import { initConfig, GlobalData } from '../utils/config';
 import path from 'path';
 import { merge } from 'webpack-merge';
 import EslintPlugin from 'eslint-webpack-plugin';

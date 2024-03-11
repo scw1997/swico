@@ -2,7 +2,7 @@ import BundleAnalyzer from 'webpack-bundle-analyzer';
 import CopyPlugin from 'copy-webpack-plugin';
 import path from 'path';
 import fs from 'fs';
-import { initConfig, GlobalData } from '../utils/tools';
+import { initConfig, GlobalData } from '../utils/config';
 import { merge } from 'webpack-merge';
 import { EsbuildPlugin } from 'esbuild-loader';
 

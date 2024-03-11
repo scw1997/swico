@@ -1,4 +1,4 @@
-import { GlobalData } from './utils/tools';
+import { GlobalData } from './utils/config';
 
 export type ConfigType = GlobalData['customConfig'];
 

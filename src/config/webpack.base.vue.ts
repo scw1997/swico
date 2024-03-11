@@ -1,6 +1,6 @@
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import { getFormatDefineVars, initConfig, GlobalData } from '../utils/tools';
+import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
 import WebpackBar from 'webpackbar';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';

@@ -1,7 +1,8 @@
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import getStartConfig from '../config/webpack.dev';
-import { getPort, getProjectConfig } from '../utils/tools';
+import { getPort } from '../utils/tools';
+import { getProjectConfig } from '../utils/config';
 import ora from 'ora';
 import chokidar from 'chokidar';
 import path from 'path';
