@@ -20,6 +20,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         return custAliasConfig;
     };
     const publicPath = customBaseConfig?.publicPath || initConfig.publicPath;
+    const routerBase = customBaseConfig?.routerBase || initConfig.routerBase;
     const basicPlugins = [];
     //处理自定义变量设置
     const defineConfigData = customConfig?.base?.define ?? {};
@@ -201,7 +202,8 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                     removeAttributeQuotes: true //是否去掉html标签属性的引号
                 },
                 templateParameters: {
-                    publicPath
+                    publicPath,
+                    routerBase
                 },
                 hash: true //对html引用的js文件添加hash戳
             }),

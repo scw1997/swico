@@ -25,6 +25,8 @@ interface CliConfigFields {
     devtool?: string; //设置 sourcemap 生成方式
     externals?: any; //设置哪些模块不打包，转而在index.ejs中通过 <script> 或其他方式引入
     routes?: RoutePageType[]; //路由配置
+    routerType?: 'browser' | 'hash'; //路由类型
+    routerBase?: string; //路由前缀
 }
 
 export interface GlobalData {
@@ -45,9 +47,17 @@ export interface GlobalData {
             | 'externals'
             | 'npmType'
             | 'routes'
+            | 'routerType'
+            | 'routerBase'
         >; //公共通用
-        dev: Pick<CliConfigFields, 'plugins' | 'proxy' | 'https' | 'devtool' | 'routes'>; //开发环境专用
-        prod: Pick<CliConfigFields, 'plugins' | 'console' | 'copy' | 'devtool' | 'routes'>; //生产环境专用
+        dev: Pick<
+            CliConfigFields,
+            'plugins' | 'proxy' | 'https' | 'devtool' | 'routes' | 'routerType' | 'routerBase'
+        >; //开发环境专用
+        prod: Pick<
+            CliConfigFields,
+            'plugins' | 'console' | 'copy' | 'devtool' | 'routes' | 'routerType' | 'routerBase'
+        >; //生产环境专用
     };
 }
 
@@ -89,16 +99,34 @@ export const getProjectConfig: (
                         'devtool',
                         'externals',
                         'npmType',
-                        'routes'
+                        'routes',
+                        'routerType',
+                        'routerBase'
                     ];
                     configFileName = 'secywo.ts';
                     break;
                 case 'dev':
-                    supportedFieldList = ['plugins', 'proxy', 'https', 'devtool', 'routes'];
+                    supportedFieldList = [
+                        'plugins',
+                        'proxy',
+                        'https',
+                        'devtool',
+                        'routes',
+                        'routerType',
+                        'routerBase'
+                    ];
                     configFileName = 'secywo.dev.ts';
                     break;
                 case 'prod':
-                    supportedFieldList = ['plugins', 'console', 'copy', 'devtool', 'routes'];
+                    supportedFieldList = [
+                        'plugins',
+                        'console',
+                        'copy',
+                        'devtool',
+                        'routes',
+                        'routerType',
+                        'routerBase'
+                    ];
                     configFileName = 'secywo.prod.ts';
             }
 
@@ -118,7 +146,14 @@ export const getProjectConfig: (
                 !['npm', 'pnpm'].includes(configObj['npmType'] ?? initConfig.npmType)
             ) {
                 spinner.fail(
-                    `\n The field '${chalk.blue('npmType')}'does not support the value '${chalk.red(configObj['npmType'])}',The value can be 'npm' or 'pnpm' `
+                    `The field '${chalk.blue('npmType')}'does not support the value '${chalk.red(configObj['npmType'])}',The value can be 'npm' or 'pnpm' `
+                );
+                process.exit();
+            }
+            //对不支持的routerType值进行提示
+            if (!['hash', 'browser'].includes(configObj['routerType'] ?? initConfig.routerType)) {
+                spinner.fail(
+                    `The field '${chalk.blue('routerType')}'does not support the value '${chalk.red(configObj['routerType'])}',The value can be 'browser' or 'hash' `
                 );
                 process.exit();
             }
@@ -131,8 +166,17 @@ export const getProjectConfig: (
     const routerConfig =
         customConfig[env].routes ?? customConfig['base'].routes ?? initConfig.routes;
 
+    const routerType =
+        customConfig[env].routerType ?? customConfig['base'].routerType ?? initConfig.routerType;
+
+    const routerBase =
+        customConfig[env].routerBase ?? customConfig['base'].routerBase ?? initConfig.routerBase;
+
     //在开发端项目生成模板路由配置
-    await initTemplateRouterConfig(routerConfig, templateType);
+    await initTemplateRouterConfig(
+        { routes: routerConfig, type: routerType, base: routerBase },
+        templateType
+    );
 
     //生成webpack入口文件
     const entryPath = path.resolve(cwd, './src/.secywo/index.js');
@@ -149,7 +193,7 @@ export const getProjectConfig: (
     };
 };
 
-const getFormatRouter = (router = [], templateType) => {
+const getFormatRouter = (routes = [], templateType) => {
     const _main = (item) => {
         const { path, component, name, children } = item;
         return {
@@ -159,15 +203,15 @@ const getFormatRouter = (router = [], templateType) => {
             children: children ? children?.map((item) => _main(item)) : undefined
         };
     };
-    return router.map((item) => {
+    return routes.map((item) => {
         return _main(item);
     });
 };
 
-//在开发端项目生成模板路由配置
-const initTemplateRouterConfig = (routerConfig, templateType) => {
+//格式化处理template文件内容
+const formatTemplateFileText = ({ routes, type, base }, templateType) => {
     return new Promise((resolve, reject) => {
-        const formatRouter = getFormatRouter(routerConfig, templateType);
+        const formatRouter = getFormatRouter(routes, templateType);
 
         //处理路由配置
         const textData = `export default ${JSON.stringify(formatRouter)}`;
@@ -183,22 +227,113 @@ const initTemplateRouterConfig = (routerConfig, templateType) => {
                     spinner.fail(errText);
                     return reject(errText);
                 }
+                //读取index文件的内容，根据routerType的值动态替换里面的部分文本，从而更换路由模式
+                const indexText = fs.readFileSync(
+                    path.resolve(__dirname, `../template/${templateType}/index.js`),
+                    'utf8'
+                );
+                let replaceIndexText = indexText;
+                switch (true) {
+                    case templateType === 'vue' && type === 'hash':
+                        replaceIndexText = indexText.replaceAll(
+                            'createWebHistory',
+                            'createWebHashHistory'
+                        );
+                        if (base) {
+                            //处理routerBase
+                            replaceIndexText = replaceIndexText.replace(
+                                /createWebHashHistory\)\('([^']*)'\)/g,
+                                function (match, p1) {
+                                    return `createWebHashHistory)('${base}')`; // 返回替换后的字符串
+                                }
+                            );
+                        }
+                        break;
+                    case templateType === 'vue' && type === 'browser':
+                        replaceIndexText = indexText.replaceAll(
+                            'createWebHashHistory',
+                            'createWebHistory'
+                        );
+                        if (base) {
+                            //处理routerBase
+                            replaceIndexText = replaceIndexText.replace(
+                                /createWebHistory\)\('([^']*)'\)/g,
+                                function (match, p1) {
+                                    // p1 是匹配到的 xxx 部分
+                                    return `createWebHistory)('${base}')`; // 返回替换后的字符串
+                                }
+                            );
+                        }
+                        break;
+                    case templateType === 'react' && type === 'hash':
+                        replaceIndexText = indexText.replaceAll('BrowserRouter', 'HashRouter');
 
-                const copyTargetPath = path.resolve(process.cwd(), './src/.secywo');
-                // 目录是否已经存在，强制删除然后重新生成
-                if (fs.existsSync(copyTargetPath)) {
-                    await fs.remove(copyTargetPath);
+                        break;
+                    case templateType === 'react' && type === 'browser':
+                        replaceIndexText = indexText.replaceAll('HashRouter', 'BrowserRouter');
+                        break;
+                }
+                if (templateType === 'react') {
+                    if (base) {
+                        //处理routerBase
+                        replaceIndexText = replaceIndexText.replace(
+                            /exports.basename = '([^']*)';/g,
+                            function (match, p1) {
+                                // p1 是匹配到的 xxx 部分
+                                return `exports.basename = '${base}';`;
+                            }
+                        );
+                    }
+                    //处理React Router 的loading组件
+                    //先判断开发端是否存在loading组件
+                    try {
+                        await fs.access(
+                            path.resolve(process.cwd(), './src/loading/index.tsx'),
+                            fs.constants.F_OK
+                        );
+                        //存在则将template中引入的loading组件路径替换
+                        replaceIndexText = replaceIndexText.replace('./loading', '../loading');
+                    } catch (e) {
+                        //不存在
+                    }
                 }
 
-                //将编译后的template配置复制到开发端
-                await copyDir(
-                    path.resolve(__dirname, `../template/${templateType}`),
-                    copyTargetPath,
-                    (fileNane) => !fileNane.endsWith('.d.ts')
+                fs.writeFile(
+                    path.resolve(__dirname, `../template/${templateType}/index.js`),
+                    replaceIndexText,
+                    () => {
+                        if (err) {
+                            const errText = 'An error occurred during the secywo configuration.';
+                            spinner.fail(errText);
+                            return reject(errText);
+                        }
+                        resolve(null);
+                    }
                 );
-                resolve(null);
             }
         );
+    });
+};
+
+//在开发端项目生成模板路由配置
+const initTemplateRouterConfig = (routerConfig, templateType) => {
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
+        await formatTemplateFileText(routerConfig, templateType);
+
+        const copyTargetPath = path.resolve(process.cwd(), './src/.secywo');
+        // 复制的目标目录是否已经存在，强制删除然后重新生成
+        if (fs.existsSync(copyTargetPath)) {
+            await fs.remove(copyTargetPath);
+        }
+
+        //将编译后的template配置复制到开发端
+        await copyDir(
+            path.resolve(__dirname, `../template/${templateType}`),
+            copyTargetPath,
+            (fileNane) => !fileNane.endsWith('.d.ts')
+        );
+        resolve(null);
     });
 };
 
@@ -224,5 +359,7 @@ export const initConfig: CliConfigFields = {
     publicPath: '/',
     proxy: undefined,
     copy: [],
-    routes: []
+    routes: [],
+    routerType: 'browser',
+    routerBase: '/'
 };
