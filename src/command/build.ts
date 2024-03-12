@@ -7,7 +7,7 @@ const spinner = ora();
 const { TEMPLATE } = process.env;
 // 执行start本地启动
 export default async function () {
-    const projectConfig = await getProjectConfig(TEMPLATE as GlobalData['templateType']);
+    const projectConfig = await getProjectConfig(TEMPLATE as GlobalData['templateType'], 'prod');
     const { entryPath, templatePath, projectPath, customConfig, templateType } = projectConfig;
     const buildConfig = await getBuildConfig({
         entryPath,

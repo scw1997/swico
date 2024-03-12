@@ -6,6 +6,12 @@ import * as process from 'process';
 import { copyDir } from './tools';
 const spinner = ora();
 
+export type RoutePageType = {
+    component?: string;
+    children?: RoutePageType[];
+    path: string;
+};
+
 interface CliConfigFields {
     npmType?: 'npm' | 'pnpm'; //包管理工具
     plugins?: any[]; //webpack插件
@@ -18,6 +24,7 @@ interface CliConfigFields {
     copy?: Array<string | { from: string; to: string }>; //复制指定文件(夹)到指定目录
     devtool?: string; //设置 sourcemap 生成方式
     externals?: any; //设置哪些模块不打包，转而在index.ejs中通过 <script> 或其他方式引入
+    routes?: RoutePageType[]; //路由配置
 }
 
 export interface GlobalData {
@@ -30,17 +37,25 @@ export interface GlobalData {
         //脚手架自定义配置
         base: Pick<
             CliConfigFields,
-            'plugins' | 'publicPath' | 'alias' | 'define' | 'devtool' | 'externals' | 'npmType'
+            | 'plugins'
+            | 'publicPath'
+            | 'alias'
+            | 'define'
+            | 'devtool'
+            | 'externals'
+            | 'npmType'
+            | 'routes'
         >; //公共通用
-        dev: Pick<CliConfigFields, 'plugins' | 'proxy' | 'https' | 'devtool'>; //开发环境专用
-        prod: Pick<CliConfigFields, 'plugins' | 'console' | 'copy' | 'devtool'>; //生产环境专用
+        dev: Pick<CliConfigFields, 'plugins' | 'proxy' | 'https' | 'devtool' | 'routes'>; //开发环境专用
+        prod: Pick<CliConfigFields, 'plugins' | 'console' | 'copy' | 'devtool' | 'routes'>; //生产环境专用
     };
 }
 
 //获取开发者的自定义项目配置和相关参数
-export const getProjectConfig: (templateType?: 'vue' | 'react') => Promise<GlobalData> = async (
-    templateType
-) => {
+export const getProjectConfig: (
+    templateType?: 'vue' | 'react',
+    env?: GlobalData['env']
+) => Promise<GlobalData> = async (templateType, env) => {
     // 当前命令行选择的目录(即项目根路径)
     const cwd = process.cwd();
     //secywo 配置文件路径
@@ -73,16 +88,17 @@ export const getProjectConfig: (templateType?: 'vue' | 'react') => Promise<Globa
                         'define',
                         'devtool',
                         'externals',
-                        'npmType'
+                        'npmType',
+                        'routes'
                     ];
                     configFileName = 'secywo.ts';
                     break;
                 case 'dev':
-                    supportedFieldList = ['plugins', 'proxy', 'https', 'devtool'];
+                    supportedFieldList = ['plugins', 'proxy', 'https', 'devtool', 'routes'];
                     configFileName = 'secywo.dev.ts';
                     break;
                 case 'prod':
-                    supportedFieldList = ['plugins', 'console', 'copy', 'devtool'];
+                    supportedFieldList = ['plugins', 'console', 'copy', 'devtool', 'routes'];
                     configFileName = 'secywo.prod.ts';
             }
 
@@ -112,7 +128,8 @@ export const getProjectConfig: (templateType?: 'vue' | 'react') => Promise<Globa
     }
 
     //读取router配置文件
-    const routerConfig = (await import(path.resolve(cwd, './config/router.ts'))).default;
+    const routerConfig =
+        customConfig[env].routes ?? customConfig['base'].routes ?? initConfig.routes;
 
     //在开发端项目生成模板路由配置
     await initTemplateRouterConfig(routerConfig, templateType);
@@ -137,16 +154,9 @@ const getFormatRouter = (router = [], templateType) => {
         const { path, component, name, children } = item;
         return {
             path,
-            component: `()=>import('@/pages/${component}')`,
+            component: `()=>import('@/${templateType === 'vue' ? 'views' : 'pages'}/${component}')`,
             name: templateType === 'vue' ? name : undefined,
-            routes:
-                templateType === 'react' && children
-                    ? children?.map((item) => _main(item))
-                    : undefined,
-            children:
-                templateType === 'vue' && children
-                    ? children?.map((item) => _main(item))
-                    : undefined
+            children: children ? children?.map((item) => _main(item)) : undefined
         };
     };
     return router.map((item) => {
@@ -160,15 +170,12 @@ const initTemplateRouterConfig = (routerConfig, templateType) => {
         const formatRouter = getFormatRouter(routerConfig, templateType);
 
         //处理路由配置
-        const textData = `
-        export default ${JSON.stringify(formatRouter)}
-
-        `;
+        const textData = `export default ${JSON.stringify(formatRouter)}`;
         let modifiedText = textData.replace(/"(\(\)=>import\('[^']+'\))"/g, '$1');
 
         //处理后写入开发端项目
         fs.writeFile(
-            path.resolve(__dirname, `../template/${templateType}/router.js`),
+            path.resolve(__dirname, `../template/${templateType}/routes.js`),
             modifiedText,
             async (err) => {
                 if (err) {
@@ -176,10 +183,18 @@ const initTemplateRouterConfig = (routerConfig, templateType) => {
                     spinner.fail(errText);
                     return reject(errText);
                 }
+
+                const copyTargetPath = path.resolve(process.cwd(), './src/.secywo');
+                // 目录是否已经存在，强制删除然后重新生成
+                if (fs.existsSync(copyTargetPath)) {
+                    await fs.remove(copyTargetPath);
+                }
+
                 //将编译后的template配置复制到开发端
                 await copyDir(
                     path.resolve(__dirname, `../template/${templateType}`),
-                    path.resolve(process.cwd(), './src/.secywo')
+                    copyTargetPath,
+                    (fileNane) => !fileNane.endsWith('.d.ts')
                 );
                 resolve(null);
             }
@@ -208,5 +223,6 @@ export const initConfig: CliConfigFields = {
     plugins: [],
     publicPath: '/',
     proxy: undefined,
-    copy: []
+    copy: [],
+    routes: []
 };

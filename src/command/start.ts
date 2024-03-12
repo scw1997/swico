@@ -76,7 +76,7 @@ export default async function start() {
     //获取可用端口（优先使用重启时的传递的port环境变量）
     availablePort = envPort ?? (await getPort());
     // @ts-ignore
-    const projectConfig = await getProjectConfig(TEMPLATE);
+    const projectConfig = await getProjectConfig(TEMPLATE, 'dev');
     const { projectPath } = projectConfig;
     const startConfig = await getStartConfig(projectConfig);
     const compiler = webpack(startConfig as any);

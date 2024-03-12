@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 
 //复制文件夹
-export const copyDir = async (src, dest) => {
+export const copyDir = async (src, dest, filter?: (fileNane) => boolean) => {
     const _copy = async (src, dest) => {
         const files = await fs.readdir(src);
         files.forEach((file) => {
@@ -14,8 +14,12 @@ export const copyDir = async (src, dest) => {
                 // 如果是目录，则递归复制
                 _copy(srcPath, destPath);
             } else {
+                const isFilter = filter ? filter(file) === true : true;
                 // 如果是文件，则直接复制
-                fs.copyFileSync(srcPath, destPath);
+                //是否开启过滤
+                if (isFilter) {
+                    fs.copyFileSync(srcPath, destPath);
+                }
             }
         });
         return null; // 所有文件复制完成后调用回调

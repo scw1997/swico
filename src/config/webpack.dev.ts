@@ -1,4 +1,3 @@
-import getReactBaseConfig from './webpack.base.react';
 import { initConfig, GlobalData } from '../utils/config';
 import path from 'path';
 import { merge } from 'webpack-merge';
