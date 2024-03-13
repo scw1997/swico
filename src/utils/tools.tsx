@@ -1,6 +1,7 @@
 import portFinder from 'portfinder';
 import fs from 'fs-extra';
 import path from 'path';
+import chalk from 'chalk';
 
 //复制文件夹
 export const copyDirFiles = async (src, dest, filter?: (fileName) => boolean) => {
@@ -41,4 +42,15 @@ export const getPort = () => {
         port: 3000, // minimum port
         stopPort: 3333 //
     });
+};
+
+export const toast = {
+    error: (message) => {
+        console.log(`\n- ${chalk.hex('#5f72f5')('There are some errors about secywo：')} \n`);
+        console.log(` > ${chalk.red.bold(message)} \n`);
+    },
+    warning: (message) => {
+        console.log(`\n- ${chalk.hex('#5f72f5')('There are some warnings about secywo：')} \n`);
+        console.log(` > ${chalk.hex('#fb8918').bold(message)} \n`);
+    }
 };

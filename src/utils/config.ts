@@ -3,7 +3,7 @@ import path from 'path';
 import ora from 'ora';
 import chalk from 'chalk';
 import * as process from 'process';
-import { copyDirFiles } from './tools';
+import { copyDirFiles, toast } from './tools';
 const spinner = ora();
 
 export type RoutesItemType = {
@@ -57,15 +57,16 @@ export interface GlobalData {
     };
 }
 
+// 当前命令行选择的目录(即项目根路径)
+const projectPath = process.cwd();
+
 //获取开发者的自定义项目配置和相关参数
 export const getProjectConfig: (
     templateType?: 'vue' | 'react',
     env?: GlobalData['env']
 ) => Promise<GlobalData> = async (templateType, env) => {
-    // 当前命令行选择的目录(即项目根路径)
-    const cwd = process.cwd();
     //secywo 配置文件路径
-    const configDir = path.join(cwd, '/config');
+    const configDir = path.join(projectPath, '/config');
     // 脚手架对应的配置文件信息
     const configPath = {
         dev: path.join(configDir, '/secywo.dev.ts'),
@@ -115,7 +116,7 @@ export const getProjectConfig: (
                 const msgText = `\n The secywo configuration file '${chalk.blue(
                     configFileName
                 )}' does not support the field '${chalk.red(unSupportedField)}' `;
-                spinner.fail(msgText);
+                toast.error(msgText);
                 process.exit();
             }
             //对不支持的npmType值进行提示
@@ -123,15 +124,17 @@ export const getProjectConfig: (
                 key === 'base' &&
                 !['npm', 'pnpm'].includes(configObj['npmType'] ?? initConfig.npmType)
             ) {
-                spinner.fail(
-                    `The field '${chalk.blue('npmType')}'does not support the value '${chalk.red(configObj['npmType'])}',The value can be 'npm' or 'pnpm' `
+                toast.error(
+                    `The field '${chalk.blue('npmType')}' does not support the value '${chalk.red(configObj['npmType'])}',the value can be 'npm' or 'pnpm' `
                 );
                 process.exit();
             }
             //对不支持的routerType值进行提示
-            if (!['hash', 'browser'].includes((configObj['router'] ?? initConfig.router).type)) {
-                spinner.fail(
-                    `The field '${chalk.blue('router.type')}'does not support the value '${chalk.red(configObj['router'].type)}',The value can be 'browser' or 'hash' `
+            if (
+                !['hash', 'browser'].includes(configObj['router']?.type ?? initConfig.router.type)
+            ) {
+                toast.error(
+                    `The field '${chalk.blue('router.type')}' does not support the value '${chalk.red(configObj['router'].type)}',the value can be 'browser' or 'hash' `
                 );
                 process.exit();
             }
@@ -146,15 +149,17 @@ export const getProjectConfig: (
 
     //在开发端项目生成模板路由配置
     await initTemplateRouterConfig(routerConfig, templateType);
+    //处理脚手架入口文件
+    await handleCliIndexFile(templateType);
 
     //生成webpack入口文件
-    const entryPath = path.resolve(cwd, './src/.secywo/index.js');
+    const entryPath = path.resolve(projectPath, './src/.secywo/index.js');
 
     //webpack html template
-    const templatePath = path.join(cwd, '/src/index.ejs');
+    const templatePath = path.join(projectPath, '/src/index.ejs');
 
     return {
-        projectPath: cwd,
+        projectPath,
         entryPath,
         templatePath,
         customConfig,
@@ -167,7 +172,7 @@ const getFormatRouter = (routes = [], templateType) => {
         const { path, component, name, children } = item;
         return {
             path,
-            component: `()=>import('@/${templateType === 'vue' ? 'views' : 'pages'}/${component}')`,
+            component: `()=>import('${projectPath}/src/${templateType === 'vue' ? 'views' : 'pages'}/${component}')`,
             name: templateType === 'vue' ? name : undefined,
             children: children ? children?.map((item) => _main(item)) : undefined
         };
@@ -177,8 +182,24 @@ const getFormatRouter = (routes = [], templateType) => {
     });
 };
 
+//根据template处理脚手架入口文件,暴露必要的api
+const handleCliIndexFile = (templateType: GlobalData['templateType']) => {
+    const targetPath = path.resolve(__dirname, '../index.js');
+    const vueFileText = fs.readFileSync(path.resolve(__dirname, '../index.vue.js'), 'utf8');
+    const reactFileText = fs.readFileSync(path.resolve(__dirname, '../index.react.js'), 'utf8');
+    fs.writeFile(targetPath, templateType === 'vue' ? vueFileText : reactFileText, (err) => {
+        if (err) {
+            const errText = 'An error occurred during the secywo configuration.';
+            toast.error(errText);
+        }
+    });
+};
+
 //格式化处理template文件内容
-const formatTemplateFileText = ({ routes, type, base }, templateType) => {
+const formatTemplateFileText = (
+    { routes, type, base },
+    templateType: GlobalData['templateType']
+) => {
     return new Promise((resolve, reject) => {
         const formatRouter = getFormatRouter(routes, templateType);
 
@@ -193,7 +214,7 @@ const formatTemplateFileText = ({ routes, type, base }, templateType) => {
             async (err) => {
                 if (err) {
                     const errText = 'An error occurred during the secywo configuration.';
-                    spinner.fail(errText);
+                    toast.error(errText);
                     return reject(errText);
                 }
                 //读取template/config或者index文件的内容，根据routerType和routerBase的值动态替换里面的部分文本，从而更换路由模式
@@ -236,7 +257,7 @@ const formatTemplateFileText = ({ routes, type, base }, templateType) => {
                     //先判断开发端是否存在loading组件
                     try {
                         await fs.access(
-                            path.resolve(process.cwd(), './src/loading/index.tsx'),
+                            path.resolve(projectPath, './src/loading/index.tsx'),
                             fs.constants.F_OK
                         );
                         //存在则将template中引入的loading组件路径替换
@@ -249,13 +270,13 @@ const formatTemplateFileText = ({ routes, type, base }, templateType) => {
                 fs.writeFile(indexFilePath, replaceIndexText, () => {
                     if (err) {
                         const errText = 'An error occurred during the secywo configuration.';
-                        spinner.fail(errText);
+                        toast.error(errText);
                         return reject(errText);
                     }
                     fs.writeFile(configFilePath, replaceConfigText, () => {
                         if (err) {
                             const errText = 'An error occurred during the secywo configuration.';
-                            spinner.fail(errText);
+                            toast.error(errText);
                             return reject(errText);
                         }
                         resolve(null);
@@ -267,12 +288,12 @@ const formatTemplateFileText = ({ routes, type, base }, templateType) => {
 };
 
 //在开发端项目生成模板路由配置
-const initTemplateRouterConfig = (routerConfig, templateType) => {
+const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templateType']) => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
         await formatTemplateFileText(routerConfig, templateType);
 
-        const copyTargetPath = path.resolve(process.cwd(), './src/.secywo');
+        const copyTargetPath = path.resolve(projectPath, './src/.secywo');
         // 复制的目标目录是否已经存在，强制删除然后重新生成
         if (fs.existsSync(copyTargetPath)) {
             await fs.remove(copyTargetPath);

@@ -1,7 +1,7 @@
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import getStartConfig from '../config/webpack.dev';
-import { getPort } from '../utils/tools';
+import { getPort, toast } from '../utils/tools';
 import { getProjectConfig } from '../utils/config';
 import ora from 'ora';
 import chokidar from 'chokidar';
@@ -30,12 +30,8 @@ const handleWatch = (projectPath, devServer) => {
             }
         )
         .on('all', async (path, stats) => {
-            console.log(
-                `\n${chalk
-                    .hex('#fb8918')
-                    .bold(
-                        'Secywo configuration files have been modified. The devServer is being restarted...'
-                    )}\n`
+            toast.warning(
+                'Secywo configuration files have been modified. The devServer is being restarted...'
             );
 
             await devServer.stop();
@@ -64,9 +60,7 @@ const restartServer = () => {
         stdio: 'inherit'
     });
     if (result.error) {
-        spinner.fail(`- ${chalk.bold('There are some errors：')} \n`);
-
-        console.log(`- ${chalk.red.bold(result.error.message())} \n`);
+        toast.error(result.error.message());
         process.exit(1);
     }
 };
@@ -92,7 +86,6 @@ export default async function start() {
         handleWatch(projectPath, devServer);
     } catch (e) {
         const strErr = e.toString();
-        spinner.fail(`${chalk.bold('There are some errors：')}\n`);
-        console.error(`- ${chalk.red.bold(strErr)} \n`);
+        toast.error(strErr);
     }
 }

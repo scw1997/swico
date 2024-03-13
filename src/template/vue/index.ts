@@ -4,7 +4,7 @@ import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router
 import Layout from '../layout/Layout.vue';
 import { routerBase, routerType } from './config';
 
-const router = createRouter({
+export const router = createRouter({
     history: (routerType === 'hash' ? createWebHashHistory : createWebHistory)(routerBase),
     routes
 });

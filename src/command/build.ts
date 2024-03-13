@@ -3,6 +3,7 @@ import getBuildConfig from '../config/webpack.prod';
 import { getProjectConfig, GlobalData } from '../utils/config';
 import chalk from 'chalk';
 import ora from 'ora';
+import { toast } from '../utils/tools';
 const spinner = ora();
 const { TEMPLATE } = process.env;
 // 执行start本地启动
@@ -20,28 +21,20 @@ export default async function () {
     spinner.start('Building...');
     compiler.run((err, stats) => {
         if (err) {
-            console.log(`- ${chalk.red.bold(err.stack || err)} \n`);
+            toast.error(err.stack || err);
             spinner.stop();
             return;
         }
         const info = stats.toJson();
 
         if (stats.hasErrors()) {
-            console.log(`- ${chalk.bold('There are some errors：')} \n`);
-
-            info.errors.forEach((item) => {
-                console.log(`- ${chalk.red.bold(item.stack)} \n`);
-            });
+            toast.error(info.errors.map((item) => item.stack).join('\n'));
             spinner.stop();
             return;
         }
 
         if (stats.hasWarnings()) {
-            console.log(`- ${chalk.bold('There are some warnings：')} \n`);
-
-            info.warnings.forEach((item) => {
-                console.log(`- ${chalk.yellow.bold(item.stack)} \n`);
-            });
+            toast.warning(info.warnings.map((item) => item.stack).join('\n'));
             spinner.stop();
         }
         spinner.succeed(`${chalk.green.bold('Building complete')} \n`);
