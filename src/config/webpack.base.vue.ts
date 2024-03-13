@@ -22,7 +22,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         return custAliasConfig;
     };
     const publicPath = customBaseConfig?.publicPath || initConfig.publicPath;
-    const routerBase = customBaseConfig?.routerBase || initConfig.routerBase;
+    const routerBase = customBaseConfig?.router?.base || initConfig.router.base;
     const basicPlugins = [];
     //处理自定义变量设置
     const defineConfigData = customConfig?.base?.define ?? {};

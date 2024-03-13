@@ -1,5 +1,7 @@
-import { createBrowserHistory } from 'history';
+import { createBrowserHistory, createHashHistory } from 'history';
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
+import { routerType } from './config';
 
-const history = createBrowserHistory();
+const history = routerType === 'hash' ? createHashHistory() : createBrowserHistory();
 
-export { history };
+export { HistoryRouter, history };

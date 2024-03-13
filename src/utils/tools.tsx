@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 
 //复制文件夹
-export const copyDir = async (src, dest, filter?: (fileNane) => boolean) => {
+export const copyDirFiles = async (src, dest, filter?: (fileName) => boolean) => {
     const _copy = async (src, dest) => {
         const files = await fs.readdir(src);
         files.forEach((file) => {

@@ -4,7 +4,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Layout from '../layout';
 import RouteList from './routes';
 import Loading from './loading';
-export const basename = '/';
+import { HistoryRouter, history } from './history';
+import { routerBase, routerType } from './config';
 
 export type RoutePageType = {
     component?: () => Promise<{ default: FC }>;
@@ -33,14 +34,19 @@ const renderChildrenRouteList = (childrenRoutes: RoutePageType[]) => {
 };
 
 const App = () => {
-    if (basename !== '/' && window.location.pathname === '/') {
-        window.location.replace(`${basename}`);
+    if (routerBase !== '/') {
+        if (routerType === 'hash' && window.location.hash === '') {
+            window.location.replace(`/#${routerBase}`);
+        } else if (routerType === 'browser' && window.location.pathname === '/') {
+            window.location.replace(`${routerBase}`);
+        }
     }
     return (
         <Layout>
-            <Router basename={basename}>
+            {/* @ts-ignore*/}
+            <HistoryRouter basename={routerBase} history={history}>
                 <Routes>{renderChildrenRouteList(RouteList)}</Routes>
-            </Router>
+            </HistoryRouter>
         </Layout>
     );
 };
