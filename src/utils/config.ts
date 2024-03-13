@@ -1,10 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
-import ora from 'ora';
 import chalk from 'chalk';
 import * as process from 'process';
 import { copyDirFiles, toast } from './tools';
-const spinner = ora();
 
 export type RoutesItemType = {
     component?: string;
@@ -185,13 +183,29 @@ const getFormatRouter = (routes = [], templateType) => {
 //根据template处理脚手架入口文件,暴露必要的api
 const handleCliIndexFile = (templateType: GlobalData['templateType']) => {
     const targetPath = path.resolve(__dirname, '../index.js');
+    const targetTypesPath = path.resolve(__dirname, '../index.d.ts');
     const vueFileText = fs.readFileSync(path.resolve(__dirname, '../index.vue.js'), 'utf8');
+    const vueFileTypesText = fs.readFileSync(path.resolve(__dirname, '../index.vue.d.ts'), 'utf8');
     const reactFileText = fs.readFileSync(path.resolve(__dirname, '../index.react.js'), 'utf8');
+    const reactFileTypesText = fs.readFileSync(
+        path.resolve(__dirname, '../index.react.d.ts'),
+        'utf8'
+    );
     fs.writeFile(targetPath, templateType === 'vue' ? vueFileText : reactFileText, (err) => {
         if (err) {
             const errText = 'An error occurred during the secywo configuration.';
             toast.error(errText);
         }
+        fs.writeFile(
+            targetTypesPath,
+            templateType === 'vue' ? vueFileTypesText : reactFileTypesText,
+            (err) => {
+                if (err) {
+                    const errText = 'An error occurred during the secywo configuration.';
+                    toast.error(errText);
+                }
+            }
+        );
     });
 };
 
@@ -263,8 +277,22 @@ const formatTemplateFileText = (
                         //存在则将template中引入的loading组件路径替换
                         replaceIndexText = replaceIndexText.replace('"./loading"', '"../loading"');
                     } catch (e) {
-                        //不存在
+                        //不存在也要替换成原值
+                        replaceIndexText = replaceIndexText.replace('"../loading"', '"./loading"');
                     }
+                }
+
+                //处理global.less文件
+                //先判断开发端是否存在global.less
+                try {
+                    await fs.access(
+                        path.resolve(projectPath, './src/global.less'),
+                        fs.constants.F_OK
+                    );
+                    replaceIndexText = 'require("../global.less");\n' + replaceIndexText;
+                } catch (e) {
+                    //不存在则取消引入
+                    replaceIndexText = replaceIndexText.replace('require("./global.less");', '');
                 }
 
                 fs.writeFile(indexFilePath, replaceIndexText, () => {

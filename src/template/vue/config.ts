@@ -1,5 +1,5 @@
-import { initConfig } from '../../utils/config';
+import { RouterType } from '../../utils/config';
 
-export const routerType = initConfig.router.type;
+export const routerType: RouterType['type'] = 'browser';
 
-export const routerBase = initConfig.router.base;
+export const routerBase: RouterType['base'] = '/';

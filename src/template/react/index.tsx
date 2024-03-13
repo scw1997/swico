@@ -42,12 +42,12 @@ const App = () => {
         }
     }
     return (
-        <Layout>
-            {/* @ts-ignore*/}
-            <HistoryRouter basename={routerBase} history={history}>
+        // @ts-ignore
+        <HistoryRouter basename={routerBase} history={history}>
+            <Layout>
                 <Routes>{renderChildrenRouteList(RouteList)}</Routes>
-            </HistoryRouter>
-        </Layout>
+            </Layout>
+        </HistoryRouter>
     );
 };
 
