@@ -45,12 +45,24 @@ export const getPort = () => {
 };
 
 export const toast = {
-    error: (message) => {
-        console.log(`\n- ${chalk.hex('#5f72f5')('There are some errors about secywo：')} \n`);
-        console.log(` > ${chalk.red.bold(message)} \n`);
+    error: (message: string | string[]) => {
+        console.log(`\n${chalk.hex('#5f72f5')('There are some errors about secywo：')} \n`);
+        if (Array.isArray(message)) {
+            message.forEach((item) => {
+                console.log(` > ${chalk.red.bold(item)} \n`);
+            });
+        } else {
+            console.log(` > ${chalk.red.bold(message)} \n`);
+        }
     },
-    warning: (message) => {
-        console.log(`\n- ${chalk.hex('#5f72f5')('There are some warnings about secywo：')} \n`);
-        console.log(` > ${chalk.hex('#fb8918').bold(message)} \n`);
+    warning: (message: string | string[]) => {
+        console.log(`\n${chalk.hex('#5f72f5')('There are some warnings about secywo：')} \n`);
+        if (Array.isArray(message)) {
+            message.forEach((item) => {
+                console.log(` > ${chalk.hex('#fb8918').bold(item)} \n`);
+            });
+        } else {
+            console.log(` > ${chalk.hex('#fb8918').bold(message)} \n`);
+        }
     }
 };

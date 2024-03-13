@@ -21,20 +21,20 @@ export default async function () {
     spinner.start('Building...');
     compiler.run((err, stats) => {
         if (err) {
-            toast.error(err.stack || err);
+            toast.error(err.stack || err.toString());
             spinner.stop();
             return;
         }
         const info = stats.toJson();
 
         if (stats.hasErrors()) {
-            toast.error(info.errors.map((item) => item.stack).join('\n'));
+            toast.error(info.errors.map((item) => item.stack));
             spinner.stop();
             return;
         }
 
         if (stats.hasWarnings()) {
-            toast.warning(info.warnings.map((item) => item.stack).join('\n'));
+            toast.warning(info.warnings.map((item) => item.stack));
             spinner.stop();
         }
         spinner.succeed(`${chalk.green.bold('Building complete')} \n`);
