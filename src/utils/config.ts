@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import * as process from 'process';
-import { copyDirFiles, toast } from './tools';
+import { copyDirFiles, toast, writeFile } from './tools';
 
 export type RoutesItemType = {
     component?: string;
@@ -181,32 +181,32 @@ const getFormatRouter = (routes = [], templateType) => {
 };
 
 //根据template处理脚手架入口文件,暴露必要的api
-const handleCliIndexFile = (templateType: GlobalData['templateType']) => {
+const handleCliIndexFile = async (templateType: GlobalData['templateType']) => {
     const targetPath = path.resolve(__dirname, '../index.js');
     const targetTypesPath = path.resolve(__dirname, '../index.d.ts');
-    const vueFileText = fs.readFileSync(path.resolve(__dirname, '../index.vue.js'), 'utf8');
-    const vueFileTypesText = fs.readFileSync(path.resolve(__dirname, '../index.vue.d.ts'), 'utf8');
-    const reactFileText = fs.readFileSync(path.resolve(__dirname, '../index.react.js'), 'utf8');
-    const reactFileTypesText = fs.readFileSync(
-        path.resolve(__dirname, '../index.react.d.ts'),
+    let replaceFileText = fs.readFileSync(
+        path.resolve(__dirname, `../index.${templateType}.js`),
         'utf8'
     );
-    fs.writeFile(targetPath, templateType === 'vue' ? vueFileText : reactFileText, (err) => {
-        if (err) {
-            const errText = 'An error occurred during the secywo configuration.';
-            toast.error(errText);
-        }
-        fs.writeFile(
-            targetTypesPath,
-            templateType === 'vue' ? vueFileTypesText : reactFileTypesText,
-            (err) => {
-                if (err) {
-                    const errText = 'An error occurred during the secywo configuration.';
-                    toast.error(errText);
-                }
-            }
+    const fileTypesText = fs.readFileSync(
+        path.resolve(__dirname, `../index.${templateType}.d.ts`),
+        'utf8'
+    );
+
+    //处理react history的导出
+    if (templateType === 'react') {
+        const relativePath = path.relative(
+            path.resolve(__dirname, '../index.js'),
+            path.resolve(projectPath, './src/.secywo/index.js')
         );
-    });
+        const replaceText = `exports.history = require("${relativePath}");`;
+        //存在则先重置状态，再添加引入
+        replaceFileText = replaceFileText.replaceAll(replaceText, '');
+        replaceFileText = `${replaceText}\n` + replaceFileText;
+    }
+
+    await writeFile(targetPath, replaceFileText);
+    await writeFile(targetTypesPath, fileTypesText);
 };
 
 //格式化处理template文件内容
@@ -214,104 +214,79 @@ const formatTemplateFileText = (
     { routes, type, base },
     templateType: GlobalData['templateType']
 ) => {
-    return new Promise((resolve, reject) => {
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
         const formatRouter = getFormatRouter(routes, templateType);
 
         //处理路由配置
         const textData = `export default ${JSON.stringify(formatRouter)}`;
         let modifiedText = textData.replace(/"(\(\)=>import\('[^']+'\))"/g, '$1');
 
-        //处理后写入开发端项目
-        fs.writeFile(
+        await writeFile(
             path.resolve(__dirname, `../template/${templateType}/routes.js`),
-            modifiedText,
-            async (err) => {
-                if (err) {
-                    const errText = 'An error occurred during the secywo configuration.';
-                    toast.error(errText);
-                    return reject(errText);
-                }
-                //读取template/config或者index文件的内容，根据routerType和routerBase的值动态替换里面的部分文本，从而更换路由模式
-                const indexFilePath = path.resolve(
-                    __dirname,
-                    `../template/${templateType}/index.js`
-                );
-                const configFilePath = path.resolve(
-                    __dirname,
-                    `../template/${templateType}/config.js`
-                );
-                const indexText = fs.readFileSync(indexFilePath, 'utf8');
-                const configText = fs.readFileSync(configFilePath, 'utf8');
-                let replaceIndexText = indexText;
-                let replaceConfigText = configText;
-
-                if (base) {
-                    //处理routerBase
-                    replaceConfigText = replaceConfigText.replace(
-                        /exports\.routerBase\s*=\s*(.*)/gm,
-                        function (match, p1) {
-                            // p1 是匹配到的 xxx 部分
-                            return `exports.routerBase = '${base}';`;
-                        }
-                    );
-                }
-                if (type) {
-                    //处理routerType
-                    replaceConfigText = replaceConfigText.replace(
-                        /exports\.routerType\s*=\s*(.*)/gm,
-                        function (match, p1) {
-                            // p1 是匹配到的 xxx 部分
-                            return `exports.routerType = '${type}';`;
-                        }
-                    );
-                }
-
-                if (templateType === 'react') {
-                    //处理React Router 的loading组件
-                    //先判断开发端是否存在loading组件
-                    try {
-                        await fs.access(
-                            path.resolve(projectPath, './src/loading/index.tsx'),
-                            fs.constants.F_OK
-                        );
-                        //存在则将template中引入的loading组件路径替换
-                        replaceIndexText = replaceIndexText.replace('"./loading"', '"../loading"');
-                    } catch (e) {
-                        //不存在也要替换成原值
-                        replaceIndexText = replaceIndexText.replace('"../loading"', '"./loading"');
-                    }
-                }
-
-                //处理global.less文件
-                //先判断开发端是否存在global.less
-                try {
-                    await fs.access(
-                        path.resolve(projectPath, './src/global.less'),
-                        fs.constants.F_OK
-                    );
-                    replaceIndexText = 'require("../global.less");\n' + replaceIndexText;
-                } catch (e) {
-                    //不存在则取消引入
-                    replaceIndexText = replaceIndexText.replace('require("./global.less");', '');
-                }
-
-                fs.writeFile(indexFilePath, replaceIndexText, () => {
-                    if (err) {
-                        const errText = 'An error occurred during the secywo configuration.';
-                        toast.error(errText);
-                        return reject(errText);
-                    }
-                    fs.writeFile(configFilePath, replaceConfigText, () => {
-                        if (err) {
-                            const errText = 'An error occurred during the secywo configuration.';
-                            toast.error(errText);
-                            return reject(errText);
-                        }
-                        resolve(null);
-                    });
-                });
-            }
+            modifiedText
         );
+
+        //读取template/config或者index文件的内容，根据routerType和routerBase的值动态替换里面的部分文本，从而更换路由模式
+        const indexFilePath = path.resolve(__dirname, `../template/${templateType}/index.js`);
+        const configFilePath = path.resolve(__dirname, `../template/${templateType}/config.js`);
+        const indexText = fs.readFileSync(indexFilePath, 'utf8');
+        const configText = fs.readFileSync(configFilePath, 'utf8');
+        let replaceIndexText = indexText;
+        let replaceConfigText = configText;
+
+        if (base) {
+            //处理routerBase
+            replaceConfigText = replaceConfigText.replace(
+                /exports\.routerBase\s*=\s*(.*)/gm,
+                function (match, p1) {
+                    // p1 是匹配到的 xxx 部分
+                    return `exports.routerBase = '${base}';`;
+                }
+            );
+        }
+        if (type) {
+            //处理routerType
+            replaceConfigText = replaceConfigText.replace(
+                /exports\.routerType\s*=\s*(.*)/gm,
+                function (match, p1) {
+                    // p1 是匹配到的 xxx 部分
+                    return `exports.routerType = '${type}';`;
+                }
+            );
+        }
+        //处理global.less文件
+        //先判断开发端是否存在global.less
+        try {
+            await fs.access(path.resolve(projectPath, './src/global.less'), fs.constants.F_OK);
+            //存在则先重置状态，再添加引入
+            replaceIndexText = replaceIndexText.replaceAll('require("../global.less");', '');
+            replaceIndexText = 'require("../global.less");\n' + replaceIndexText;
+        } catch (e) {
+            //不存在则取消引入
+            replaceIndexText = replaceIndexText.replaceAll('require("../global.less");', '');
+        }
+
+        if (templateType === 'react') {
+            //处理React Router 的loading组件
+            //先判断开发端是否存在loading组件
+            try {
+                await fs.access(
+                    path.resolve(projectPath, './src/loading/index.tsx'),
+                    fs.constants.F_OK
+                );
+                //存在则将template中引入的loading组件路径替换
+                replaceIndexText = replaceIndexText.replace('"./loading"', '"../loading"');
+            } catch (e) {
+                //不存在也要替换成原值
+                replaceIndexText = replaceIndexText.replace('"../loading"', '"./loading"');
+            }
+        }
+
+        //最后写入修改后的内容
+        await writeFile(indexFilePath, replaceIndexText);
+        await writeFile(configFilePath, replaceConfigText);
+        resolve(null);
     });
 };
 

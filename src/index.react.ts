@@ -11,5 +11,3 @@ export interface DefineConfigType {
 export const defineConfig: DefineConfigType = (env, config) => config;
 
 export * from 'react-router-dom';
-
-// export { history } from './template/react/history';

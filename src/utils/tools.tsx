@@ -66,3 +66,18 @@ export const toast = {
         }
     }
 };
+
+//写入文件
+export const writeFile = (sourcePath, text) => {
+    return new Promise((resolve, reject) => {
+        fs.writeFile(sourcePath, text, (err) => {
+            if (err) {
+                const errText = 'An error occurred during the secywo configuration.';
+                toast.error(errText);
+                return reject(errText);
+            } else {
+                return resolve(null);
+            }
+        });
+    });
+};
