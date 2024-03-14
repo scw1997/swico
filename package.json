@@ -1,6 +1,6 @@
 {
   "name": "secywo-template-cli",
-  "version": "2.0.0-beta4",
+  "version": "2.0.0-beta5",
   "description": "secywo template cli",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
@@ -19,7 +19,7 @@
     "secywo": "./src/bin.js"
   },
   "scripts": {
-    "compile": "tsc & ts-node task.ts",
+    "compile": "tsc",
     "publish:offical": "npm run compile && cd ./dist && npm publish",
     "publish:beta": "npm run compile && cd ./dist && npm publish --tag=beta"
   },

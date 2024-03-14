@@ -37,12 +37,8 @@ const renderChildrenRouteList = (childrenRoutes: RoutePageType[]) => {
 
 const App = () => {
     if (routerBase && routerBase !== '/') {
-        if (
-            routerType === 'hash' &&
-            window.location.pathname === '/' &&
-            window.location.hash === ''
-        ) {
-            window.location.replace(`${routerBase}#/`);
+        if (routerType === 'hash' && ['', '/'].includes(window.location.hash)) {
+            window.location.replace(`/#${routerBase}`);
         } else if (routerType === 'browser' && window.location.pathname === '/') {
             window.location.replace(`${routerBase}`);
         }

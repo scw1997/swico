@@ -195,10 +195,13 @@ const handleCliIndexFile = async (templateType: GlobalData['templateType']) => {
 
     //处理react history的导出
     if (templateType === 'react') {
-        const relativePath = path.relative(
-            path.resolve(__dirname, '../index.js'),
-            path.resolve(projectPath, './src/.secywo/index.js')
-        );
+        const relativePath = path
+            .relative(
+                path.resolve(__dirname, './index.js'),
+                path.resolve(projectPath, './src/.secywo/index.js')
+            )
+            // @ts-ignore
+            .replaceAll('\\', '/');
         const replaceText = `exports.history = require("${relativePath}");`;
         //存在则先重置状态，再添加引入
         replaceFileText = replaceFileText.replaceAll(replaceText, '');
