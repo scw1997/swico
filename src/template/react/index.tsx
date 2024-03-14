@@ -7,8 +7,6 @@ import Loading from './loading';
 import { HistoryRouter, history } from './history';
 import { routerBase, routerType } from './config';
 
-export default history;
-
 export type RoutePageType = {
     component?: () => Promise<{ default: FC }>;
     children?: RoutePageType[];
