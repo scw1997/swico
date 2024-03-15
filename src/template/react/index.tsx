@@ -44,7 +44,7 @@ const App = () => {
     return (
         // @ts-ignore
         <HistoryRouter basename={routerBase} history={history}>
-            <Layout>
+            <Layout history={history}>
                 <Routes>{renderChildrenRouteList(RouteList)}</Routes>
             </Layout>
         </HistoryRouter>

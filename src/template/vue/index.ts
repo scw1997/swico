@@ -11,7 +11,10 @@ export const router = createRouter({
 
 const app = createApp(
     defineComponent({
-        template: '<Layout><RouterView /></Layout>'
+        data(vm) {
+            return { router, app };
+        },
+        template: '<Layout :history="router" :app="app"><RouterView /></Layout>'
     })
 );
 

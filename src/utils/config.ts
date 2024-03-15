@@ -199,7 +199,7 @@ const handleCliIndexFile = async (templateType: GlobalData['templateType']) => {
 
 //格式化处理template文件内容
 const formatTemplateFileText = (
-    { routes, type, base },
+    { routes = [], type = 'browser', base = '/' },
     templateType: GlobalData['templateType']
 ) => {
     // eslint-disable-next-line no-async-promise-executor

@@ -9,3 +9,5 @@ export interface DefineConfigType {
 }
 
 export const defineConfig: DefineConfigType = (env, config) => config;
+
+export const router: any = {};

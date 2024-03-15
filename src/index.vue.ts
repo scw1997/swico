@@ -1,6 +1,4 @@
 import { GlobalData } from './utils/config';
-import { getHistory } from './template/history';
-import { routerBase, routerType } from './template/vue/config';
 
 export type ConfigType = GlobalData['customConfig'];
 
@@ -12,8 +10,4 @@ export interface DefineConfigType {
 
 export const defineConfig: DefineConfigType = (env, config) => config;
 
-export * from 'vue-router';
-
-const history = getHistory(routerBase, routerType);
-
-export { history };
+export * as router from 'vue-router';
