@@ -10,4 +10,4 @@ export interface DefineConfigType {
 
 export const defineConfig: DefineConfigType = (env, config) => config;
 
-export * as router from 'react-router-dom';
+export * from 'react-router-dom';

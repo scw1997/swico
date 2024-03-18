@@ -1,22 +1,17 @@
 import { createApp, defineComponent } from 'vue';
 import routes from './routes';
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
-import Layout from '../layout/layout';
+import Container from './Container.vue';
 import { routerBase, routerType } from './config';
+import Layout from '../layout/Layout';
 
 export const router = createRouter({
     history: (routerType === 'hash' ? createWebHashHistory : createWebHistory)(routerBase),
     routes
 });
 
-const app = createApp(
-    defineComponent({
-        data(vm) {
-            return { router, app };
-        },
-        template: '<Layout :history="router" :app="app"><RouterView /></Layout>'
-    })
-);
+// @ts-ignore
+const app = createApp(Container, { app, history: router });
 
 app.component('Layout', Layout);
 
