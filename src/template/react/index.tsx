@@ -1,28 +1,35 @@
 import { createRoot } from 'react-dom/client';
 import React, { createElement, FC, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
 import Layout from '../layout';
 import RouteList from './routes';
 import Loading from './loading';
 import { HistoryRouter, history } from './history';
 import { routerBase, routerType } from './config';
 
-export type RoutePageType = {
-    component?: () => Promise<{ default: FC }>;
-    children?: RoutePageType[];
-    path: string;
+export type RoutesItemType = {
+    component?: () => Promise<{ default: FC }>; //页面路径
+    children?: RoutesItemType[]; //子路由
+    path: string; //路由地址
+    redirect?: string; // 重定向路由地址
 };
 
-const renderChildrenRouteList = (childrenRoutes: RoutePageType[]) => {
+const renderChildrenRouteList = (childrenRoutes: RoutesItemType[]) => {
     return childrenRoutes?.map((item) => {
-        const { component, path, children } = item;
+        const { component, path, children, redirect } = item;
 
         return (
             <Route
                 element={
-                    <Suspense fallback={createElement(Loading)}>
-                        {createElement(lazy(component))}
-                    </Suspense>
+                    redirect ? (
+                        <Navigate to={redirect} replace />
+                    ) : component ? (
+                        <Suspense fallback={createElement(Loading)}>
+                            {createElement(lazy(component))}
+                        </Suspense>
+                    ) : (
+                        <Outlet />
+                    )
                 }
                 path={path}
                 key={path}

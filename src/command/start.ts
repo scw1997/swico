@@ -3,14 +3,10 @@ import WebpackDevServer from 'webpack-dev-server';
 import getStartConfig from '../config/webpack.dev';
 import { getPort, toast } from '../utils/tools';
 import { getProjectConfig } from '../utils/config';
-import ora from 'ora';
 import chokidar from 'chokidar';
 import path from 'path';
-import chalk from 'chalk';
 import spawn from 'cross-spawn';
 const { PORT: envPort, TEMPLATE } = process.env;
-
-const spinner = ora();
 
 //监听ts全局声明文件和cli config文件修改
 const handleWatch = (projectPath, devServer) => {
@@ -18,9 +14,7 @@ const handleWatch = (projectPath, devServer) => {
     const configFilesWatcher = chokidar
         .watch(
             [
-                path.join(projectPath, '/config/secywo.ts'),
-                path.join(projectPath, '/config/secywo.dev.ts'),
-                path.join(projectPath, '/config/secywo.prod.ts'),
+                path.join(projectPath, '/config/*.ts'),
                 path.join(projectPath, '/.eslintrc'),
                 path.join(projectPath, '/src/global.less')
             ],

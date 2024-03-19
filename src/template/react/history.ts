@@ -1,19 +1,22 @@
 import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 import { routerType, routerBase } from './config';
 import { createBrowserHistory, createHashHistory, To } from 'history';
-import { RouterType } from '../../utils/config';
+import { ConfigRouterType } from '../../utils/config';
 
-export type SecywoHistory = {
+export type HistoryType = {
     push: (to: To, state?: any) => void;
-    replace: SecywoHistory['push'];
+    replace: HistoryType['push'];
     go: (delta: number) => void;
     back: () => void;
     location: Record<string, any>;
     action: string;
 };
 
-export const getHistory = (routerBase: RouterType['base'], routerType: RouterType['type']) => {
-    let history: SecywoHistory;
+export const getHistory = (
+    routerBase: ConfigRouterType['base'],
+    routerType: ConfigRouterType['type']
+) => {
+    let history: HistoryType;
     const h = (routerType === 'hash' ? createHashHistory : createBrowserHistory)();
 
     const lastIndexBase = routerBase[routerBase.length - 1];

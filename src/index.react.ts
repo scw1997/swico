@@ -1,13 +1,28 @@
-import { GlobalData } from './utils/config';
+import { GlobalData, GlobalConfigType } from './utils/config';
 
-export type ConfigType = GlobalData['customConfig'];
+export type CustomConfigType = GlobalData['customConfig'];
+
+export type { GlobalConfigType };
 
 export interface DefineConfigType {
-    (env: 'base', config: ConfigType['base']);
-    (env: 'dev', config: ConfigType['dev']);
-    (env: 'prod', config: ConfigType['prod']);
+    (env: 'base', config: CustomConfigType['base']);
+    (env: 'dev', config: CustomConfigType['dev']);
+    (env: 'prod', config: CustomConfigType['prod']);
 }
 
 export const defineConfig: DefineConfigType = (env, config) => config;
 
-export * from 'react-router-dom';
+export type { HistoryType } from './template/react/history';
+
+export {
+    useLocation,
+    useMatch,
+    useNavigate,
+    useOutlet,
+    useParams,
+    useRoutes,
+    useSearchParams,
+    Link,
+    NavLink,
+    Outlet
+} from 'react-router-dom';

@@ -4,19 +4,21 @@ import chalk from 'chalk';
 import * as process from 'process';
 import { copyDirFiles, toast, writeFile } from './tools';
 
-export type RoutesItemType = {
-    component?: string;
-    children?: RoutesItemType[];
-    path: string;
+export type ConfigRoutesItemType = {
+    component?: string; //页面路径
+    children?: ConfigRoutesItemType[]; //子路由
+    path: string; //路由地址
+    redirect?: string; // 重定向路由地址
+    name?: string; //vue-router专属
 };
 
-export type RouterType = {
+export type ConfigRouterType = {
     type?: 'browser' | 'hash'; //路由类型
     base?: string; //路由前缀
-    routes?: RoutesItemType[]; //路由配置
+    routes?: ConfigRoutesItemType[]; //路由配置
 };
 
-interface CliConfigFields {
+export interface GlobalConfigType {
     npmType?: 'npm' | 'pnpm'; //包管理工具
     plugins?: any[]; //webpack插件
     publicPath?: string; //非根路径部署所需要定义的base路径
@@ -28,7 +30,7 @@ interface CliConfigFields {
     copy?: Array<string | { from: string; to: string }>; //复制指定文件(夹)到指定目录
     devtool?: string; //设置 sourcemap 生成方式
     externals?: any; //设置哪些模块不打包，转而在index.ejs中通过 <script> 或其他方式引入
-    router?: RouterType; //路由相关
+    router?: ConfigRouterType; //路由相关
 }
 
 export interface GlobalData {
@@ -40,7 +42,7 @@ export interface GlobalData {
     customConfig: {
         //脚手架自定义配置
         base: Pick<
-            CliConfigFields,
+            GlobalConfigType,
             | 'plugins'
             | 'publicPath'
             | 'alias'
@@ -50,8 +52,8 @@ export interface GlobalData {
             | 'npmType'
             | 'router'
         >; //公共通用
-        dev: Pick<CliConfigFields, 'plugins' | 'proxy' | 'https' | 'devtool' | 'router'>; //开发环境专用
-        prod: Pick<CliConfigFields, 'plugins' | 'console' | 'copy' | 'devtool' | 'router'>; //生产环境专用
+        dev: Pick<GlobalConfigType, 'plugins' | 'proxy' | 'https' | 'devtool' | 'router'>; //开发环境专用
+        prod: Pick<GlobalConfigType, 'plugins' | 'console' | 'copy' | 'devtool' | 'router'>; //生产环境专用
     };
 }
 
@@ -165,13 +167,16 @@ export const getProjectConfig: (
     };
 };
 
-const getFormatRouter = (routes = [], templateType) => {
-    const _main = (item) => {
-        const { path, component, name, children } = item;
+const getFormatRouter = (routes: ConfigRouterType['routes'], templateType) => {
+    const _main = (item: ConfigRoutesItemType) => {
+        const { path, component, name, children, redirect } = item;
         return {
             path,
-            component: `()=>import('${projectPath}/src/${templateType === 'vue' ? 'views' : 'pages'}/${component}')`,
+            component: component
+                ? `()=>import('${projectPath}/src/${templateType === 'vue' ? 'views' : 'pages'}/${component}')`
+                : undefined,
             name: templateType === 'vue' ? name : undefined,
+            redirect,
             children: children ? children?.map((item) => _main(item)) : undefined
         };
     };
@@ -199,7 +204,7 @@ const handleCliIndexFile = async (templateType: GlobalData['templateType']) => {
 
 //格式化处理template文件内容
 const formatTemplateFileText = (
-    { routes = [], type = 'browser', base = '/' },
+    { routes = [], type = 'browser', base = '/' }: ConfigRouterType,
     templateType: GlobalData['templateType']
 ) => {
     // eslint-disable-next-line no-async-promise-executor
@@ -337,7 +342,7 @@ export const getFormatDefineVars = async (defineVarsConfigData) => {
 };
 
 //部分secywo配置项的初始默认值
-export const initConfig: CliConfigFields = {
+export const initConfig: GlobalConfigType = {
     npmType: 'npm',
     console: true,
     plugins: [],

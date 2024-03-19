@@ -207,7 +207,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 },
                 hash: true //对html引用的js文件添加hash戳
             }),
-
+            //ts类型检查
             new ForkTsCheckerWebpackPlugin({
                 typescript: {
                     diagnosticOptions: {
@@ -216,7 +216,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                     }
                 }
             }),
-
+            //提取css文件
             new MiniCssExtractPlugin({
                 filename: env === 'dev' ? 'css/[name].css' : 'css/[name].[contenthash].css',
                 ignoreOrder: true

@@ -1,3 +1,3 @@
-import { RoutePageType } from './index';
+import { RoutesItemType } from './index';
 
-export default [] as RoutePageType[];
+export default [] as RoutesItemType[];
