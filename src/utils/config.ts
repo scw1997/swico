@@ -10,6 +10,7 @@ export type ConfigRoutesItemType = {
     path: string; //路由地址
     redirect?: string; // 重定向路由地址
     name?: string; //vue-router专属
+    [key: string]: any;
 };
 
 export type ConfigRouterType = {

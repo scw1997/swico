@@ -48,7 +48,7 @@ const App = () => {
             window.location.replace(`${routerBase}`);
         }
     }
-
+    window.historys = history;
     return (
         // @ts-ignore
         <HistoryRouter basename={routerBase} history={history}>
