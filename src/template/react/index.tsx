@@ -4,7 +4,7 @@ import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
 import Layout from '../layout';
 import RouteList from './routes';
 import Loading from './loading';
-import { HistoryRouter, history } from './history';
+import { HistoryRouter, originalHistory, history } from './history';
 import { routerBase, routerType } from './config';
 
 export type RoutesItemType = {
@@ -51,7 +51,7 @@ const App = () => {
     window.historys = history;
     return (
         // @ts-ignore
-        <HistoryRouter basename={routerBase} history={history}>
+        <HistoryRouter basename={routerBase} history={originalHistory}>
             <Layout history={history}>
                 <Routes>{renderChildrenRouteList(RouteList)}</Routes>
             </Layout>

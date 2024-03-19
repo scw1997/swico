@@ -12,12 +12,13 @@ export type HistoryType = {
     action: string;
 };
 
+export const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)();
+
 export const getHistory = (
     routerBase: ConfigRouterType['base'],
     routerType: ConfigRouterType['type']
 ) => {
     let history: HistoryType;
-    const h = (routerType === 'hash' ? createHashHistory : createBrowserHistory)();
 
     const lastIndexBase = routerBase[routerBase.length - 1];
     //如果Base末尾为/，则忽略
@@ -26,17 +27,17 @@ export const getHistory = (
     console.log('formatRouterBase', formatRouterBase, routerBase);
     console.log('routerType', routerType);
     history = {
-        ...h,
+        ...originalHistory,
         push: (to, state) => {
             console.log('to', to);
             switch (typeof to) {
                 case 'string':
-                    h.push(`${formatRouterBase}${to}`, state);
+                    originalHistory.push(`${formatRouterBase}${to}`, state);
                     break;
                 case 'object':
                     // eslint-disable-next-line no-case-declarations
-                    const pathname = h.location.pathname;
-                    h.push(
+                    const pathname = originalHistory.location.pathname;
+                    originalHistory.push(
                         {
                             ...to,
                             pathname: to.pathname ? `${formatRouterBase}${to.pathname}` : pathname
@@ -52,12 +53,12 @@ export const getHistory = (
             console.log('to', to);
             switch (typeof to) {
                 case 'string':
-                    h.replace(`${formatRouterBase}${to}`, state);
+                    originalHistory.replace(`${formatRouterBase}${to}`, state);
                     break;
                 case 'object':
                     // eslint-disable-next-line no-case-declarations
-                    const pathname = h.location.pathname;
-                    h.replace(
+                    const pathname = originalHistory.location.pathname;
+                    originalHistory.replace(
                         {
                             ...to,
                             pathname: to.pathname ? `${formatRouterBase}${to.pathname}` : pathname
