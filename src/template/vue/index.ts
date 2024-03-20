@@ -11,8 +11,10 @@ const router = createRouter({
 });
 
 // @ts-ignore
-const app = createApp(Container, { app, history: router });
+const app = createApp(Container);
 
+window.navigation = router;
+window.app = app;
 app.component('Layout', Layout);
 
 app.use(router);

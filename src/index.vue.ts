@@ -12,4 +12,4 @@ export interface DefineConfigType {
 
 export const defineConfig: DefineConfigType = (env, config) => config;
 
-export * from 'vue-router';
+export { useRouter, useRoute, useLink, RouterView, RouterLink } from 'vue-router';

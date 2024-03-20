@@ -9,7 +9,8 @@ export type ConfigRoutesItemType = {
     children?: ConfigRoutesItemType[]; //子路由
     path: string; //路由地址
     redirect?: string; // 重定向路由地址
-    name?: string; //vue-router专属
+    name?: string;
+    auth?: string; //权限组件
     [key: string]: any;
 };
 
@@ -170,16 +171,33 @@ export const getProjectConfig: (
 
 const getFormatRouter = (routes: ConfigRouterType['routes'], templateType) => {
     const _main = (item: ConfigRoutesItemType) => {
-        const { path, component, name, children, redirect } = item;
-        return {
-            path,
-            component: component
-                ? `()=>import('${projectPath}/src/${templateType === 'vue' ? 'views' : 'pages'}/${component}')`
-                : undefined,
-            name: templateType === 'vue' ? name : undefined,
-            redirect,
-            children: children ? children?.map((item) => _main(item)) : undefined
-        };
+        const { path, component, name, children, redirect, auth } = item;
+
+        return auth
+            ? {
+                  ...item,
+                  component: `()=>import('${projectPath}/src/pages/${auth}${templateType === 'vue' ? '.vue' : ''}')`,
+                  children: [
+                      {
+                          path: '',
+                          component: component
+                              ? `()=>import('${projectPath}/src/pages/${component}${templateType === 'vue' ? '.vue' : ''}')`
+                              : undefined,
+                          name,
+                          redirect,
+                          children: children ? children?.map((item) => _main(item)) : undefined
+                      }
+                  ]
+              }
+            : {
+                  path,
+                  component: component
+                      ? `()=>import('${projectPath}/src/pages/${component}${templateType === 'vue' ? '.vue' : ''}')`
+                      : undefined,
+                  name,
+                  redirect,
+                  children: children ? children?.map((item) => _main(item)) : undefined
+              };
     };
     return routes.map((item) => {
         return _main(item);

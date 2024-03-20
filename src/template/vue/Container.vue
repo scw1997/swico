@@ -1,10 +1,8 @@
-<script setup lang="ts">
-defineProps<{ app: any; history: any }>();
-</script>
+<script setup lang="ts"></script>
 
 <template>
     <div>
-        <Layout :app :history><RouterView /></Layout>
+        <Layout><RouterView /></Layout>
     </div>
 </template>
 

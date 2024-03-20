@@ -1,3 +1,7 @@
 import { RouteRecordRaw } from 'vue-router';
 
-export default [] as RouteRecordRaw[];
+type RouteItem = RouteRecordRaw & {
+    auth?: string;
+};
+
+export default [] as RouteItem[];

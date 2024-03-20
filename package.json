@@ -1,6 +1,6 @@
 {
   "name": "secywo-template-cli",
-  "version": "2.0.0-beta28",
+  "version": "2.0.0-beta29",
   "description": "secywo template cli",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
@@ -35,6 +35,7 @@
     "react-router-dom": "6.4.5",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.0",
+    "vue": "~3.4.14",
     "vue-router": "^4.2.5",
     "history": "5.3.0"
   },

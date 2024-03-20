@@ -1,6 +1,6 @@
 declare module '*.vue';
 
 declare interface Window {
-    routerBase: string;
-    historys: any;
+    navigation: any;
+    app: any;
 }

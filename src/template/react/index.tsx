@@ -41,6 +41,7 @@ const renderChildrenRouteList = (childrenRoutes: RoutesItemType[]) => {
 };
 
 const App = () => {
+    //处理含basename的情况，自动重定向
     if (routerBase && routerBase !== '/') {
         if (routerType === 'hash' && ['', '/'].includes(window.location.hash)) {
             window.location.replace(`/#${routerBase}`);
@@ -48,7 +49,8 @@ const App = () => {
             window.location.replace(`${routerBase}`);
         }
     }
-    window.historys = history;
+    //挂载到window上
+    window.navigation = history;
     return (
         // @ts-ignore
         <HistoryRouter basename={routerBase} history={originalHistory}>
