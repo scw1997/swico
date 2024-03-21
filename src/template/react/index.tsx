@@ -12,6 +12,7 @@ export type RoutesItemType = {
     children?: RoutesItemType[]; //子路由
     path: string; //路由地址
     redirect?: string; // 重定向路由地址
+    name?: string;
 };
 
 const renderChildrenRouteList = (childrenRoutes: RoutesItemType[]) => {
@@ -50,7 +51,7 @@ const App = () => {
         }
     }
     //挂载到window上
-    window.navigation = history;
+    window.Navigation = history;
     return (
         // @ts-ignore
         <HistoryRouter basename={routerBase} history={originalHistory}>

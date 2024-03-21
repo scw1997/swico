@@ -13,8 +13,9 @@ const router = createRouter({
 // @ts-ignore
 const app = createApp(Container);
 
-window.navigation = router;
-window.app = app;
+window.Navigation = router;
+window.App = app;
+
 app.component('Layout', Layout);
 
 app.use(router);
