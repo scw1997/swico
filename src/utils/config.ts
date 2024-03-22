@@ -297,34 +297,30 @@ const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templa
         );
 
         //下面是一些复制完之后需要处理的操作
+        let replaceIndexText = fs.readFileSync(
+            path.resolve(projectPath, './src/.secywo/index.js'),
+            'utf8'
+        );
+        //处理global.less文件
+        //先判断开发端是否存在global.less
+        try {
+            await fs.access(path.resolve(projectPath, './src/global.less'), fs.constants.F_OK);
+            //存在则先重置状态，再添加引入
+            replaceIndexText = replaceIndexText.replaceAll('require("../global.less");', '');
+            replaceIndexText = 'require("../global.less");\n' + replaceIndexText;
+        } catch (e) {
+            //不存在则取消引入
+            replaceIndexText = replaceIndexText.replaceAll('require("../global.less");', '');
+        }
+
         if (templateType === 'vue') {
-            const indexText = fs.readFileSync(
-                path.resolve(projectPath, './src/.secywo/index.js'),
-                'utf8'
-            );
-            const replaceIndexText = indexText.replace('"./Container"', '"./Container.vue"');
+            replaceIndexText = replaceIndexText.replace('"./Container"', '"./Container.vue"');
             await writeFile(path.resolve(projectPath, './src/.secywo/index.js'), replaceIndexText);
         }
 
         if (templateType === 'react') {
-            let replaceIndexText = fs.readFileSync(
-                path.resolve(projectPath, './src/.secywo/index.js'),
-                'utf8'
-            );
-            //处理global.less文件
-            //先判断开发端是否存在global.less
-            try {
-                await fs.access(path.resolve(projectPath, './src/global.less'), fs.constants.F_OK);
-                //存在则先重置状态，再添加引入
-                replaceIndexText = replaceIndexText.replaceAll('require("../global.less");', '');
-                replaceIndexText = 'require("../global.less");\n' + replaceIndexText;
-            } catch (e) {
-                //不存在则取消引入
-                replaceIndexText = replaceIndexText.replaceAll('require("../global.less");', '');
-            }
             //处理React Router 的loading组件
             //先判断开发端是否存在loading组件
-
             try {
                 await fs.access(
                     path.resolve(projectPath, './src/loading/index.tsx'),

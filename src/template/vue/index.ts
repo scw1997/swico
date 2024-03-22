@@ -13,7 +13,14 @@ const router = createRouter({
 // @ts-ignore
 const app = createApp(Container);
 
-window.Navigation = router;
+const { push, replace, go, back } = router;
+
+window.Navigation = {
+    push,
+    replace,
+    go,
+    back
+};
 window.App = app;
 
 app.component('Layout', Layout);

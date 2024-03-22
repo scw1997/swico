@@ -9,5 +9,5 @@ export interface DefineConfigType {
     (env: 'dev', config: CustomConfigType['dev']);
     (env: 'prod', config: CustomConfigType['prod']);
 }
-
+export type { NavigationType, NavigationOptionType } from './template/react/history';
 export const defineConfig: DefineConfigType = (env, config) => config;

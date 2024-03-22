@@ -12,4 +12,6 @@ export interface DefineConfigType {
 
 export const defineConfig: DefineConfigType = (env, config) => config;
 
+export type { NavigationType, NavigationOptionType } from './template/react/history';
+
 export { useRouter, useRoute, useLink, RouterView, RouterLink } from 'vue-router';

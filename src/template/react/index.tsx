@@ -4,7 +4,7 @@ import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
 import Layout from '../layout';
 import RouteList from './routes';
 import Loading from './loading';
-import { HistoryRouter, originalHistory, history } from './history';
+import { HistoryRouter, originalHistory, Navigation } from './history';
 import { routerBase, routerType } from './config';
 
 export type RoutesItemType = {
@@ -51,7 +51,7 @@ const App = () => {
         }
     }
     //挂载到window上
-    window.Navigation = history;
+    window.Navigation = Navigation;
     return (
         // @ts-ignore
         <HistoryRouter basename={routerBase} history={originalHistory}>

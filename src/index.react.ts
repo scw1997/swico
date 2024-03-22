@@ -11,8 +11,7 @@ export interface DefineConfigType {
 }
 
 export const defineConfig: DefineConfigType = (env, config) => config;
-
-export type { HistoryType } from './template/react/history';
+export type { NavigationType, NavigationOptionType } from './template/react/history';
 
 export {
     useLocation,
