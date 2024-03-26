@@ -1,34 +1,63 @@
 import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 import { routerType, routerBase } from './config';
-import { createBrowserHistory, createHashHistory, To } from 'history';
 import { ConfigRouterType } from '../../utils/config';
 import routes from './routes';
 import { RoutesItemType } from './index';
 import qs from 'qs';
 
-export interface NavigationOptionType {
-    path: string;
-    name?: string;
+type CustHistoryType = {
+    createBrowserHistory: () => {
+        go: (delta) => void;
+        back: () => void;
+        replace: (options) => void;
+        push: (options) => void;
+    };
+    createHashHistory: CustHistoryType['createBrowserHistory'];
+};
+let history: CustHistoryType;
+const { createBrowserHistory, createHashHistory } = history;
+
+export type NavigationOptionType = {
     query?: Record<string, any>;
     params?: Record<string, any>;
     hash?: string;
-}
+    path?: string;
+    name: string;
+};
 
 export type NavigationType = {
-    push: (to: string | NavigationOptionType, state) => void;
+    push: (to: string | NavigationOptionType) => void;
     replace: NavigationType['push'];
     go: (delta: number) => void;
     back: () => void;
 };
 
+//处理params参数，将路径模板中的参数部分替换为对应的值
+const interpolatePath = (pathTemplate: string, params: Record<string, any>) => {
+    const pathParts = pathTemplate.split('/');
+    const interpolatedParts = pathParts.map((part) => {
+        // 查找参数（以:开头和结尾）
+        const paramMatch = part.match(/^\:(.+)$/);
+        if (paramMatch) {
+            // 如果找到了参数，使用params对象中的对应值替换
+            const paramName = paramMatch[1];
+            return params[paramName] || part; // 如果params中没有对应的值，则保留原样
+        }
+        return part;
+    });
+
+    // 将替换后的部分重新组合成完整的路径
+    return interpolatedParts.join('/');
+};
+
 //根据name找到定义路由中的指定path
-export const getPathByName = (targetName: string) => {
+const getPathByName = (targetName: string, params: Record<string, any>) => {
     let targetPath;
     const checkRouteItem = (item: RoutesItemType, ancPath: string) => {
         const { path, name, children } = item;
         const newAncPath = `${ancPath.startsWith('/') ? ancPath : '/' + ancPath}${path}`;
         if (name === targetName) {
-            targetPath = newAncPath;
+            targetPath = params ? interpolatePath(newAncPath, params) : newAncPath;
             return true;
         }
         if (children) {
@@ -52,12 +81,13 @@ const getFormatHistoryOption = (
         search: query ? qs.stringify(query) : undefined
     };
     if (path) {
-        obj.pathname = `${formatRouterBase}${path}${params ? `/${params}` : ''}`;
+        //只有path无name时，params需要开发者自行加到path里
+        obj.pathname = `${formatRouterBase}${path}`;
     }
     if (name) {
-        const targetPath = getPathByName(name);
+        const targetPath = getPathByName(name, params);
         if (targetPath) {
-            obj.pathname = `${formatRouterBase}${targetPath}${params ? `/${params}` : ''}`;
+            obj.pathname = `${formatRouterBase}${targetPath}`;
         } else {
             throw `An error occurred while executing 'Navigation.${type}' operation: The path for the name "${name}" could not be found`;
         }
@@ -77,30 +107,30 @@ export const getNavigation = (routerBase: ConfigRouterType['base']) => {
     history = {
         go: originalHistory.go,
         back: originalHistory.back,
-        push: (to, state) => {
+        push: (to) => {
             switch (typeof to) {
                 case 'string':
-                    originalHistory.push(`${formatRouterBase}${to}`, state);
+                    originalHistory.push(`${formatRouterBase}${to}`);
                     break;
                 case 'object':
                     // eslint-disable-next-line no-case-declarations
                     const formatOption = getFormatHistoryOption(to, routerBase, 'push');
 
-                    originalHistory.push(formatOption, state);
+                    originalHistory.push(formatOption);
                     break;
                 default:
                     throw `An error occurred while executing Navigation.push operation: unexpected type of 'to':${typeof to}`;
             }
         },
-        replace: (to, state) => {
+        replace: (to) => {
             switch (typeof to) {
                 case 'string':
-                    originalHistory.replace(`${formatRouterBase}${to}`, state);
+                    originalHistory.replace(`${formatRouterBase}${to}`);
                     break;
                 case 'object':
                     // eslint-disable-next-line no-case-declarations
                     const formatOption = getFormatHistoryOption(to, routerBase, 'replace');
-                    originalHistory.replace(formatOption, state);
+                    originalHistory.replace(formatOption);
                     break;
                 default:
                     throw `An error occurred while executing Navigation.replace operation: unexpected type of 'to':${typeof to}`;

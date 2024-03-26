@@ -17,7 +17,7 @@ export type RoutesItemType = {
 
 const renderChildrenRouteList = (childrenRoutes: RoutesItemType[]) => {
     return childrenRoutes?.map((item) => {
-        const { component, path, children, redirect } = item;
+        const { component, path, children, name, redirect } = item;
 
         return (
             <Route
@@ -33,7 +33,7 @@ const renderChildrenRouteList = (childrenRoutes: RoutesItemType[]) => {
                     )
                 }
                 path={path}
-                key={path}
+                key={name}
             >
                 {renderChildrenRouteList(children)}
             </Route>

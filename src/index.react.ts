@@ -13,15 +13,6 @@ export interface DefineConfigType {
 export const defineConfig: DefineConfigType = (env, config) => config;
 export type { NavigationType, NavigationOptionType } from './template/react/history';
 
-export {
-    useLocation,
-    useMatch,
-    useNavigate,
-    useOutlet,
-    useParams,
-    useRoutes,
-    useSearchParams,
-    Link,
-    NavLink,
-    Outlet
-} from 'react-router-dom';
+export { Link, Outlet } from 'react-router-dom';
+
+export { useLocation } from './template/hooks/react';

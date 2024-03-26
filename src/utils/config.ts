@@ -231,7 +231,9 @@ const formatTemplateFileText = (
         const formatRouter = getFormatRouter(routes, templateType);
 
         //处理路由配置
-        const textData = `export default ${JSON.stringify(formatRouter)}`;
+        const textData = `"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = ${JSON.stringify(formatRouter)};`;
         let modifiedText = textData.replace(/"(\(\)=>import\('[^']+'\))"/g, '$1');
 
         await writeFile(
