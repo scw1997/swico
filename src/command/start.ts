@@ -6,7 +6,7 @@ import { getProjectConfig } from '../utils/config';
 import chokidar from 'chokidar';
 import path from 'path';
 import spawn from 'cross-spawn';
-const { PORT: envPort, TEMPLATE } = process.env;
+const { PORT: envPort } = process.env;
 
 //监听ts全局声明文件和cli config文件修改
 const handleWatch = (projectPath, devServer) => {
@@ -65,7 +65,7 @@ export default async function start() {
     //获取可用端口（优先使用重启时的传递的port环境变量）
     availablePort = envPort ?? (await getPort());
     // @ts-ignore
-    const projectConfig = await getProjectConfig(TEMPLATE, 'dev');
+    const projectConfig = await getProjectConfig('dev');
     const { projectPath } = projectConfig;
     const startConfig = await getStartConfig(projectConfig);
     const compiler = webpack(startConfig as any);

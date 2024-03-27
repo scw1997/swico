@@ -11,3 +11,6 @@ export interface DefineConfigType {
 }
 export type { NavigationType, NavigationOptionType } from './template/react/history';
 export const defineConfig: DefineConfigType = (env, config) => config;
+
+let Outlet: any, Link: any, useLocation: any;
+export { Outlet, Link, useLocation };

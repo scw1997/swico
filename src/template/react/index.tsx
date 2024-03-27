@@ -4,7 +4,7 @@ import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
 import Layout from '../layout';
 import RouteList from './routes';
 import Loading from './loading';
-import { HistoryRouter, originalHistory, Navigation } from './history';
+import { HistoryRouter, originalHistory, history } from './history';
 import { routerBase, routerType } from './config';
 
 export type RoutesItemType = {
@@ -17,7 +17,7 @@ export type RoutesItemType = {
 
 const renderChildrenRouteList = (childrenRoutes: RoutesItemType[]) => {
     return childrenRoutes?.map((item) => {
-        const { component, path, children, name, redirect } = item;
+        const { component, path, children, redirect, name } = item;
 
         return (
             <Route
@@ -32,8 +32,8 @@ const renderChildrenRouteList = (childrenRoutes: RoutesItemType[]) => {
                         <Outlet />
                     )
                 }
-                path={path}
                 key={name}
+                path={path}
             >
                 {renderChildrenRouteList(children)}
             </Route>
@@ -51,7 +51,7 @@ const App = () => {
         }
     }
     //挂载到window上
-    window.Navigation = Navigation;
+    window.Navigation = history;
     return (
         // @ts-ignore
         <HistoryRouter basename={routerBase} history={originalHistory}>

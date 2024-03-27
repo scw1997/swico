@@ -21,6 +21,7 @@ export type ConfigRouterType = {
 };
 
 export interface GlobalConfigType {
+    template: 'react' | 'vue'; //模板类型
     npmType?: 'npm' | 'pnpm'; //包管理工具
     plugins?: any[]; //webpack插件
     publicPath?: string; //非根路径部署所需要定义的base路径
@@ -36,7 +37,7 @@ export interface GlobalConfigType {
 }
 
 export interface GlobalData {
-    templateType?: 'vue' | 'react'; //模板类型
+    templateType?: GlobalConfigType['template']; //模板类型
     projectPath: string; //模板项目根路径
     entryPath: string; //入口文件路径
     templatePath: string; //html模板文件路径
@@ -53,6 +54,7 @@ export interface GlobalData {
             | 'externals'
             | 'npmType'
             | 'router'
+            | 'template'
         >; //公共通用
         dev: Pick<GlobalConfigType, 'plugins' | 'proxy' | 'https' | 'devtool' | 'router'>; //开发环境专用
         prod: Pick<GlobalConfigType, 'plugins' | 'console' | 'copy' | 'devtool' | 'router'>; //生产环境专用
@@ -63,10 +65,7 @@ export interface GlobalData {
 const projectPath = process.cwd();
 
 //获取开发者的自定义项目配置和相关参数
-export const getProjectConfig: (
-    templateType?: 'vue' | 'react',
-    env?: GlobalData['env']
-) => Promise<GlobalData> = async (templateType, env) => {
+export const getProjectConfig: (env?: GlobalData['env']) => Promise<GlobalData> = async (env) => {
     //secywo 配置文件路径
     const configDir = path.join(projectPath, '/config');
     // 脚手架对应的配置文件信息
@@ -98,7 +97,8 @@ export const getProjectConfig: (
                         'devtool',
                         'externals',
                         'npmType',
-                        'router'
+                        'router',
+                        'template'
                     ];
                     configFileName = 'secywo.ts';
                     break;
@@ -119,6 +119,16 @@ export const getProjectConfig: (
                     configFileName
                 )}' does not support the field '${chalk.red(unSupportedField)}' `;
                 toast.error(msgText);
+                process.exit();
+            }
+            //对不支持的template值进行提示
+            if (
+                key === 'base' &&
+                !['vue', 'react'].includes(configObj['template'] ?? initConfig.template)
+            ) {
+                toast.error(
+                    `The field '${chalk.blue('template')}' does not support the value '${chalk.red(configObj['template'])}',the value can be 'vue' or 'react' `
+                );
                 process.exit();
             }
             //对不支持的npmType值进行提示
@@ -144,6 +154,7 @@ export const getProjectConfig: (
             customConfig[key] = (await import(curConfigFilePath)).default;
         }
     }
+    const templateType = customConfig['base'].template ?? initConfig.template;
 
     //读取router配置文件
     const routerConfig =
@@ -165,7 +176,7 @@ export const getProjectConfig: (
         entryPath,
         templatePath,
         customConfig,
-        templateType: templateType ?? 'react'
+        templateType
     };
 };
 
@@ -303,6 +314,7 @@ const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templa
             path.resolve(projectPath, './src/.secywo/index.js'),
             'utf8'
         );
+
         //处理global.less文件
         //先判断开发端是否存在global.less
         try {
@@ -360,6 +372,7 @@ export const getFormatDefineVars = async (defineVarsConfigData) => {
 
 //部分secywo配置项的初始默认值
 export const initConfig: GlobalConfigType = {
+    template: 'react',
     npmType: 'npm',
     console: true,
     plugins: [],

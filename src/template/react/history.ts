@@ -4,25 +4,14 @@ import { ConfigRouterType } from '../../utils/config';
 import routes from './routes';
 import { RoutesItemType } from './index';
 import qs from 'qs';
-
-type CustHistoryType = {
-    createBrowserHistory: () => {
-        go: (delta) => void;
-        back: () => void;
-        replace: (options) => void;
-        push: (options) => void;
-    };
-    createHashHistory: CustHistoryType['createBrowserHistory'];
-};
-let history: CustHistoryType;
-const { createBrowserHistory, createHashHistory } = history;
+import { createBrowserHistory, createHashHistory } from 'history';
 
 export type NavigationOptionType = {
     query?: Record<string, any>;
     params?: Record<string, any>;
     hash?: string;
     path?: string;
-    name: string;
+    name?: string;
 };
 
 export type NavigationType = {
@@ -41,7 +30,12 @@ const interpolatePath = (pathTemplate: string, params: Record<string, any>) => {
         if (paramMatch) {
             // 如果找到了参数，使用params对象中的对应值替换
             const paramName = paramMatch[1];
-            return params[paramName] || part; // 如果params中没有对应的值，则保留原样
+            if (params[paramName]) {
+                return params[paramName];
+            } else {
+                // 如果params中没有对应的值，则抛出错误
+                throw `Missing required params '${paramName}'`;
+            }
         }
         return part;
     });
@@ -51,13 +45,13 @@ const interpolatePath = (pathTemplate: string, params: Record<string, any>) => {
 };
 
 //根据name找到定义路由中的指定path
-const getPathByName = (targetName: string, params: Record<string, any>) => {
+const getPathByName = (targetName: string, params: Record<string, any> = {}) => {
     let targetPath;
     const checkRouteItem = (item: RoutesItemType, ancPath: string) => {
         const { path, name, children } = item;
-        const newAncPath = `${ancPath.startsWith('/') ? ancPath : '/' + ancPath}${path}`;
+        const newAncPath = `${ancPath.startsWith('/') ? ancPath : '/' + ancPath}${path.startsWith('/') ? path.slice(1) : path}`;
         if (name === targetName) {
-            targetPath = params ? interpolatePath(newAncPath, params) : newAncPath;
+            targetPath = interpolatePath(newAncPath, params);
             return true;
         }
         if (children) {
@@ -95,9 +89,9 @@ const getFormatHistoryOption = (
     return obj;
 };
 
-export const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)();
+const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)?.();
 
-export const getNavigation = (routerBase: ConfigRouterType['base']) => {
+export const getHistory = (routerBase: ConfigRouterType['base']) => {
     let history: NavigationType;
 
     const lastIndexBase = routerBase[routerBase.length - 1];
@@ -141,6 +135,6 @@ export const getNavigation = (routerBase: ConfigRouterType['base']) => {
     return history;
 };
 
-const Navigation = getNavigation(routerBase);
+const history = getHistory(routerBase);
 
-export { HistoryRouter, Navigation };
+export { HistoryRouter, originalHistory, history };
