@@ -4,7 +4,6 @@ import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router
 import Container from './Container';
 import { routerBase, routerType } from './config';
 import Layout from '../layout/Layout';
-import { NavigationType } from '../react/history';
 
 const router = createRouter({
     history: (routerType === 'hash' ? createWebHashHistory : createWebHistory)(routerBase),
@@ -12,8 +11,9 @@ const router = createRouter({
 });
 // @ts-ignore
 const app = createApp(Container);
+const Secywo: Window['Secywo'] = { history: null, app: null };
 
-window.Navigation = {
+Secywo.history = {
     push: (options) => {
         if (typeof options === 'string') {
             router.push(options);
@@ -34,8 +34,11 @@ window.Navigation = {
     },
     go: router.go,
     back: router.back
-} as NavigationType;
-window.App = app;
+    // eslint-disable-next-line no-undef
+} as SecywoHistoryType;
+Secywo.app = app;
+
+window.Secywo = Secywo;
 
 app.component('Layout', Layout);
 

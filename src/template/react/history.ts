@@ -6,21 +6,6 @@ import { RoutesItemType } from './index';
 import qs from 'qs';
 import { createBrowserHistory, createHashHistory } from 'history';
 
-export type NavigationOptionType = {
-    query?: Record<string, any>;
-    params?: Record<string, any>;
-    hash?: string;
-    path?: string;
-    name?: string;
-};
-
-export type NavigationType = {
-    push: (to: string | NavigationOptionType) => void;
-    replace: NavigationType['push'];
-    go: (delta: number) => void;
-    back: () => void;
-};
-
 //处理params参数，将路径模板中的参数部分替换为对应的值
 const interpolatePath = (pathTemplate: string, params: Record<string, any>) => {
     const pathParts = pathTemplate.split('/');
@@ -65,7 +50,8 @@ const getPathByName = (targetName: string, params: Record<string, any> = {}) => 
 
 //格式化处理option
 const getFormatHistoryOption = (
-    to: NavigationOptionType,
+    // eslint-disable-next-line no-undef
+    to: SecywoHistoryOptionType,
     formatRouterBase,
     type: 'push' | 'replace'
 ) => {
@@ -92,7 +78,8 @@ const getFormatHistoryOption = (
 const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)?.();
 
 export const getHistory = (routerBase: ConfigRouterType['base']) => {
-    let history: NavigationType;
+    // eslint-disable-next-line no-undef
+    let history: SecywoHistoryType;
 
     const lastIndexBase = routerBase[routerBase.length - 1];
     //如果Base末尾为/，则忽略

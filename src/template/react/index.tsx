@@ -50,12 +50,14 @@ const App = () => {
             window.location.replace(`${routerBase}`);
         }
     }
-    //挂载到window上
-    window.Navigation = history;
+    //挂载到window的Secywo上
+    window.Secywo = {
+        history
+    };
     return (
         // @ts-ignore
         <HistoryRouter basename={routerBase} history={originalHistory}>
-            <Layout history={history}>
+            <Layout>
                 <Routes>{renderChildrenRouteList(RouteList)}</Routes>
             </Layout>
         </HistoryRouter>
