@@ -5,9 +5,9 @@ import routes from '../react/routes';
 
 export interface UseLocationType {
     (): {
-        name: string;
-        path: string;
-        pathname: string;
+        name: string; //路由唯一标识
+        path: string; //路由path值
+        pathname: string; //带basename的路由path值
         search: string;
         query?: Record<string, any>;
         hash: string;

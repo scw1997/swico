@@ -5,9 +5,9 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { toast } from '../utils/tools';
 const spinner = ora();
-const { TEMPLATE } = process.env;
 // 执行start本地启动
 export default async function () {
+    process.env.SECYWO_ENV = 'prod';
     const projectConfig = await getProjectConfig('prod');
     const { entryPath, templatePath, projectPath, customConfig, templateType } = projectConfig;
     const buildConfig = await getBuildConfig({

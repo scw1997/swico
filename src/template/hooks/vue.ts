@@ -16,7 +16,6 @@ export const useLocation: UseLocationType = () => {
     });
 
     watchEffect(() => {
-        console.log('123');
         const { hash, path, params, fullPath, query, name } = route;
         const search = query ? qs.stringify(query) : '';
         location.name = name as string;

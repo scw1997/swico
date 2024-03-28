@@ -62,6 +62,7 @@ const restartServer = () => {
 
 // 执行start本地启动
 export default async function start() {
+    process.env.SECYWO_ENV = 'dev';
     //获取可用端口（优先使用重启时的传递的port环境变量）
     availablePort = envPort ?? (await getPort());
     // @ts-ignore

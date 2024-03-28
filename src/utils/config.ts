@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
-import * as process from 'process';
 import { copyDirFiles, toast, writeFile } from './tools';
 
 export type ConfigRoutesItemType = {
@@ -20,6 +19,7 @@ export type ConfigRouterType = {
     routes?: ConfigRoutesItemType[]; //路由配置
 };
 
+//secywo所有可配置选项
 export interface GlobalConfigType {
     template: 'react' | 'vue'; //模板类型
     npmType?: 'npm' | 'pnpm'; //包管理工具
@@ -122,10 +122,7 @@ export const getProjectConfig: (env?: GlobalData['env']) => Promise<GlobalData> 
                 process.exit();
             }
             //对不支持的template值进行提示
-            if (
-                key === 'base' &&
-                !['vue', 'react'].includes(configObj['template'] ?? initConfig.template)
-            ) {
+            if (key === 'base' && !['vue', 'react'].includes(configObj['template'])) {
                 toast.error(
                     `The field '${chalk.blue('template')}' does not support the value '${chalk.red(configObj['template'])}',the value can be 'vue' or 'react' `
                 );
@@ -154,7 +151,7 @@ export const getProjectConfig: (env?: GlobalData['env']) => Promise<GlobalData> 
             customConfig[key] = (await import(curConfigFilePath)).default;
         }
     }
-    const templateType = customConfig['base'].template ?? initConfig.template;
+    const templateType = customConfig['base'].template;
 
     //读取router配置文件
     const routerConfig =
@@ -371,8 +368,7 @@ export const getFormatDefineVars = async (defineVarsConfigData) => {
 };
 
 //部分secywo配置项的初始默认值
-export const initConfig: GlobalConfigType = {
-    template: 'react',
+export const initConfig: Omit<GlobalConfigType, 'template'> = {
     npmType: 'npm',
     console: true,
     plugins: [],
