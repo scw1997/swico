@@ -18,6 +18,5 @@ declare module '*.vue';
 declare interface Window {
     Secywo: {
         history: SecywoHistoryType;
-        app?: any;
     };
 }

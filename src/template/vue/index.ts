@@ -4,6 +4,7 @@ import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router
 import Container from './Container';
 import { routerBase, routerType } from './config';
 import Layout from '../layout/Layout';
+import global from '../global';
 
 const router = createRouter({
     history: (routerType === 'hash' ? createWebHashHistory : createWebHistory)(routerBase),
@@ -11,7 +12,7 @@ const router = createRouter({
 });
 // @ts-ignore
 const app = createApp(Container);
-const Secywo: Window['Secywo'] = { history: null, app: null };
+const Secywo: Window['Secywo'] = { history: null };
 
 Secywo.history = {
     push: (options) => {
@@ -36,12 +37,12 @@ Secywo.history = {
     back: router.back
     // eslint-disable-next-line no-undef
 } as SecywoHistoryType;
-Secywo.app = app;
-
-window.Secywo = Secywo;
-
 app.component('Layout', Layout);
 
 app.use(router);
+
+window.Secywo = Secywo;
+
+global.initApp?.(app);
 
 app.mount('#root');

@@ -6,6 +6,10 @@ import RouteList from './routes';
 import Loading from './loading';
 import { HistoryRouter, originalHistory, history } from './history';
 import { routerBase, routerType } from './config';
+import global from '../global';
+
+// eslint-disable-next-line no-empty-pattern
+const {} = global;
 
 export type RoutesItemType = {
     component?: () => Promise<{ default: FC }>; //页面路径
@@ -15,10 +19,10 @@ export type RoutesItemType = {
     name?: string;
 };
 
-const renderChildrenRouteList = (childrenRoutes: RoutesItemType[]) => {
+const renderChildrenRouteList = (childrenRoutes: RoutesItemType[], ancPathKey: string) => {
     return childrenRoutes?.map((item) => {
-        const { component, path, children, redirect, name } = item;
-
+        const { component, path, children, redirect } = item;
+        const newAncPathKey = `${ancPathKey}-${path}`;
         return (
             <Route
                 element={
@@ -32,10 +36,10 @@ const renderChildrenRouteList = (childrenRoutes: RoutesItemType[]) => {
                         <Outlet />
                     )
                 }
-                key={name}
+                key={newAncPathKey}
                 path={path}
             >
-                {renderChildrenRouteList(children)}
+                {renderChildrenRouteList(children, newAncPathKey)}
             </Route>
         );
     });
@@ -58,7 +62,7 @@ const App = () => {
         // @ts-ignore
         <HistoryRouter basename={routerBase} history={originalHistory}>
             <Layout>
-                <Routes>{renderChildrenRouteList(RouteList)}</Routes>
+                <Routes>{renderChildrenRouteList(RouteList, '')}</Routes>
             </Layout>
         </HistoryRouter>
     );

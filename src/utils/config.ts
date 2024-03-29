@@ -9,7 +9,7 @@ export type ConfigRoutesItemType = {
     path: string; //路由地址
     redirect?: string; // 重定向路由地址
     name?: string;
-    auth?: string; //权限组件
+    decorator?: string; //装饰组件
     [key: string]: any;
 };
 
@@ -179,12 +179,12 @@ export const getProjectConfig: (env?: GlobalData['env']) => Promise<GlobalData> 
 
 const getFormatRouter = (routes: ConfigRouterType['routes'], templateType) => {
     const _main = (item: ConfigRoutesItemType) => {
-        const { path, component, name, children, redirect, auth } = item;
+        const { path, component, name, children, redirect, decorator } = item;
 
-        return auth
+        return decorator
             ? {
                   ...item,
-                  component: `()=>import('${projectPath}/src/pages/${auth}${templateType === 'vue' ? '.vue' : ''}')`,
+                  component: `()=>import('${projectPath}/src/pages/${decorator}${templateType === 'vue' ? '.vue' : ''}')`,
                   children: [
                       {
                           path: '',
@@ -311,6 +311,11 @@ const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templa
             path.resolve(projectPath, './src/.secywo/index.js'),
             'utf8'
         );
+
+        if (templateType === 'vue') {
+            replaceIndexText = replaceIndexText.replace('"./Container"', '"./Container.vue"');
+            await writeFile(path.resolve(projectPath, './src/.secywo/index.js'), replaceIndexText);
+        }
 
         //处理global.less文件
         //先判断开发端是否存在global.less
