@@ -4,7 +4,7 @@ import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
 import Layout from '../layout';
 import RouteList from './routes';
 import Loading from './loading';
-import { HistoryRouter, originalHistory, history } from './history';
+import { HistoryRouter, historyData } from './history';
 import { routerBase, routerType } from './config';
 import '../global';
 
@@ -43,6 +43,7 @@ const renderChildrenRouteList = (childrenRoutes: RoutesItemType[], ancPathKey: s
 };
 
 const App = () => {
+    const { history, originalHistory } = historyData;
     //处理含basename的情况，自动重定向
     if (routerBase && routerBase !== '/') {
         if (routerType === 'hash' && ['', '/'].includes(window.location.hash)) {

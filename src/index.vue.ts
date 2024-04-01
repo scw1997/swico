@@ -1,11 +1,11 @@
-import { GlobalData, GlobalConfigType } from './utils/config';
+import { GlobalData, GlobalSecywoConfigType } from './utils/config';
 import { App, defineComponent } from 'vue';
-import { RouterHistory, RouterLink } from 'vue-router';
+import { Router, RouterLink } from 'vue-router';
 
 export type CustomConfigType = GlobalData['customConfig'];
 export { RouterView as Outlet } from 'vue-router';
 export { useLocation } from './template/hooks/vue';
-export type { GlobalConfigType };
+export type { GlobalSecywoConfigType };
 //二次封装link组件，只支持部分属性
 export const Link = defineComponent({
     components: {
@@ -23,13 +23,17 @@ export const Link = defineComponent({
 });
 
 //secywo 配置
-export interface DefineConfigType {
+export interface DefineSecywoConfigType {
     (env: 'base', config: CustomConfigType['base']);
     (env: 'dev', config: CustomConfigType['dev']);
     (env: 'prod', config: CustomConfigType['prod']);
 }
-export const defineConfig: DefineConfigType = (env, config) => config;
+export const defineConfig: DefineSecywoConfigType = (env, config) => config;
 
-//secywo global.ts相关函数API
+//secywo global.ts 配置
+export interface DefineGlobalConfigType {
+    onInit?: (app: App, router: Router) => void;
+}
 
-export type InitAppType = (app: App, router: RouterHistory) => void;
+export const defineGlobal: (config: DefineGlobalConfigType) => DefineGlobalConfigType = (config) =>
+    config;

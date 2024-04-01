@@ -1,7 +1,6 @@
 import { useLocation as useOriLocation, useParams } from 'react-router-dom';
 import qs from 'qs';
-import { RoutesItemType } from '../react';
-import routes from '../react/routes';
+import { pathNameList } from '../react/history';
 
 export interface UseLocationType {
     (): {
@@ -46,30 +45,6 @@ const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: 
     return true;
 };
 
-//根据path找到定义路由中的name
-const getNameByPath = (targetPath: string, params: Record<string, any>) => {
-    let targetName;
-    const checkRouteItem = (item: RoutesItemType, ancPath: string) => {
-        const { path, name, children } = item;
-        const newAncPath = `${ancPath.startsWith('/') ? ancPath : '/' + ancPath}${path.startsWith('/') ? path.slice(1) : path}`;
-        if (params && compareURLPatterns(targetPath, newAncPath)) {
-            targetName = name;
-            return true;
-        }
-        if (newAncPath === targetPath) {
-            targetName = name;
-            return true;
-        }
-        if (children) {
-            return children?.some((item) => checkRouteItem(item, newAncPath));
-        }
-        return false;
-    };
-    routes.some((item) => checkRouteItem(item, ''));
-    console.log('getNameByPath', targetName, targetPath);
-    return targetName;
-};
-
 export const useLocation: UseLocationType = () => {
     const location = useOriLocation();
 
@@ -77,7 +52,9 @@ export const useLocation: UseLocationType = () => {
 
     const { search, hash, pathname } = location;
 
-    const name = getNameByPath(pathname, params);
+    const name = pathNameList.find(
+        (item) => (params && compareURLPatterns(pathname, item.path)) || item.path === pathname
+    )?.name;
 
     const query = search ? qs.parse(search.startsWith('?') ? search.slice(1) : search) : {};
 

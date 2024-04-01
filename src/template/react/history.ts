@@ -29,30 +29,36 @@ const interpolatePath = (pathTemplate: string, params: Record<string, any>) => {
     return interpolatedParts.join('/');
 };
 
-//根据name找到定义路由中的指定path
-const getPathByName = (targetName: string, params: Record<string, any> = {}) => {
-    let targetPath;
+//保留ancPath的首部/，去掉尾部/
+export const formatAncPath = (ancPath: string) => {
+    let newAncPath = ancPath.startsWith('/') ? ancPath : '/' + ancPath;
+    newAncPath = newAncPath.endsWith('/') ? newAncPath.slice(0, -1) : newAncPath;
+    return newAncPath;
+};
+
+//根据全体路由配置生成含完整path和name的集合数据
+const getPathNameList: () => Array<{ path: string; name: string }> = () => {
+    const list = [];
     const checkRouteItem = (item: RoutesItemType, ancPath: string) => {
         const { path, name, children } = item;
-        const newAncPath = `${ancPath.startsWith('/') ? ancPath : '/' + ancPath}${path.startsWith('/') ? path.slice(1) : path}`;
-        if (name === targetName) {
-            targetPath = interpolatePath(newAncPath, params);
-            return true;
-        }
+        const newAncPath = `${formatAncPath(ancPath)}${path.startsWith('/') ? path : '/' + path}`;
+        list.push({ path: newAncPath, name });
         if (children) {
-            return children?.some((item) => checkRouteItem(item, newAncPath));
+            children.some((item) => checkRouteItem(item, newAncPath));
         }
     };
-    routes.some((item) => checkRouteItem(item, ''));
-    console.log('getPathByName', targetName, targetPath);
-    return targetPath;
+    routes.forEach((item) => checkRouteItem(item, ''));
+    return list;
 };
+
+export const pathNameList = getPathNameList();
 
 //格式化处理option
 const getFormatHistoryOption = (
     // eslint-disable-next-line no-undef
     to: SecywoHistoryOptionType,
     formatRouterBase,
+    pathList: ReturnType<typeof getPathNameList>,
     type: 'push' | 'replace'
 ) => {
     const { params, path, hash, name, query } = to;
@@ -63,13 +69,12 @@ const getFormatHistoryOption = (
     if (path) {
         //只有path无name时，params需要开发者自行加到path里
         obj.pathname = `${formatRouterBase}${path}`;
-        console.log('pathname', `${formatRouterBase}${path}`);
     }
     if (name) {
-        const targetPath = getPathByName(name, params);
+        const fullPath = pathList.find((item) => item.name === name)?.path;
+        const targetPath = fullPath ? interpolatePath(fullPath, params) : null;
         if (targetPath) {
             obj.pathname = `${formatRouterBase}${targetPath}`;
-            console.log('pathname', `${formatRouterBase}${targetPath}`);
         } else {
             throw `An error occurred while executing 'Navigation.${type}' operation: The path for the name "${name}" could not be found`;
         }
@@ -77,12 +82,10 @@ const getFormatHistoryOption = (
     return obj;
 };
 
-const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)?.();
-
 export const getHistory = (routerBase: ConfigRouterType['base']) => {
     // eslint-disable-next-line no-undef
     let history: SecywoHistoryType;
-
+    const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)?.();
     const lastIndexBase = routerBase[routerBase.length - 1];
     //如果Base末尾为/，则忽略
     const formatRouterBase =
@@ -97,7 +100,12 @@ export const getHistory = (routerBase: ConfigRouterType['base']) => {
                     break;
                 case 'object':
                     // eslint-disable-next-line no-case-declarations
-                    const formatOption = getFormatHistoryOption(to, formatRouterBase, 'push');
+                    const formatOption = getFormatHistoryOption(
+                        to,
+                        formatRouterBase,
+                        pathNameList,
+                        'push'
+                    );
 
                     originalHistory.push(formatOption);
                     break;
@@ -112,7 +120,12 @@ export const getHistory = (routerBase: ConfigRouterType['base']) => {
                     break;
                 case 'object':
                     // eslint-disable-next-line no-case-declarations
-                    const formatOption = getFormatHistoryOption(to, formatRouterBase, 'replace');
+                    const formatOption = getFormatHistoryOption(
+                        to,
+                        formatRouterBase,
+                        pathNameList,
+                        'replace'
+                    );
                     originalHistory.replace(formatOption);
                     break;
                 default:
@@ -121,9 +134,9 @@ export const getHistory = (routerBase: ConfigRouterType['base']) => {
         }
     };
 
-    return history;
+    return { history, originalHistory };
 };
 
-const history = getHistory(routerBase);
+const historyData = getHistory(routerBase);
 
-export { HistoryRouter, originalHistory, history };
+export { HistoryRouter, historyData };

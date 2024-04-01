@@ -4,7 +4,7 @@ import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router
 import Container from './Container';
 import { routerBase, routerType } from './config';
 import Layout from '../layout/Layout';
-import '../global';
+import global from '../global';
 
 const router = createRouter({
     history: (routerType === 'hash' ? createWebHashHistory : createWebHistory)(routerBase),
@@ -42,8 +42,7 @@ app.component('Layout', Layout);
 app.use(router);
 
 window.Secywo = Secywo;
-
-// eslint-disable-next-line no-undef
-initApp?.(app, router);
+//回调触发
+global?.onInit?.(app, router);
 
 app.mount('#root');

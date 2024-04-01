@@ -20,7 +20,7 @@ export type ConfigRouterType = {
 };
 
 //secywo所有可配置选项
-export interface GlobalConfigType {
+export interface GlobalSecywoConfigType {
     template: 'react' | 'vue'; //模板类型
     npmType?: 'npm' | 'pnpm'; //包管理工具
     plugins?: any[]; //webpack插件
@@ -37,7 +37,7 @@ export interface GlobalConfigType {
 }
 
 export interface GlobalData {
-    templateType?: GlobalConfigType['template']; //模板类型
+    templateType?: GlobalSecywoConfigType['template']; //模板类型
     projectPath: string; //模板项目根路径
     entryPath: string; //入口文件路径
     templatePath: string; //html模板文件路径
@@ -45,7 +45,7 @@ export interface GlobalData {
     customConfig: {
         //脚手架自定义配置
         base: Pick<
-            GlobalConfigType,
+            GlobalSecywoConfigType,
             | 'plugins'
             | 'publicPath'
             | 'alias'
@@ -56,8 +56,8 @@ export interface GlobalData {
             | 'router'
             | 'template'
         >; //公共通用
-        dev: Pick<GlobalConfigType, 'plugins' | 'proxy' | 'https' | 'devtool' | 'router'>; //开发环境专用
-        prod: Pick<GlobalConfigType, 'plugins' | 'console' | 'copy' | 'devtool' | 'router'>; //生产环境专用
+        dev: Pick<GlobalSecywoConfigType, 'plugins' | 'proxy' | 'https' | 'devtool' | 'router'>; //开发环境专用
+        prod: Pick<GlobalSecywoConfigType, 'plugins' | 'console' | 'copy' | 'devtool' | 'router'>; //生产环境专用
     };
 }
 
@@ -381,7 +381,7 @@ export const getFormatDefineVars = async (defineVarsConfigData) => {
 };
 
 //部分secywo配置项的初始默认值
-export const initConfig: Omit<GlobalConfigType, 'template'> = {
+export const initConfig: Omit<GlobalSecywoConfigType, 'template'> = {
     npmType: 'npm',
     console: true,
     plugins: [],
