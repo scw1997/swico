@@ -312,9 +312,16 @@ const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templa
             'utf8'
         );
 
-        if (templateType === 'vue') {
-            replaceIndexText = replaceIndexText.replace('"./Container"', '"./Container.vue"');
-            await writeFile(path.resolve(projectPath, './src/.secywo/index.js'), replaceIndexText);
+        //处理global.ts文件
+        //先判断开发端是否存在global.ts
+        try {
+            await fs.access(path.resolve(projectPath, './src/global.ts'), fs.constants.F_OK);
+            //存在则先重置状态，再添加引入
+            replaceIndexText = replaceIndexText.replaceAll('require("../global");', '');
+            replaceIndexText = 'require("../global");\n' + replaceIndexText;
+        } catch (e) {
+            //不存在则取消引入
+            replaceIndexText = replaceIndexText.replaceAll('require("../global");', '');
         }
 
         //处理global.less文件
@@ -329,13 +336,14 @@ const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templa
             replaceIndexText = replaceIndexText.replaceAll('require("../global.less");', '');
         }
 
+        //处理Container组件，将ts换成vue（因为vue文件默认包内不支持引入）
         if (templateType === 'vue') {
             replaceIndexText = replaceIndexText.replace('"./Container"', '"./Container.vue"');
             await writeFile(path.resolve(projectPath, './src/.secywo/index.js'), replaceIndexText);
         }
 
+        //处理React Router 的loading组件
         if (templateType === 'react') {
-            //处理React Router 的loading组件
             //先判断开发端是否存在loading组件
             try {
                 await fs.access(

@@ -23,7 +23,6 @@ export default async function (options: GlobalData) {
     } as GlobalData);
 
     const consoleAvailable = customConfig.prod?.console ?? initConfig.console;
-
     //处理public文件夹（静态资源）
     const isPublicDirExist = fs.existsSync(path.join(projectPath, '/public'));
     //处理其他自定义复制输出目录的文件

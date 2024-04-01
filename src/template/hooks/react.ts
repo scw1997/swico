@@ -66,7 +66,7 @@ const getNameByPath = (targetPath: string, params: Record<string, any>) => {
         return false;
     };
     routes.some((item) => checkRouteItem(item, ''));
-    console.log('targetName', targetName);
+    console.log('getNameByPath', targetName, targetPath);
     return targetName;
 };
 

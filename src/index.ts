@@ -4,6 +4,9 @@ export type CustomConfigType = GlobalData['customConfig'];
 
 export type { GlobalConfigType };
 
+let Outlet: any, Link: any, useLocation: any;
+export { Outlet, Link, useLocation };
+
 //secywo 配置
 export interface DefineConfigType {
     (env: 'base', config: CustomConfigType['base']): CustomConfigType['base'];
@@ -12,12 +15,6 @@ export interface DefineConfigType {
 }
 export const defineConfig: DefineConfigType = (env, config) => config;
 
-//secywo global.ts 配置
-export interface DefineGlobalConfigType {
-    initApp?: (app) => void;
-}
-export const defineGlobal: (config: DefineGlobalConfigType) => DefineGlobalConfigType = (config) =>
-    config;
+//secywo global.ts相关函数API
 
-let Outlet: any, Link: any, useLocation: any;
-export { Outlet, Link, useLocation };
+export type InitAppType = (app: any, router: any) => void;

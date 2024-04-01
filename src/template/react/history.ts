@@ -44,7 +44,7 @@ const getPathByName = (targetName: string, params: Record<string, any> = {}) => 
         }
     };
     routes.some((item) => checkRouteItem(item, ''));
-    console.log('targetPath', targetName, targetPath);
+    console.log('getPathByName', targetName, targetPath);
     return targetPath;
 };
 
@@ -63,11 +63,13 @@ const getFormatHistoryOption = (
     if (path) {
         //只有path无name时，params需要开发者自行加到path里
         obj.pathname = `${formatRouterBase}${path}`;
+        console.log('pathname', `${formatRouterBase}${path}`);
     }
     if (name) {
         const targetPath = getPathByName(name, params);
         if (targetPath) {
             obj.pathname = `${formatRouterBase}${targetPath}`;
+            console.log('pathname', `${formatRouterBase}${targetPath}`);
         } else {
             throw `An error occurred while executing 'Navigation.${type}' operation: The path for the name "${name}" could not be found`;
         }
@@ -95,7 +97,7 @@ export const getHistory = (routerBase: ConfigRouterType['base']) => {
                     break;
                 case 'object':
                     // eslint-disable-next-line no-case-declarations
-                    const formatOption = getFormatHistoryOption(to, routerBase, 'push');
+                    const formatOption = getFormatHistoryOption(to, formatRouterBase, 'push');
 
                     originalHistory.push(formatOption);
                     break;
@@ -110,7 +112,7 @@ export const getHistory = (routerBase: ConfigRouterType['base']) => {
                     break;
                 case 'object':
                     // eslint-disable-next-line no-case-declarations
-                    const formatOption = getFormatHistoryOption(to, routerBase, 'replace');
+                    const formatOption = getFormatHistoryOption(to, formatRouterBase, 'replace');
                     originalHistory.replace(formatOption);
                     break;
                 default:

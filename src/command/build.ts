@@ -18,24 +18,21 @@ export default async function () {
         templateType
     });
     const compiler = webpack(buildConfig as any);
-    spinner.start('Building...');
+    console.log(`${chalk.hex('#5f72f5')('Secywo starts building....')} \n`);
     compiler.run((err, stats) => {
         if (err) {
             toast.error(err.stack || err.toString());
-            spinner.stop();
             return;
         }
         const info = stats.toJson();
 
         if (stats.hasErrors()) {
             toast.error(info.errors.map((item) => item.stack));
-            spinner.stop();
             return;
         }
 
         if (stats.hasWarnings()) {
             toast.warning(info.warnings.map((item) => item.stack));
-            spinner.stop();
         }
         spinner.succeed(`${chalk.green.bold('Building complete')} \n`);
     });

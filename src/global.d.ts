@@ -13,6 +13,8 @@ declare type SecywoHistoryType = {
     back: () => void;
 };
 
+declare const initApp: any;
+
 declare module '*.vue';
 
 declare interface Window {

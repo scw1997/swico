@@ -6,10 +6,7 @@ import RouteList from './routes';
 import Loading from './loading';
 import { HistoryRouter, originalHistory, history } from './history';
 import { routerBase, routerType } from './config';
-import global from '../global';
-
-// eslint-disable-next-line no-empty-pattern
-const {} = global;
+import '../global';
 
 export type RoutesItemType = {
     component?: () => Promise<{ default: FC }>; //页面路径
