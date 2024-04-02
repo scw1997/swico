@@ -4,7 +4,7 @@ import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
 import Layout from '../layout';
 import RouteList from './routes';
 import Loading from './loading';
-import { HistoryRouter, historyData } from './history';
+import { HistoryRouter, getHistory } from './history';
 import { routerBase, routerType } from './config';
 import '../global';
 
@@ -43,7 +43,7 @@ const renderChildrenRouteList = (childrenRoutes: RoutesItemType[], ancPathKey: s
 };
 
 const App = () => {
-    const { history, originalHistory } = historyData;
+    const { history, originalHistory } = getHistory(routerBase, routerType);
     //处理含basename的情况，自动重定向
     if (routerBase && routerBase !== '/') {
         if (routerType === 'hash' && ['', '/'].includes(window.location.hash)) {
@@ -52,8 +52,8 @@ const App = () => {
             window.location.replace(`${routerBase}`);
         }
     }
-    //挂载到window的Secywo上
-    window.Secywo = {
+    //挂载到window的Swico上
+    window.Swico = {
         history
     };
     return (

@@ -1,4 +1,4 @@
-declare type SecywoHistoryOptionType = {
+declare type SwicoHistoryOptionType = {
     query?: Record<string, any>;
     params?: Record<string, any>;
     hash?: string;
@@ -6,9 +6,9 @@ declare type SecywoHistoryOptionType = {
     name?: string;
 };
 
-declare type SecywoHistoryType = {
-    push: (to: string | SecywoHistoryOptionType) => void;
-    replace: SecywoHistoryType['push'];
+declare type SwicoHistoryType = {
+    push: (to: string | SwicoHistoryOptionType) => void;
+    replace: SwicoHistoryType['push'];
     go: (delta: number) => void;
     back: () => void;
 };
@@ -16,7 +16,7 @@ declare type SecywoHistoryType = {
 declare module '*.vue';
 
 declare interface Window {
-    Secywo: {
-        history: SecywoHistoryType;
+    Swico: {
+        history: SwicoHistoryType;
     };
 }

@@ -7,7 +7,7 @@ import { toast } from '../utils/tools';
 const spinner = ora();
 // 执行start本地启动
 export default async function () {
-    process.env.SECYWO_ENV = 'prod';
+    process.env.SWICO_ENV = 'prod';
     const projectConfig = await getProjectConfig('prod');
     const { entryPath, templatePath, projectPath, customConfig, templateType } = projectConfig;
     const buildConfig = await getBuildConfig({
@@ -18,7 +18,7 @@ export default async function () {
         templateType
     });
     const compiler = webpack(buildConfig as any);
-    console.log(`${chalk.hex('#5f72f5')('Secywo starts building....')} \n`);
+    console.log(`${chalk.hex('#5f72f5')('Swico starts building....')} \n`);
     compiler.run((err, stats) => {
         if (err) {
             toast.error(err.stack || err.toString());

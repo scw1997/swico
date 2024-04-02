@@ -1,7 +1,7 @@
 {
-  "name": "secywo-template-cli",
-  "version": "2.0.0-beta56",
-  "description": "secywo template cli",
+  "name": "swico",
+  "version": "0.1.0",
+  "description": "Simple, efficient, and practical front-end framework",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "keywords": [
@@ -11,12 +11,12 @@
     "react",
     "vue",
     "cli",
-    "secywo",
+    "swico",
     "template",
     "webpack"
   ],
   "bin": {
-    "secywo": "./src/bin.js"
+    "swico": "./src/bin.js"
   },
   "scripts": {
     "compile": "tsc && ts-node ./src/task.ts",

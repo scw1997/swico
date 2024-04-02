@@ -1,10 +1,10 @@
-import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
-import { routerType, routerBase } from './config';
 import { ConfigRouterType } from '../../utils/config';
 import routes from './routes';
 import { RoutesItemType } from './index';
 import qs from 'qs';
 import { createBrowserHistory, createHashHistory } from 'history';
+
+export { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 
 //处理params参数，将路径模板中的参数部分替换为对应的值
 const interpolatePath = (pathTemplate: string, params: Record<string, any>) => {
@@ -56,7 +56,7 @@ export const pathNameList = getPathNameList();
 //格式化处理option
 const getFormatHistoryOption = (
     // eslint-disable-next-line no-undef
-    to: SecywoHistoryOptionType,
+    to: SwicoHistoryOptionType,
     formatRouterBase,
     pathList: ReturnType<typeof getPathNameList>,
     type: 'push' | 'replace'
@@ -82,9 +82,12 @@ const getFormatHistoryOption = (
     return obj;
 };
 
-export const getHistory = (routerBase: ConfigRouterType['base']) => {
+export const getHistory = (
+    routerBase: ConfigRouterType['base'],
+    routerType: ConfigRouterType['type']
+) => {
     // eslint-disable-next-line no-undef
-    let history: SecywoHistoryType;
+    let history: SwicoHistoryType;
     const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)?.();
     const lastIndexBase = routerBase[routerBase.length - 1];
     //如果Base末尾为/，则忽略
@@ -136,7 +139,3 @@ export const getHistory = (routerBase: ConfigRouterType['base']) => {
 
     return { history, originalHistory };
 };
-
-const historyData = getHistory(routerBase);
-
-export { HistoryRouter, historyData };

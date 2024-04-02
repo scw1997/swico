@@ -1,20 +1,20 @@
-import { GlobalData, GlobalSecywoConfigType } from './utils/config';
+import { GlobalData, GlobalSwicoConfigType } from './utils/config';
 
 export type CustomConfigType = GlobalData['customConfig'];
 
-export type { GlobalSecywoConfigType };
+export type { GlobalSwicoConfigType };
 
 let Outlet: any, Link: any, useLocation: any;
 export { Outlet, Link, useLocation };
 
-//secywo 配置
-export interface DefineSecywoConfigType {
+//swico 配置
+export interface DefineSwicoConfigType {
     (env: 'base', config: CustomConfigType['base']): CustomConfigType['base'];
     (env: 'dev', config: CustomConfigType['dev']): CustomConfigType['dev'];
     (env: 'prod', config: CustomConfigType['prod']): CustomConfigType['prod'];
 }
-export const defineConfig: DefineSecywoConfigType = (env, config) => config;
-//secywo global.ts 配置
+export const defineConfig: DefineSwicoConfigType = (env, config) => config;
+//swico global.ts 配置
 export interface DefineGlobalConfigType {
     onInit?: (app, router) => void;
 }

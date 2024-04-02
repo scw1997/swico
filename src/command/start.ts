@@ -26,7 +26,7 @@ const handleWatch = (projectPath, devServer) => {
         )
         .on('all', async (path, stats) => {
             toast.warning(
-                'Secywo configuration files have been modified. The devServer is being restarted...'
+                'Swico configuration files have been modified. The devServer is being restarted...'
             );
 
             await devServer.stop();
@@ -51,7 +51,7 @@ const handleWatch = (projectPath, devServer) => {
 
 let availablePort; //若是更新重启的情况，则用缓存的端口，不用新端口
 const restartServer = () => {
-    const result = spawn.sync('cross-env', [`PORT=${availablePort}`, 'secywo', 'start'], {
+    const result = spawn.sync('cross-env', [`PORT=${availablePort}`, 'swico', 'start'], {
         stdio: 'inherit'
     });
     if (result.error) {
@@ -62,7 +62,7 @@ const restartServer = () => {
 
 // 执行start本地启动
 export default async function start() {
-    process.env.SECYWO_ENV = 'dev';
+    process.env.SWICO_ENV = 'dev';
     //获取可用端口（优先使用重启时的传递的port环境变量）
     availablePort = envPort ?? (await getPort());
     // @ts-ignore

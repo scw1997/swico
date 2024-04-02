@@ -46,7 +46,7 @@ export const getPort = () => {
 
 export const toast = {
     error: (message: string | string[]) => {
-        console.log(`\n${chalk.hex('#5f72f5')('There are some errors about secywo：')} \n`);
+        console.log(`\n${chalk.hex('#5f72f5')('There are some errors about Swico：')} \n`);
         if (Array.isArray(message)) {
             message.forEach((item) => {
                 console.log(` > ${chalk.red.bold(item)} \n`);
@@ -56,7 +56,7 @@ export const toast = {
         }
     },
     warning: (message: string | string[]) => {
-        console.log(`\n${chalk.hex('#5f72f5')('There are some warnings about secywo：')} \n`);
+        console.log(`\n${chalk.hex('#5f72f5')('There are some warnings about Swico：')} \n`);
         if (Array.isArray(message)) {
             message.forEach((item) => {
                 console.log(` > ${chalk.hex('#fb8918').bold(item)} \n`);
@@ -72,7 +72,7 @@ export const writeFile = (sourcePath, text) => {
     return new Promise((resolve, reject) => {
         fs.writeFile(sourcePath, text, (err) => {
             if (err) {
-                const errText = 'An error occurred during the secywo configuration.';
+                const errText = 'An error occurred during the Swico configuration.';
                 toast.error(errText);
                 return reject(errText);
             } else {

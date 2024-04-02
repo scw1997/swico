@@ -1,8 +1,8 @@
-# secywo-template-cli
+# swico
 
 ## 介绍
 
-前端脚手架`secywo`的核心实现部分，主要用于处理开发模板的启动，构建等运行过程。
+个人独立开发的前端框架`Swico`
 
-详见：[SECYWO 官方文档](https://fanlaboy.gitee.io/secywo-docs/)
+详见：[SWICO 官方文档](http://fanlaboy.gitee.io/swico-docs)
 

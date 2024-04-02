@@ -19,8 +19,8 @@ export type ConfigRouterType = {
     routes?: ConfigRoutesItemType[]; //路由配置
 };
 
-//secywo所有可配置选项
-export interface GlobalSecywoConfigType {
+//swico所有可配置选项
+export interface GlobalSwicoConfigType {
     template: 'react' | 'vue'; //模板类型
     npmType?: 'npm' | 'pnpm'; //包管理工具
     plugins?: any[]; //webpack插件
@@ -37,7 +37,7 @@ export interface GlobalSecywoConfigType {
 }
 
 export interface GlobalData {
-    templateType?: GlobalSecywoConfigType['template']; //模板类型
+    templateType?: GlobalSwicoConfigType['template']; //模板类型
     projectPath: string; //模板项目根路径
     entryPath: string; //入口文件路径
     templatePath: string; //html模板文件路径
@@ -45,7 +45,7 @@ export interface GlobalData {
     customConfig: {
         //脚手架自定义配置
         base: Pick<
-            GlobalSecywoConfigType,
+            GlobalSwicoConfigType,
             | 'plugins'
             | 'publicPath'
             | 'alias'
@@ -56,8 +56,8 @@ export interface GlobalData {
             | 'router'
             | 'template'
         >; //公共通用
-        dev: Pick<GlobalSecywoConfigType, 'plugins' | 'proxy' | 'https' | 'devtool' | 'router'>; //开发环境专用
-        prod: Pick<GlobalSecywoConfigType, 'plugins' | 'console' | 'copy' | 'devtool' | 'router'>; //生产环境专用
+        dev: Pick<GlobalSwicoConfigType, 'plugins' | 'proxy' | 'https' | 'devtool' | 'router'>; //开发环境专用
+        prod: Pick<GlobalSwicoConfigType, 'plugins' | 'console' | 'copy' | 'devtool' | 'router'>; //生产环境专用
     };
 }
 
@@ -66,13 +66,13 @@ const projectPath = process.cwd();
 
 //获取开发者的自定义项目配置和相关参数
 export const getProjectConfig: (env?: GlobalData['env']) => Promise<GlobalData> = async (env) => {
-    //secywo 配置文件路径
+    //swico 配置文件路径
     const configDir = path.join(projectPath, '/config');
     // 脚手架对应的配置文件信息
     const configPath = {
-        dev: path.join(configDir, '/secywo.dev.ts'),
-        prod: path.join(configDir, '/secywo.prod.ts'),
-        base: path.join(configDir, '/secywo.ts')
+        dev: path.join(configDir, '/swico.dev.ts'),
+        prod: path.join(configDir, '/swico.prod.ts'),
+        base: path.join(configDir, '/swico.ts')
     };
 
     const customConfig = {} as GlobalData['customConfig'];
@@ -100,22 +100,22 @@ export const getProjectConfig: (env?: GlobalData['env']) => Promise<GlobalData> 
                         'router',
                         'template'
                     ];
-                    configFileName = 'secywo.ts';
+                    configFileName = 'swico.ts';
                     break;
                 case 'dev':
                     supportedFieldList = ['plugins', 'proxy', 'https', 'devtool', 'router'];
-                    configFileName = 'secywo.dev.ts';
+                    configFileName = 'swico.dev.ts';
                     break;
                 case 'prod':
                     supportedFieldList = ['plugins', 'console', 'copy', 'devtool', 'router'];
-                    configFileName = 'secywo.prod.ts';
+                    configFileName = 'swico.prod.ts';
             }
 
             const unSupportedField = configFields.find(
                 (field) => !supportedFieldList.includes(field)
             );
             if (configFields.length > 0 && unSupportedField) {
-                const msgText = `\n The secywo configuration file '${chalk.blue(
+                const msgText = `\n The Swico configuration file '${chalk.blue(
                     configFileName
                 )}' does not support the field '${chalk.red(unSupportedField)}' `;
                 toast.error(msgText);
@@ -163,7 +163,7 @@ export const getProjectConfig: (env?: GlobalData['env']) => Promise<GlobalData> 
     await handleCliIndexFile(templateType);
 
     //生成webpack入口文件
-    const entryPath = path.resolve(projectPath, './src/.secywo/index.js');
+    const entryPath = path.resolve(projectPath, './src/.swico/index.js');
 
     //webpack html template
     const templatePath = path.join(projectPath, '/src/index.ejs');
@@ -291,7 +291,7 @@ const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templa
     return new Promise(async (resolve, reject) => {
         await formatTemplateFileText(routerConfig, templateType);
 
-        const copyTargetPath = path.resolve(projectPath, './src/.secywo');
+        const copyTargetPath = path.resolve(projectPath, './src/.swico');
         // 复制的目标目录是否已经存在，强制删除然后重新生成
         if (fs.existsSync(copyTargetPath)) {
             await fs.remove(copyTargetPath);
@@ -308,7 +308,7 @@ const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templa
 
         //下面是一些复制完之后需要处理的操作
         let replaceIndexText = fs.readFileSync(
-            path.resolve(projectPath, './src/.secywo/index.js'),
+            path.resolve(projectPath, './src/.swico/index.js'),
             'utf8'
         );
 
@@ -339,7 +339,7 @@ const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templa
         //处理Container组件，将ts换成vue（因为vue文件默认包内不支持引入）
         if (templateType === 'vue') {
             replaceIndexText = replaceIndexText.replace('"./Container"', '"./Container.vue"');
-            await writeFile(path.resolve(projectPath, './src/.secywo/index.js'), replaceIndexText);
+            await writeFile(path.resolve(projectPath, './src/.swico/index.js'), replaceIndexText);
         }
 
         //处理React Router 的loading组件
@@ -357,7 +357,7 @@ const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templa
                 replaceIndexText = replaceIndexText.replace('"../loading"', '"./loading"');
             } finally {
                 await writeFile(
-                    path.resolve(projectPath, './src/.secywo/index.js'),
+                    path.resolve(projectPath, './src/.swico/index.js'),
                     replaceIndexText
                 );
             }
@@ -380,8 +380,8 @@ export const getFormatDefineVars = async (defineVarsConfigData) => {
     return formatObj;
 };
 
-//部分secywo配置项的初始默认值
-export const initConfig: Omit<GlobalSecywoConfigType, 'template'> = {
+//部分swico配置项的初始默认值
+export const initConfig: Omit<GlobalSwicoConfigType, 'template'> = {
     npmType: 'npm',
     console: true,
     plugins: [],

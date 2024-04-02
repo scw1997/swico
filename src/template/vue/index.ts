@@ -12,9 +12,9 @@ const router = createRouter({
 });
 // @ts-ignore
 const app = createApp(Container);
-const Secywo: Window['Secywo'] = { history: null };
+const Swico: Window['Swico'] = { history: null };
 
-Secywo.history = {
+Swico.history = {
     push: (options) => {
         if (typeof options === 'string') {
             router.push(options);
@@ -36,12 +36,12 @@ Secywo.history = {
     go: router.go,
     back: router.back
     // eslint-disable-next-line no-undef
-} as SecywoHistoryType;
+} as SwicoHistoryType;
 app.component('Layout', Layout);
 
 app.use(router);
 
-window.Secywo = Secywo;
+window.Swico = Swico;
 //回调触发
 global?.onInit?.(app, router);
 
