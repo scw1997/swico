@@ -224,7 +224,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             // 编译进度条
             new WebpackBar({
                 name: 'Secywo',
-                color: '#82B2FD',
+                color: '#5f72f5',
                 profile: false
             }),
             ...(customBaseConfig?.plugins || initConfig.plugins)
