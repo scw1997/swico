@@ -1,1 +1,3 @@
-export default ({ children }) => children;
+import {Outlet} from 'react-router-dom';
+import React from 'react';
+export default () => <Outlet/>;

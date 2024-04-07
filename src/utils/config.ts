@@ -236,9 +236,11 @@ const formatTemplateFileText = (
 ) => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-        const formatRouter = getFormatRouter(routes, templateType);
 
         //处理路由配置
+
+       const formatRouter = getFormatRouter(routes, templateType);
+
         const textData = `"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ${JSON.stringify(formatRouter)};`;

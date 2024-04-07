@@ -1,12 +1,12 @@
 import { createRoot } from 'react-dom/client';
 import React, { createElement, FC, lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
-import Layout from '../layout';
 import RouteList from './routes';
 import Loading from './loading';
 import { HistoryRouter, getHistory } from './history';
 import { routerBase, routerType } from './config';
 import '../global';
+import Layout from '../layout';
 
 export type RoutesItemType = {
     component?: () => Promise<{ default: FC }>; //页面路径
@@ -59,9 +59,13 @@ const App = () => {
     return (
         // @ts-ignore
         <HistoryRouter basename={routerBase} history={originalHistory}>
-            <Layout>
-                <Routes>{renderChildrenRouteList(RouteList, '')}</Routes>
-            </Layout>
+            <Routes>
+
+                <Route element={<Layout/>} path={''}>
+                    {renderChildrenRouteList(RouteList, '')}
+                </Route>
+
+            </Routes>
         </HistoryRouter>
     );
 };
