@@ -46,9 +46,8 @@ const App = () => {
     const { history, originalHistory } = getHistory(routerBase, routerType);
     //处理含basename的情况，自动重定向
     if (routerBase && routerBase !== '/') {
-        if (routerType === 'hash' && ['', '/'].includes(window.location.hash)) {
-            window.location.replace(`/#${routerBase}`);
-        } else if (routerType === 'browser' && window.location.pathname === '/') {
+
+         if (routerType === 'browser' && window.location.pathname === '/') {
             window.location.replace(`${routerBase}`);
         }
     }

@@ -265,7 +265,8 @@ exports.default = ${JSON.stringify(formatRouter)};`;
                 /exports\.routerBase\s*=\s*(.*)/gm,
                 function (match, p1) {
                     // p1 是匹配到的 xxx 部分
-                    return `exports.routerBase = '${base}';`;
+                    //对react模板的hash路由进行特殊处理，忽略base值
+                    return `exports.routerBase = '${(templateType==='react' && type==='hash')?'/':base}';`;
                 }
             );
         }
