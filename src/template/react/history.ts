@@ -37,7 +37,7 @@ export const formatAncPath = (ancPath: string) => {
 };
 
 //根据全体路由配置生成含完整path和name的集合数据
-const getPathNameList: () => Array<{ path: string; name: string }> = () => {
+export const getPathNameList: () => Array<{ path: string; name: string }> = () => {
     const list = [];
     const checkRouteItem = (item: RoutesItemType, ancPath: string) => {
         const { path, name, children } = item;
@@ -51,7 +51,18 @@ const getPathNameList: () => Array<{ path: string; name: string }> = () => {
     return list;
 };
 
-export const pathNameList = getPathNameList();
+const getLocation = (originalHistory): SwicoLocationType => {
+    const { pathname, hash, search } = originalHistory.location;
+    return {
+        hash,
+        search,
+        pathname,
+        query: search ? qs.parse(search.startsWith('?') ? search.slice(1) : search) : {},
+        name: '',
+        params: {},
+        path: ''
+    };
+};
 
 //格式化处理option
 const getFormatHistoryOption = (
@@ -89,12 +100,15 @@ export const getHistory = (
     // eslint-disable-next-line no-undef
     let history: SwicoHistoryType;
     const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)?.();
+    const pathNameList = getPathNameList();
     const lastIndexBase = routerBase[routerBase.length - 1];
+
     //如果Base末尾为/，则忽略
     const formatRouterBase =
         lastIndexBase === '/' ? routerBase.slice(0, routerBase.length - 1) : routerBase;
     history = {
         go: originalHistory.go,
+        forward: originalHistory.forward,
         back: originalHistory.back,
         push: (to) => {
             switch (typeof to) {
@@ -134,6 +148,10 @@ export const getHistory = (
                 default:
                     throw `An error occurred while executing Navigation.replace operation: unexpected type of 'to':${typeof to}`;
             }
+        },
+        // @ts-ignore
+        get location() {
+            return getLocation(originalHistory);
         }
     };
 

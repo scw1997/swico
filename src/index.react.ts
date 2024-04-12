@@ -27,14 +27,9 @@ export interface DefineSwicoConfigType {
     (env: 'prod', config: CustomConfigType['prod']);
 }
 
-
 export const defineConfig: DefineSwicoConfigType = (env, config) => config;
 
-
 //swico global.ts 配置
-export interface DefineGlobalConfigType {
-
-}
+export interface DefineGlobalConfigType {}
 export const defineGlobal: (config: DefineGlobalConfigType) => DefineGlobalConfigType = (config) =>
     config;
-

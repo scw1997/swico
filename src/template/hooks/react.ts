@@ -1,6 +1,6 @@
 import { useLocation as useOriLocation, useParams } from 'react-router-dom';
 import qs from 'qs';
-import { pathNameList } from '../react/history';
+import { getPathNameList } from '../react/history';
 
 export interface UseLocationType {
     (): {
@@ -51,7 +51,7 @@ export const useLocation: UseLocationType = () => {
     const params = useParams();
 
     const { search, hash, pathname } = location;
-
+    const pathNameList = getPathNameList();
     const name = pathNameList.find(
         (item) => (params && compareURLPatterns(pathname, item.path)) || item.path === pathname
     )?.name;

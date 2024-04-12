@@ -5,6 +5,7 @@ import Container from './Container';
 import { routerBase, routerType } from './config';
 import Layout from '../layout/Layout';
 import global from '../global';
+import qs from 'qs';
 
 const router = createRouter({
     history: (routerType === 'hash' ? createWebHashHistory : createWebHistory)(routerBase),
@@ -34,8 +35,25 @@ Swico.history = {
         }
     },
     go: router.go,
-    back: router.back
-    // eslint-disable-next-line no-undef
+    back: router.back,
+    forward: router.forward,
+    // @ts-ignore
+    get location() {
+        const lastIndexBase = routerBase[routerBase.length - 1];
+        //如果Base末尾为/，则忽略
+        const formatRouterBase =
+            lastIndexBase === '/' ? routerBase.slice(0, routerBase.length - 1) : routerBase;
+        const { path, params, query, name, hash, fullPath } = router.currentRoute.value;
+        return {
+            path,
+            pathname: formatRouterBase + path,
+            params,
+            query,
+            name,
+            hash,
+            search: query ? qs.stringify(query) : ''
+        };
+    }
 } as SwicoHistoryType;
 app.component('Layout', Layout);
 

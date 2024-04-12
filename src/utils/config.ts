@@ -154,8 +154,12 @@ export const getProjectConfig: (env?: GlobalData['env']) => Promise<GlobalData> 
     const templateType = customConfig['base'].template;
 
     //读取router配置文件
-    const routerConfig =
-        customConfig[env].router ?? customConfig['base'].router ?? initConfig.router;
+    const routerConfig = {
+        ...initConfig.router,
+        ...customConfig['base'].router,
+        ...customConfig[env].router
+    };
+    // const routerConfig =  customConfig[env].router ?? customConfig['base'].router ?? initConfig.router;
 
     //在开发端项目生成模板路由配置
     await initTemplateRouterConfig(routerConfig, templateType);
@@ -236,10 +240,9 @@ const formatTemplateFileText = (
 ) => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-
         //处理路由配置
 
-       const formatRouter = getFormatRouter(routes, templateType);
+        const formatRouter = getFormatRouter(routes, templateType);
 
         const textData = `"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -266,7 +269,7 @@ exports.default = ${JSON.stringify(formatRouter)};`;
                 function (match, p1) {
                     // p1 是匹配到的 xxx 部分
                     //对react模板的hash路由进行特殊处理，忽略base值
-                    return `exports.routerBase = '${(templateType==='react' && type==='hash')?'/':base}';`;
+                    return `exports.routerBase = '${templateType === 'react' && type === 'hash' ? '/' : base}';`;
                 }
             );
         }

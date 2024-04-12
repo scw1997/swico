@@ -2,6 +2,13 @@ import { useRoute } from 'vue-router';
 import qs from 'qs';
 import { UseLocationType } from './react';
 import { reactive, watch, watchEffect } from 'vue';
+import { routerBase } from '../vue/config';
+
+export const getFormatRouterBase = (routerBase) => {
+    const lastIndexBase = routerBase[routerBase.length - 1];
+    //如果Base末尾为/，则忽略
+    return lastIndexBase === '/' ? routerBase.slice(0, routerBase.length - 1) : routerBase;
+};
 
 export const useLocation: UseLocationType = () => {
     const route = useRoute();
@@ -20,7 +27,7 @@ export const useLocation: UseLocationType = () => {
         const search = query ? qs.stringify(query) : '';
         location.name = name as string;
         location.path = path;
-        location.pathname = fullPath;
+        location.pathname = getFormatRouterBase(routerBase) + path;
         location.search = search;
         location.query = query;
         location.hash = hash;

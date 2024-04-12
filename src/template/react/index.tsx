@@ -46,8 +46,7 @@ const App = () => {
     const { history, originalHistory } = getHistory(routerBase, routerType);
     //处理含basename的情况，自动重定向
     if (routerBase && routerBase !== '/') {
-
-         if (routerType === 'browser' && window.location.pathname === '/') {
+        if (routerType === 'browser' && window.location.pathname === '/') {
             window.location.replace(`${routerBase}`);
         }
     }
@@ -59,11 +58,9 @@ const App = () => {
         // @ts-ignore
         <HistoryRouter basename={routerBase} history={originalHistory}>
             <Routes>
-
-                <Route element={<Layout/>} path={''}>
+                <Route element={<Layout />} path={''}>
                     {renderChildrenRouteList(RouteList, '')}
                 </Route>
-
             </Routes>
         </HistoryRouter>
     );
