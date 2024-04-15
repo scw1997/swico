@@ -219,7 +219,7 @@ const getFormatRouter = (routes: ConfigRouterType['routes'], templateType) => {
 const initCliIndexFile = async (templateType: GlobalData['templateType']) => {
     const targetPath = path.resolve(__dirname, '../index.js');
     const targetTypesPath = path.resolve(__dirname, '../index.d.ts');
-    let replaceFileText = fs.readFileSync(
+    let replaceFileText = await fs.readFileSync(
         path.resolve(__dirname, `../index.${templateType}.js`),
         'utf8'
     );
@@ -234,7 +234,6 @@ const initCliIndexFile = async (templateType: GlobalData['templateType']) => {
             .resolve(projectPath, './src/.swico/hooks')
             // @ts-ignore
             .replaceAll('\\', '/');
-        console.log('formatHooksPath', formatHooksPath);
         replaceFileText = replaceFileText.replaceAll(
             'require("./template/react/hooks");',
             `require("${formatHooksPath}");`

@@ -1,6 +1,6 @@
 import routes from './routes';
 import { useLocation as useOriLocation, useParams } from 'react-router-dom';
-import { getPathNameList } from './history';
+import { pathNameList } from './history';
 import qs from 'qs';
 
 const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: string) => {
@@ -34,13 +34,10 @@ const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: 
 };
 
 export const useLocation: UseLocationType = () => {
-    console.log('useLocationRoutes', routes);
     const location = useOriLocation();
     const params = useParams();
 
     const { search, hash, pathname } = location;
-
-    const pathNameList = getPathNameList(routes);
 
     const name = pathNameList.find(
         (item) =>

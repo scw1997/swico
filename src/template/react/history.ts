@@ -36,9 +36,9 @@ export const formatAncPath = (ancPath: string) => {
 };
 
 //根据全体路由配置生成含完整path和name的集合数据
-export const getPathNameList: (
-    routes: RoutesItemType[]
-) => Array<{ path: string; name: string }> = (routes) => {
+const getPathNameList: (routes: RoutesItemType[]) => Array<{ path: string; name: string }> = (
+    routes
+) => {
     const list = [];
     const checkRouteItem = (item: RoutesItemType, ancPath: string) => {
         const { path, name, children } = item;
@@ -51,6 +51,8 @@ export const getPathNameList: (
     routes.forEach((item) => checkRouteItem(item, ''));
     return list;
 };
+
+export const pathNameList = getPathNameList(routes);
 
 const getLocation = (originalHistory): SwicoLocationType => {
     const { pathname, hash, search } = originalHistory.location;
@@ -101,7 +103,6 @@ export const getHistory = (
     // eslint-disable-next-line no-undef
     let history: SwicoHistoryType;
     const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)?.();
-    const pathNameList = getPathNameList(routes);
     const lastIndexBase = routerBase[routerBase.length - 1];
 
     //如果Base末尾为/，则忽略
