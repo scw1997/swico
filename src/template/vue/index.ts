@@ -1,5 +1,5 @@
 import { createApp, defineComponent } from 'vue';
-import routes from './routes';
+import { routes } from './routes';
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
 import Container from './Container';
 import { routerBase, routerType } from './config';

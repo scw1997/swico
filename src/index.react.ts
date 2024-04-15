@@ -18,7 +18,7 @@ export const Link: FC<{
 
 export { Outlet } from 'react-router-dom';
 
-export { useLocation } from './template/hooks/react';
+export { useLocation } from './template/react/hooks';
 
 //swico 配置
 export interface DefineSwicoConfigType {

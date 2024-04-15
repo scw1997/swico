@@ -1,8 +1,7 @@
 import { useRoute } from 'vue-router';
 import qs from 'qs';
-import { UseLocationType } from './react';
 import { reactive, watch, watchEffect } from 'vue';
-import { routerBase } from '../vue/config';
+import { routerBase } from './config';
 
 export const getFormatRouterBase = (routerBase) => {
     const lastIndexBase = routerBase[routerBase.length - 1];

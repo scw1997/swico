@@ -1,9 +1,9 @@
 import { createRoot } from 'react-dom/client';
 import React, { createElement, FC, lazy, Suspense } from 'react';
-import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
-import RouteList from './routes';
+import { Navigate, Route, Routes, Outlet, useParams } from 'react-router-dom';
+import routes from './routes';
 import Loading from './loading';
-import { HistoryRouter, getHistory } from './history';
+import { HistoryRouter, getHistory, getPathNameList } from './history';
 import { routerBase, routerType } from './config';
 import '../global';
 import Layout from '../layout';
@@ -59,7 +59,7 @@ const App = () => {
         <HistoryRouter basename={routerBase} history={originalHistory}>
             <Routes>
                 <Route element={<Layout />} path={''}>
-                    {renderChildrenRouteList(RouteList, '')}
+                    {renderChildrenRouteList(routes, '')}
                 </Route>
             </Routes>
         </HistoryRouter>

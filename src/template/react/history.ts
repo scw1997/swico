@@ -1,9 +1,8 @@
 import { ConfigRouterType } from '../../utils/config';
-import routes from './routes';
 import { RoutesItemType } from './index';
 import qs from 'qs';
 import { createBrowserHistory, createHashHistory } from 'history';
-
+import routes from './routes';
 export { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 
 //处理params参数，将路径模板中的参数部分替换为对应的值
@@ -37,7 +36,9 @@ export const formatAncPath = (ancPath: string) => {
 };
 
 //根据全体路由配置生成含完整path和name的集合数据
-export const getPathNameList: () => Array<{ path: string; name: string }> = () => {
+export const getPathNameList: (
+    routes: RoutesItemType[]
+) => Array<{ path: string; name: string }> = (routes) => {
     const list = [];
     const checkRouteItem = (item: RoutesItemType, ancPath: string) => {
         const { path, name, children } = item;
@@ -100,7 +101,7 @@ export const getHistory = (
     // eslint-disable-next-line no-undef
     let history: SwicoHistoryType;
     const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)?.();
-    const pathNameList = getPathNameList();
+    const pathNameList = getPathNameList(routes);
     const lastIndexBase = routerBase[routerBase.length - 1];
 
     //如果Base末尾为/，则忽略

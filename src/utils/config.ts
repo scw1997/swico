@@ -159,12 +159,11 @@ export const getProjectConfig: (env?: GlobalData['env']) => Promise<GlobalData> 
         ...customConfig['base'].router,
         ...customConfig[env].router
     };
-    // const routerConfig =  customConfig[env].router ?? customConfig['base'].router ?? initConfig.router;
 
-    //在开发端项目生成模板路由配置
-    await initTemplateRouterConfig(routerConfig, templateType);
+    //在开发端项目生成.secywo配置文件
+    await initTemplateConfig(routerConfig, templateType);
     //处理脚手架入口文件
-    await handleCliIndexFile(templateType);
+    await initCliIndexFile(templateType);
 
     //生成webpack入口文件
     const entryPath = path.resolve(projectPath, './src/.swico/index.js');
@@ -217,7 +216,7 @@ const getFormatRouter = (routes: ConfigRouterType['routes'], templateType) => {
 };
 
 //根据template处理脚手架入口文件,暴露必要的api
-const handleCliIndexFile = async (templateType: GlobalData['templateType']) => {
+const initCliIndexFile = async (templateType: GlobalData['templateType']) => {
     const targetPath = path.resolve(__dirname, '../index.js');
     const targetTypesPath = path.resolve(__dirname, '../index.d.ts');
     let replaceFileText = fs.readFileSync(
@@ -229,12 +228,25 @@ const handleCliIndexFile = async (templateType: GlobalData['templateType']) => {
         'utf8'
     );
 
+    if (templateType === 'react') {
+        //处理react hooks的引入路径，由从脚手架引入改为从.secywo引入
+        const formatHooksPath = path
+            .resolve(projectPath, './src/.swico/hooks')
+            // @ts-ignore
+            .replaceAll('\\', '/');
+        console.log('formatHooksPath', formatHooksPath);
+        replaceFileText = replaceFileText.replaceAll(
+            'require("./template/react/hooks");',
+            `require("${formatHooksPath}");`
+        );
+    }
+
     await writeFile(targetPath, replaceFileText);
     await writeFile(targetTypesPath, fileTypesText);
 };
 
-//格式化处理template文件内容
-const formatTemplateFileText = (
+//路由相关配置
+const formatRouterConfig = (
     { routes = [], type = 'browser', base = '/' }: ConfigRouterType,
     templateType: GlobalData['templateType']
 ) => {
@@ -246,21 +258,14 @@ const formatTemplateFileText = (
 
         const textData = `"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = ${JSON.stringify(formatRouter)};`;
+exports.default  = ${JSON.stringify(formatRouter)};`;
         let modifiedText = textData.replace(/"(\(\)=>import\('[^']+'\))"/g, '$1');
 
-        await writeFile(
-            path.resolve(__dirname, `../template/${templateType}/routes.js`),
-            modifiedText
-        );
+        await writeFile(path.resolve(projectPath, './src/.swico/routes.js'), modifiedText);
 
-        //读取template/config或者index文件的内容，根据routerType和routerBase的值动态替换里面的部分文本，从而更换路由模式
-        const indexFilePath = path.resolve(__dirname, `../template/${templateType}/index.js`);
-        const configFilePath = path.resolve(__dirname, `../template/${templateType}/config.js`);
-        const indexText = fs.readFileSync(indexFilePath, 'utf8');
-        const configText = fs.readFileSync(configFilePath, 'utf8');
-        let replaceIndexText = indexText;
-        let replaceConfigText = configText;
+        //读取template/config文件的内容，根据routerType和routerBase的值动态替换里面的部分文本，从而更换路由模式
+        const configFilePath = path.resolve(projectPath, './src/.swico/config.js');
+        let replaceConfigText = fs.readFileSync(configFilePath, 'utf8');
 
         if (base) {
             //处理routerBase
@@ -285,18 +290,15 @@ exports.default = ${JSON.stringify(formatRouter)};`;
         }
 
         //最后写入修改后的内容
-        await writeFile(indexFilePath, replaceIndexText);
         await writeFile(configFilePath, replaceConfigText);
         resolve(null);
     });
 };
 
 //在开发端项目生成模板路由配置
-const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templateType']) => {
+const initTemplateConfig = (routerConfig, templateType: GlobalData['templateType']) => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-        await formatTemplateFileText(routerConfig, templateType);
-
         const copyTargetPath = path.resolve(projectPath, './src/.swico');
         // 复制的目标目录是否已经存在，强制删除然后重新生成
         if (fs.existsSync(copyTargetPath)) {
@@ -313,6 +315,10 @@ const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templa
         );
 
         //下面是一些复制完之后需要处理的操作
+
+        //处理路由相关
+        await formatRouterConfig(routerConfig, templateType);
+
         let replaceIndexText = fs.readFileSync(
             path.resolve(projectPath, './src/.swico/index.js'),
             'utf8'
@@ -348,8 +354,8 @@ const initTemplateRouterConfig = (routerConfig, templateType: GlobalData['templa
             await writeFile(path.resolve(projectPath, './src/.swico/index.js'), replaceIndexText);
         }
 
-        //处理React Router 的loading组件
         if (templateType === 'react') {
+            //处理React Router 的loading组件
             //先判断开发端是否存在loading组件
             try {
                 await fs.access(

@@ -32,3 +32,15 @@ declare interface Window {
         history: SwicoHistoryType;
     };
 }
+
+declare type UseLocationType = {
+    (): {
+        name: string; //路由唯一标识
+        path: string; //路由path值
+        pathname: string; //带basename的路由path值
+        search: string;
+        query?: Record<string, any>;
+        hash: string;
+        params?: Record<string, any>;
+    };
+};

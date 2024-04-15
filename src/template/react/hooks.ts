@@ -1,20 +1,8 @@
+import routes from './routes';
 import { useLocation as useOriLocation, useParams } from 'react-router-dom';
+import { getPathNameList } from './history';
 import qs from 'qs';
-import { getPathNameList } from '../react/history';
 
-export interface UseLocationType {
-    (): {
-        name: string; //路由唯一标识
-        path: string; //路由path值
-        pathname: string; //带basename的路由path值
-        search: string;
-        query?: Record<string, any>;
-        hash: string;
-        params?: Record<string, any>;
-    };
-}
-
-//判断带params的path是否符合对应path的路由规则
 const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: string) => {
     const patternWithValuesParts = urlPatternWithValues.split('/');
     const patternWithParamsParts = urlPatternWithParams.split('/');
@@ -46,14 +34,18 @@ const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: 
 };
 
 export const useLocation: UseLocationType = () => {
+    console.log('useLocationRoutes', routes);
     const location = useOriLocation();
-
     const params = useParams();
 
     const { search, hash, pathname } = location;
-    const pathNameList = getPathNameList();
+
+    const pathNameList = getPathNameList(routes);
+
     const name = pathNameList.find(
-        (item) => (params && compareURLPatterns(pathname, item.path)) || item.path === pathname
+        (item) =>
+            (Object.keys(params).length > 0 && compareURLPatterns(pathname, item.path)) ||
+            item.path === pathname
     )?.name;
 
     const query = search ? qs.parse(search.startsWith('?') ? search.slice(1) : search) : {};
@@ -62,7 +54,7 @@ export const useLocation: UseLocationType = () => {
         name,
         path: pathname,
         pathname: window?.location?.pathname,
-        search,
+        search: '',
         query,
         hash,
         params

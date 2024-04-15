@@ -4,4 +4,4 @@ type RouteItem = RouteRecordRaw & {
     decorator?: string;
 };
 
-export default [] as RouteItem[];
+export const routes = [] as RouteItem[];
