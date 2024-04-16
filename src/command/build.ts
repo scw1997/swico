@@ -3,13 +3,17 @@ import getBuildConfig from '../config/webpack.prod';
 import { getProjectConfig, GlobalData } from '../utils/config';
 import chalk from 'chalk';
 import ora from 'ora';
-import { toast } from '../utils/tools';
+import { initIndexFile, toast } from '../utils/tools';
+import packageJson from '../../package.json';
 const spinner = ora();
 // 执行start本地启动
 export default async function () {
     process.env.SWICO_ENV = 'prod';
+    toast.info(`Swico v${packageJson.version}`);
+    spinner.start('Initializing Swico production config...\n');
     const projectConfig = await getProjectConfig('prod');
     const { entryPath, templatePath, projectPath, customConfig, templateType } = projectConfig;
+    initIndexFile(templateType);
     const buildConfig = await getBuildConfig({
         entryPath,
         templatePath,
@@ -17,8 +21,8 @@ export default async function () {
         customConfig,
         templateType
     });
+    spinner.succeed();
     const compiler = webpack(buildConfig as any);
-    console.log(`${chalk.hex('#5f72f5')('Swico starts building....')} \n`);
     compiler.run((err, stats) => {
         if (err) {
             toast.error(err.stack || err.toString());

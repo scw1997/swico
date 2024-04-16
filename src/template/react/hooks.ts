@@ -1,9 +1,8 @@
-import routes from './routes';
 import { useLocation as useOriLocation, useParams } from 'react-router-dom';
 import { pathNameList } from './history';
 import qs from 'qs';
 
-const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: string) => {
+export const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: string) => {
     const patternWithValuesParts = urlPatternWithValues.split('/');
     const patternWithParamsParts = urlPatternWithParams.split('/');
 

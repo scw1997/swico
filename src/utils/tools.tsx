@@ -45,8 +45,11 @@ export const getPort = () => {
 };
 
 export const toast = {
+    info: (message: string) => {
+        console.log(`\n> ${chalk.hex('#5f72f5')(message)}\n`);
+    },
     error: (message: string | string[]) => {
-        console.log(`\n${chalk.hex('#5f72f5')('There are some errors about Swico：')} \n`);
+        console.log(`\n> ${chalk.hex('#5f72f5')('There are some errors about Swico：')} \n`);
         if (Array.isArray(message)) {
             message.forEach((item) => {
                 console.log(` > ${chalk.red.bold(item)} \n`);
@@ -56,7 +59,7 @@ export const toast = {
         }
     },
     warning: (message: string | string[]) => {
-        console.log(`\n${chalk.hex('#5f72f5')('There are some warnings about Swico：')} \n`);
+        console.log(`\n> ${chalk.hex('#5f72f5')('There are some warnings about Swico：')} \n`);
         if (Array.isArray(message)) {
             message.forEach((item) => {
                 console.log(` > ${chalk.hex('#fb8918').bold(item)} \n`);
@@ -80,4 +83,14 @@ export const writeFile = (sourcePath, text) => {
             }
         });
     });
+};
+
+export const initIndexFile = async (tempalteType) => {
+    //还原脚手架index.js的内容
+    if (tempalteType === 'react') {
+        const fileText = fs.readFileSync(path.resolve(__dirname, '../index.react.js'), 'utf8');
+        const targetPath = path.resolve(__dirname, '../index.js');
+
+        await writeFile(targetPath, fileText);
+    }
 };

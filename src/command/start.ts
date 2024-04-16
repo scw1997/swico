@@ -1,12 +1,15 @@
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import getStartConfig from '../config/webpack.dev';
-import { getPort, toast } from '../utils/tools';
+import { getPort, initIndexFile, toast } from '../utils/tools';
 import { getProjectConfig } from '../utils/config';
 import chokidar from 'chokidar';
 import path from 'path';
 import spawn from 'cross-spawn';
 const { PORT: envPort } = process.env;
+import packageJson from '../../package.json';
+import ora from 'ora';
+const spinner = ora();
 
 //监听ts全局声明文件和cli config文件修改
 const handleWatch = (projectPath, devServer) => {
@@ -64,12 +67,18 @@ const restartServer = () => {
 // 执行start本地启动
 export default async function start() {
     process.env.SWICO_ENV = 'dev';
+    toast.info(`Swico v${packageJson.version}`);
+    spinner.start('Initializing Swico development config...\n');
     //获取可用端口（优先使用重启时的传递的port环境变量）
     availablePort = envPort ?? (await getPort());
     // @ts-ignore
     const projectConfig = await getProjectConfig('dev');
-    const { projectPath } = projectConfig;
+
+    const { projectPath, templateType } = projectConfig;
+
+    initIndexFile(templateType);
     const startConfig = await getStartConfig(projectConfig);
+    spinner.succeed();
     const compiler = webpack(startConfig as any);
     //启动服务
     const devServer = new WebpackDevServer(

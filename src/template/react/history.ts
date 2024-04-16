@@ -3,9 +3,16 @@ import { RoutesItemType } from './index';
 import qs from 'qs';
 import { createBrowserHistory, createHashHistory } from 'history';
 import routes from './routes';
+import { routerBase } from './config';
+import { compareURLPatterns } from './hooks';
 export { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 
-//处理params参数，将路径模板中的参数部分替换为对应的值
+const lastIndexBase = routerBase[routerBase.length - 1];
+//如果Base末尾为/，则忽略
+const formatRouterBase =
+    lastIndexBase === '/' ? routerBase.slice(0, routerBase.length - 1) : routerBase;
+
+//根据params对象和路径模板获取具体的路径值
 const interpolatePath = (pathTemplate: string, params: Record<string, any>) => {
     const pathParts = pathTemplate.split('/');
     const interpolatedParts = pathParts.map((part) => {
@@ -26,6 +33,34 @@ const interpolatePath = (pathTemplate: string, params: Record<string, any>) => {
 
     // 将替换后的部分重新组合成完整的路径
     return interpolatedParts.join('/');
+};
+
+//根据路径模板和路径值获取params对象
+const interpolatePathParams = (pathTemplate: string = '', path: string) => {
+    // 将模式中的参数占位符替换为正则表达式中的捕获组
+    const regexPattern = pathTemplate.replace(/:(\w+)/g, '([^/]+)');
+    // 编译正则表达式，并确保匹配路径的开头
+    const regex = new RegExp(`^${regexPattern}$`);
+    // 执行匹配
+    const match = path.match(regex);
+
+    // 如果匹配成功，则提取参数
+    if (match) {
+        // 排除模式匹配的第一个结果（完整的匹配）
+        const params = match.slice(1);
+        // 将参数名称与匹配到的值对应起来
+        const paramNames = pathTemplate.match(/:(\w+)/g)?.map((name) => name.slice(1)) || [];
+        // 创建结果对象
+        const result = {};
+        // 填充结果对象
+        paramNames.forEach((name, index) => {
+            result[name] = params[index];
+        });
+        return result;
+    }
+
+    // 如果没有匹配到，返回空对象
+    return {};
 };
 
 //保留ancPath的首部/，去掉尾部/
@@ -56,14 +91,21 @@ export const pathNameList = getPathNameList(routes);
 
 const getLocation = (originalHistory): SwicoLocationType => {
     const { pathname, hash, search } = originalHistory.location;
+    const routerBaseLength = formatRouterBase.length;
+    const path = pathname.slice(routerBaseLength);
+    const matchPathNameItem = pathNameList.find(
+        (item) => item.path === path || compareURLPatterns(path, item.path)
+    );
+    console.log('matchPathNameItem', matchPathNameItem);
+    const params = interpolatePathParams(matchPathNameItem?.path, path);
     return {
         hash,
         search,
         pathname,
         query: search ? qs.parse(search.startsWith('?') ? search.slice(1) : search) : {},
-        name: '',
-        params: {},
-        path: ''
+        name: matchPathNameItem?.name,
+        params,
+        path
     };
 };
 
@@ -103,11 +145,7 @@ export const getHistory = (
     // eslint-disable-next-line no-undef
     let history: SwicoHistoryType;
     const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)?.();
-    const lastIndexBase = routerBase[routerBase.length - 1];
 
-    //如果Base末尾为/，则忽略
-    const formatRouterBase =
-        lastIndexBase === '/' ? routerBase.slice(0, routerBase.length - 1) : routerBase;
     history = {
         go: originalHistory.go,
         forward: originalHistory.forward,
