@@ -1,10 +1,10 @@
 import { createApp, defineComponent } from 'vue';
 import routes from './routes';
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
-import Container from './Container';
+import Container from '../Container';
 import { routerBase, routerType } from './config';
-import Layout from '../layout/Layout';
-import global from '../global';
+import Layout from '../../layout/Layout';
+import global from '../../global';
 import qs from 'qs';
 
 const router = createRouter({

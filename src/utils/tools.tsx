@@ -2,6 +2,8 @@ import portFinder from 'portfinder';
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
+import * as process from 'process';
+import { GlobalData } from './config';
 
 //复制文件夹
 export const copyDirFiles = async (src, dest, filter?: (fileName) => boolean) => {
@@ -85,11 +87,21 @@ export const writeFile = (sourcePath, text) => {
     });
 };
 
-export const initIndexFile = async (tempalteType) => {
-    //还原脚手架index.js的内容
-    if (tempalteType === 'react') {
-        const fileText = fs.readFileSync(path.resolve(__dirname, '../index.react.js'), 'utf8');
-        const targetPath = path.resolve(__dirname, '../index.js');
+export const initIndexFile = async () => {
+    //还原react hooks的引入路径，由从.secywo引入改为从脚手架引入
+    let fileText = fs.readFileSync(path.resolve(__dirname, '../index.js'), 'utf8');
+    const targetPath = path.resolve(__dirname, '../index.js');
+
+    const formatHooksPath = path
+        .resolve(process.cwd(), './src/.swico/react-hooks')
+        // @ts-ignore
+        .replaceAll('\\', '/');
+
+    if (fileText.includes(`require("${formatHooksPath}");`)) {
+        fileText = fileText.replaceAll(
+            `require("${formatHooksPath}");`,
+            'require("./template/react/react-hooks");'
+        );
 
         await writeFile(targetPath, fileText);
     }

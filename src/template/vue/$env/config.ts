@@ -1,4 +1,4 @@
-import { ConfigRouterType } from '../../utils/config';
+import { ConfigRouterType } from '../../../utils/config';
 
 export const routerType: ConfigRouterType['type'] = 'browser';
 

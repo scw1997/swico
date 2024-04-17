@@ -1,8 +1,8 @@
 import { useLocation as useOriLocation, useParams } from 'react-router-dom';
-import { pathNameList } from './history';
+import { pathNameList } from './$env/history';
 import qs from 'qs';
 
-export const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: string) => {
+const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: string) => {
     const patternWithValuesParts = urlPatternWithValues.split('/');
     const patternWithParamsParts = urlPatternWithParams.split('/');
 

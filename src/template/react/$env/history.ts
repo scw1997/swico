@@ -1,16 +1,46 @@
-import { ConfigRouterType } from '../../utils/config';
+import { ConfigRouterType } from '../../../utils/config';
 import { RoutesItemType } from './index';
 import qs from 'qs';
 import { createBrowserHistory, createHashHistory } from 'history';
 import routes from './routes';
 import { routerBase } from './config';
-import { compareURLPatterns } from './hooks';
+
 export { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 
 const lastIndexBase = routerBase[routerBase.length - 1];
 //如果Base末尾为/，则忽略
 const formatRouterBase =
     lastIndexBase === '/' ? routerBase.slice(0, routerBase.length - 1) : routerBase;
+
+const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: string) => {
+    const patternWithValuesParts = urlPatternWithValues.split('/');
+    const patternWithParamsParts = urlPatternWithParams.split('/');
+
+    // 确保两个路径具有相同数量的部分
+    if (patternWithValuesParts.length !== patternWithParamsParts.length) {
+        return false;
+    }
+
+    // 遍历每个部分进行比较
+    for (let i = 0; i < patternWithValuesParts.length; i++) {
+        const valuePart = patternWithValuesParts[i];
+        const paramPart = patternWithParamsParts[i];
+
+        // 检查是否是参数占位符，并跳过空部分（比如URL开头或结尾的/）
+        if (paramPart.startsWith(':') && paramPart !== '') {
+            // 是参数占位符，则继续下一个部分的比较
+            continue;
+        }
+
+        // 非参数占位符的部分必须严格相等
+        if (valuePart !== paramPart) {
+            return false;
+        }
+    }
+
+    // 所有部分都匹配
+    return true;
+};
 
 //根据params对象和路径模板获取具体的路径值
 const interpolatePath = (pathTemplate: string, params: Record<string, any>) => {
@@ -96,7 +126,7 @@ const getLocation = (originalHistory): SwicoLocationType => {
     const matchPathNameItem = pathNameList.find(
         (item) => item.path === path || compareURLPatterns(path, item.path)
     );
-    console.log('matchPathNameItem', matchPathNameItem);
+    // console.log('matchPathNameItem', matchPathNameItem);
     const params = interpolatePathParams(matchPathNameItem?.path, path);
     return {
         hash,

@@ -2,11 +2,11 @@ import { createRoot } from 'react-dom/client';
 import React, { createElement, FC, lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, Outlet, useParams } from 'react-router-dom';
 import routes from './routes';
-import Loading from './loading';
+import Loading from '../loading';
 import { HistoryRouter, getHistory } from './history';
 import { routerBase, routerType } from './config';
-import '../global';
-import Layout from '../layout';
+import '../../global';
+import Layout from '../../layout';
 
 export type RoutesItemType = {
     component?: () => Promise<{ default: FC }>; //页面路径

@@ -10,10 +10,10 @@ const spinner = ora();
 export default async function () {
     process.env.SWICO_ENV = 'prod';
     toast.info(`Swico v${packageJson.version}`);
-    spinner.start('Initializing Swico production config...\n');
+    toast.info('Initializing Swico production config...');
+    await initIndexFile();
     const projectConfig = await getProjectConfig('prod');
     const { entryPath, templatePath, projectPath, customConfig, templateType } = projectConfig;
-    initIndexFile(templateType);
     const buildConfig = await getBuildConfig({
         entryPath,
         templatePath,
@@ -21,7 +21,6 @@ export default async function () {
         customConfig,
         templateType
     });
-    spinner.succeed();
     const compiler = webpack(buildConfig as any);
     compiler.run((err, stats) => {
         if (err) {

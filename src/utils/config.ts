@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
-import { copyDirFiles, toast, writeFile } from './tools';
+import { copyDirFiles, initIndexFile, toast, writeFile } from './tools';
 
 export type ConfigRoutesItemType = {
     component?: string; //页面路径
@@ -165,8 +165,10 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
     //处理脚手架入口文件
     await initCliIndexFile(templateType);
 
+    const envPath = env === 'dev' ? '.dev/' : '.prod/';
+
     //生成webpack入口文件
-    const entryPath = path.resolve(projectPath, './src/.swico/index.js');
+    const entryPath = path.resolve(projectPath, `./src/.swico/${envPath}index.js`);
 
     //webpack html template
     const templatePath = path.join(projectPath, '/src/index.ejs');
@@ -227,15 +229,14 @@ const initCliIndexFile = async (templateType: GlobalData['templateType']) => {
         path.resolve(__dirname, `../index.${templateType}.d.ts`),
         'utf8'
     );
-
     if (templateType === 'react') {
         //处理react hooks的引入路径，由从脚手架引入改为从.secywo引入
         const formatHooksPath = path
-            .resolve(projectPath, './src/.swico/hooks')
+            .resolve(projectPath, './src/.swico/react-hooks')
             // @ts-ignore
             .replaceAll('\\', '/');
         replaceFileText = replaceFileText.replaceAll(
-            'require("./template/react/hooks");',
+            'require("./template/react/react-hooks");',
             `require("${formatHooksPath}");`
         );
     }
@@ -250,7 +251,7 @@ const formatRouterConfig = (
     templateType: GlobalData['templateType'],
     env: GlobalData['env']
 ) => {
-    const envPathSuffix = env === 'dev' ? '' : 'prod.';
+    const envPath = env === 'dev' ? '/.dev/' : '/.prod/';
 
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
@@ -263,13 +264,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default  = ${JSON.stringify(formatRouter)};`;
         let modifiedText = textData.replace(/"(\(\)=>import\('[^']+'\))"/g, '$1');
 
-        await writeFile(
-            path.resolve(projectPath, `./src/.swico/routes.${envPathSuffix}js`),
-            modifiedText
-        );
+        await writeFile(path.resolve(projectPath, `./src/.swico${envPath}routes.js`), modifiedText);
 
         //读取template/config文件的内容，根据routerType和routerBase的值动态替换里面的部分文本，从而更换路由模式
-        const configFilePath = path.resolve(projectPath, `./src/.swico/config.${envPathSuffix}js`);
+        const configFilePath = path.resolve(projectPath, `./src/.swico${envPath}config.js`);
         let replaceConfigText = fs.readFileSync(configFilePath, 'utf8');
 
         if (base) {
@@ -300,52 +298,40 @@ exports.default  = ${JSON.stringify(formatRouter)};`;
     });
 };
 
-//根据环境和模板类型，获取要复制的模板文件列表
-const getCopyFileNameList = (templateType: GlobalData['templateType'], env: GlobalData['env']) => {
-    let list = ['hooks.js', 'index.js', 'history.js', 'loading.js'];
-    switch (true) {
-        case templateType === 'vue' && env === 'dev':
-            list.push('config.js', 'Container.vue', 'routes.js');
-            break;
-        case templateType === 'vue' && env === 'prod':
-            list.push('config.prod.js', 'Container.vue', 'routes.prod.js');
-            break;
-        case templateType === 'react' && env === 'dev':
-            list.push('config.js', 'history.js', 'routes.js');
-            break;
-        case templateType === 'react' && env === 'prod':
-            list.push('config.prod.js', 'history.js', 'routes.prod.js');
-            break;
-        default:
-            break;
-    }
-
-    return list;
-};
-
 //在开发端项目生成模板路由配置
 const initTemplateConfig = (
     routerConfig,
     templateType: GlobalData['templateType'],
     env: GlobalData['env']
 ) => {
+    const envPath = env === 'dev' ? '/.dev/' : '/.prod/';
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-        console.log('0');
-        const copyTargetPath = path.resolve(projectPath, './src/.swico');
+        const copyTargetPath = path.resolve(projectPath, `./src/.swico${envPath}`);
         // // 复制的目标目录是否已经存在，强制删除然后重新生成
         // if (fs.existsSync(copyTargetPath)) {
         //     await fs.remove(copyTargetPath);
         // }
 
-        const copyFileNameList = getCopyFileNameList(templateType, env);
+        //将template路径中跟环境相关的文件复制到开发端相应env路径
+        await copyDirFiles(
+            path.resolve(__dirname, `../template/${templateType}/$env`),
+            copyTargetPath,
+            (fileName) =>
+                !fileName.endsWith('.d.ts') &&
+                (templateType === 'vue'
+                    ? !['Container.js', 'vue-hooks.js'].includes(fileName)
+                    : !['react-hooks.js'].includes(fileName))
+        );
 
-        //将template配置复制到开发端
+        //将template路径中跟环境无关的配置文件复制到开发端固定路径
         await copyDirFiles(
             path.resolve(__dirname, `../template/${templateType}`),
-            copyTargetPath,
-            (fileName) => copyFileNameList.includes(fileName)
+            path.resolve(projectPath, './src/.swico'),
+            (fileName) =>
+                ['react-hooks.js', 'vue-hooks.js', 'loading.js', 'Container.vue'].includes(fileName)
         );
+
         //下面是一些复制完之后需要修改的操作
 
         //处理路由相关
@@ -353,77 +339,35 @@ const initTemplateConfig = (
 
         //处理index.js的引入相关
         let replaceIndexText = fs.readFileSync(
-            path.resolve(projectPath, './src/.swico/index.js'),
+            path.resolve(projectPath, `./src/.swico${envPath}index.js`),
             'utf8'
         );
 
-        //处理config.js，routes.js文件在不同环境时index.js中的引入
-        if (env === 'prod') {
-            replaceIndexText = replaceIndexText.replaceAll(
-                'require("./config")',
-                'require("./config.prod")'
-            );
-            replaceIndexText = replaceIndexText.replaceAll(
-                'require("./routes")',
-                'require("./routes.prod")'
-            );
-        } else {
-            replaceIndexText = replaceIndexText.replaceAll(
-                'require("./config.prod")',
-                'require("./config")'
-            );
-            replaceIndexText = replaceIndexText.replaceAll(
-                'require("./routes.prod")',
-                'require("./routes")'
-            );
-        }
-
-        //处理global.ts文件
-        //先判断开发端是否存在global.ts
-        try {
-            await fs.access(path.resolve(projectPath, './src/global.ts'), fs.constants.F_OK);
-            //存在则先重置状态，再添加引入
-            replaceIndexText = replaceIndexText.replaceAll('require("../global");', '');
-            replaceIndexText = 'require("../global");\n' + replaceIndexText;
-        } catch (e) {
-            //不存在则取消引入
-            replaceIndexText = replaceIndexText.replaceAll('require("../global");', '');
-        }
+        //处理hooks.js的引入相关
+        const hooksFilePath = path.resolve(projectPath, `./src/.swico/${templateType}-hooks.js`);
+        let replaceHooksText = fs.readFileSync(hooksFilePath, 'utf8');
+        replaceHooksText = replaceHooksText.replaceAll('$env', `.${env}`);
+        await writeFile(hooksFilePath, replaceHooksText);
 
         //处理global.less文件
         //先判断开发端是否存在global.less
         try {
             await fs.access(path.resolve(projectPath, './src/global.less'), fs.constants.F_OK);
             //存在则先重置状态，再添加引入
-            replaceIndexText = replaceIndexText.replaceAll('require("../global.less");', '');
-            replaceIndexText = 'require("../global.less");\n' + replaceIndexText;
+            replaceIndexText = replaceIndexText.replaceAll('require("../../global.less");', '');
+            replaceIndexText = 'require("../../global.less");\n' + replaceIndexText;
         } catch (e) {
             //不存在则取消引入
-            replaceIndexText = replaceIndexText.replaceAll('require("../global.less");', '');
+            replaceIndexText = replaceIndexText.replaceAll('require("../../global.less");', '');
         }
 
         //处理Container组件，将ts换成vue（因为vue文件默认包内不支持引入）
         if (templateType === 'vue') {
-            replaceIndexText = replaceIndexText.replace('"./Container"', '"./Container.vue"');
-            await writeFile(path.resolve(projectPath, './src/.swico/index.js'), replaceIndexText);
-            //处理config.js文件在不同环境时hooks.js中的引入
-            let replaceHooksText = fs.readFileSync(
-                path.resolve(projectPath, './src/.swico/hooks.js'),
-                'utf8'
+            replaceIndexText = replaceIndexText.replace('"../Container"', '"../Container.vue"');
+            await writeFile(
+                path.resolve(projectPath, `./src/.swico${envPath}index.js`),
+                replaceIndexText
             );
-            if (env === 'prod') {
-                replaceHooksText = replaceHooksText.replaceAll(
-                    'require("./config")',
-                    'require("./config.prod")'
-                );
-            } else {
-                replaceHooksText = replaceIndexText.replaceAll(
-                    'require("./config.prod")',
-                    'require("./config")'
-                );
-            }
-            //更新hooks.js
-            await writeFile(path.resolve(projectPath, './src/.swico/hooks.js'), replaceHooksText);
         } else if (templateType === 'react') {
             //处理React Router 的loading组件
             //先判断开发端是否存在loading组件
@@ -433,45 +377,15 @@ const initTemplateConfig = (
                     fs.constants.F_OK
                 );
                 //存在则将template中引入的loading组件路径替换
-                replaceIndexText = replaceIndexText.replace('"./loading"', '"../loading"');
+                replaceIndexText = replaceIndexText.replace('"../loading"', '"../../loading"');
             } catch (e) {
                 //不存在也要替换成原值
-                replaceIndexText = replaceIndexText.replace('"../loading"', '"./loading"');
+                replaceIndexText = replaceIndexText.replace('"../../loading"', '"../loading"');
             } finally {
                 //更新index.js
                 await writeFile(
-                    path.resolve(projectPath, './src/.swico/index.js'),
+                    path.resolve(projectPath, `./src/.swico${envPath}index.js`),
                     replaceIndexText
-                );
-
-                //处理config.js，routes.js文件在不同环境时history.js中的引入
-                let replaceHistoryText = fs.readFileSync(
-                    path.resolve(projectPath, './src/.swico/history.js'),
-                    'utf8'
-                );
-                if (env === 'prod') {
-                    replaceHistoryText = replaceHistoryText.replaceAll(
-                        'require("./config")',
-                        'require("./config.prod")'
-                    );
-                    replaceHistoryText = replaceHistoryText.replaceAll(
-                        'require("./routes")',
-                        'require("./routes.prod")'
-                    );
-                } else {
-                    replaceHistoryText = replaceHistoryText.replaceAll(
-                        'require("./config.prod")',
-                        'require("./config")'
-                    );
-                    replaceHistoryText = replaceHistoryText.replaceAll(
-                        'require("./routes.prod")',
-                        'require("./routes")'
-                    );
-                }
-                //更新history.js
-                await writeFile(
-                    path.resolve(projectPath, './src/.swico/history.js'),
-                    replaceHistoryText
                 );
             }
         }

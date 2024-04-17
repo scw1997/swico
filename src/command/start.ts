@@ -68,17 +68,16 @@ const restartServer = () => {
 export default async function start() {
     process.env.SWICO_ENV = 'dev';
     toast.info(`Swico v${packageJson.version}`);
-    spinner.start('Initializing Swico development config...\n');
+    toast.info('Initializing Swico development config...\n');
+    await initIndexFile();
     //获取可用端口（优先使用重启时的传递的port环境变量）
     availablePort = envPort ?? (await getPort());
     // @ts-ignore
     const projectConfig = await getProjectConfig('dev');
 
-    const { projectPath, templateType } = projectConfig;
+    const { projectPath } = projectConfig;
 
-    initIndexFile(templateType);
     const startConfig = await getStartConfig(projectConfig);
-    spinner.succeed();
     const compiler = webpack(startConfig as any);
     //启动服务
     const devServer = new WebpackDevServer(
