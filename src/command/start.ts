@@ -6,11 +6,8 @@ import { getProjectConfig } from '../utils/config';
 import chokidar from 'chokidar';
 import path from 'path';
 import spawn from 'cross-spawn';
-const { PORT: envPort } = process.env;
+const { PORT: envPort, RESTART } = process.env;
 import packageJson from '../../package.json';
-import ora from 'ora';
-const spinner = ora();
-
 //监听ts全局声明文件和cli config文件修改
 const handleWatch = (projectPath, devServer) => {
     //监听配置文件修改，重启服务
@@ -55,9 +52,13 @@ const handleWatch = (projectPath, devServer) => {
 
 let availablePort; //若是更新重启的情况，则用缓存的端口，不用新端口
 const restartServer = () => {
-    const result = spawn.sync('cross-env', [`PORT=${availablePort}`, 'swico', 'start'], {
-        stdio: 'inherit'
-    });
+    const result = spawn.sync(
+        'cross-env',
+        [`PORT=${availablePort}`, 'RESTART=true', 'swico', 'start'],
+        {
+            stdio: 'inherit'
+        }
+    );
     if (result.error) {
         toast.error(result.error.message());
         process.exit(1);
@@ -67,8 +68,11 @@ const restartServer = () => {
 // 执行start本地启动
 export default async function start() {
     process.env.SWICO_ENV = 'dev';
-    toast.info(`Swico v${packageJson.version}`);
-    toast.info('Initializing Swico development config...\n');
+    if (RESTART !== 'true') {
+        toast.info(`Swico v${packageJson.version}`);
+        toast.info('Initializing Swico development config...');
+    }
+
     await initIndexFile();
     //获取可用端口（优先使用重启时的传递的port环境变量）
     availablePort = envPort ?? (await getPort());

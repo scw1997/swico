@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
-import { copyDirFiles, initIndexFile, toast, writeFile } from './tools';
+import { copyDirFiles, toast } from './tools';
 
 export type ConfigRoutesItemType = {
     component?: string; //页面路径
@@ -80,7 +80,7 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
 
     for (const key of Object.keys(configPath)) {
         const curConfigFilePath = configPath[key];
-        const exists = fs.existsSync(curConfigFilePath);
+        const exists = await fs.exists(curConfigFilePath);
         //存在则读取
         if (exists) {
             const configObj = (await import(curConfigFilePath)).default;
@@ -221,11 +221,11 @@ const getFormatRouter = (routes: ConfigRouterType['routes'], templateType) => {
 const initCliIndexFile = async (templateType: GlobalData['templateType']) => {
     const targetPath = path.resolve(__dirname, '../index.js');
     const targetTypesPath = path.resolve(__dirname, '../index.d.ts');
-    let replaceFileText = fs.readFileSync(
+    let replaceFileText = await fs.readFile(
         path.resolve(__dirname, `../index.${templateType}.js`),
         'utf8'
     );
-    const fileTypesText = fs.readFileSync(
+    const fileTypesText = await fs.readFile(
         path.resolve(__dirname, `../index.${templateType}.d.ts`),
         'utf8'
     );
@@ -241,8 +241,8 @@ const initCliIndexFile = async (templateType: GlobalData['templateType']) => {
         );
     }
 
-    await writeFile(targetPath, replaceFileText);
-    await writeFile(targetTypesPath, fileTypesText);
+    await fs.writeFile(targetPath, replaceFileText);
+    await fs.writeFile(targetTypesPath, fileTypesText);
 };
 
 //路由相关配置
@@ -264,11 +264,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default  = ${JSON.stringify(formatRouter)};`;
         let modifiedText = textData.replace(/"(\(\)=>import\('[^']+'\))"/g, '$1');
 
-        await writeFile(path.resolve(projectPath, `./src/.swico${envPath}routes.js`), modifiedText);
+        await fs.writeFile(
+            path.resolve(projectPath, `./src/.swico${envPath}routes.js`),
+            modifiedText
+        );
 
         //读取template/config文件的内容，根据routerType和routerBase的值动态替换里面的部分文本，从而更换路由模式
         const configFilePath = path.resolve(projectPath, `./src/.swico${envPath}config.js`);
-        let replaceConfigText = fs.readFileSync(configFilePath, 'utf8');
+        let replaceConfigText = await fs.readFile(configFilePath, 'utf8');
 
         if (base) {
             //处理routerBase
@@ -293,7 +296,7 @@ exports.default  = ${JSON.stringify(formatRouter)};`;
         }
 
         //最后写入修改后的内容
-        await writeFile(configFilePath, replaceConfigText);
+        await fs.writeFile(configFilePath, replaceConfigText);
         resolve(null);
     });
 };
@@ -308,10 +311,6 @@ const initTemplateConfig = (
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
         const copyTargetPath = path.resolve(projectPath, `./src/.swico${envPath}`);
-        // // 复制的目标目录是否已经存在，强制删除然后重新生成
-        // if (fs.existsSync(copyTargetPath)) {
-        //     await fs.remove(copyTargetPath);
-        // }
 
         //将template路径中跟环境相关的文件复制到开发端相应env路径
         await copyDirFiles(
@@ -338,16 +337,16 @@ const initTemplateConfig = (
         await formatRouterConfig(routerConfig, templateType, env);
 
         //处理index.js的引入相关
-        let replaceIndexText = fs.readFileSync(
+        let replaceIndexText = await fs.readFile(
             path.resolve(projectPath, `./src/.swico${envPath}index.js`),
             'utf8'
         );
 
         //处理hooks.js的引入相关
         const hooksFilePath = path.resolve(projectPath, `./src/.swico/${templateType}-hooks.js`);
-        let replaceHooksText = fs.readFileSync(hooksFilePath, 'utf8');
+        let replaceHooksText = await fs.readFile(hooksFilePath, 'utf8');
         replaceHooksText = replaceHooksText.replaceAll('$env', `.${env}`);
-        await writeFile(hooksFilePath, replaceHooksText);
+        await fs.writeFile(hooksFilePath, replaceHooksText);
 
         //处理global.less文件
         //先判断开发端是否存在global.less
@@ -364,7 +363,7 @@ const initTemplateConfig = (
         //处理Container组件，将ts换成vue（因为vue文件默认包内不支持引入）
         if (templateType === 'vue') {
             replaceIndexText = replaceIndexText.replace('"../Container"', '"../Container.vue"');
-            await writeFile(
+            await fs.writeFile(
                 path.resolve(projectPath, `./src/.swico${envPath}index.js`),
                 replaceIndexText
             );
@@ -383,7 +382,7 @@ const initTemplateConfig = (
                 replaceIndexText = replaceIndexText.replace('"../../loading"', '"../loading"');
             } finally {
                 //更新index.js
-                await writeFile(
+                await fs.writeFile(
                     path.resolve(projectPath, `./src/.swico${envPath}index.js`),
                     replaceIndexText
                 );

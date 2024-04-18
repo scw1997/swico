@@ -1,7 +1,7 @@
 import BundleAnalyzer from 'webpack-bundle-analyzer';
 import CopyPlugin from 'copy-webpack-plugin';
 import path from 'path';
-import fs from 'fs';
+import fs from 'fs-extra';
 import { initConfig, GlobalData } from '../utils/config';
 import { merge } from 'webpack-merge';
 import { EsbuildPlugin } from 'esbuild-loader';
@@ -24,7 +24,7 @@ export default async function (options: GlobalData) {
 
     const consoleAvailable = customConfig.prod?.console ?? initConfig.console;
     //处理public文件夹（静态资源）
-    const isPublicDirExist = fs.existsSync(path.join(projectPath, '/public'));
+    const isPublicDirExist = await fs.exists(path.join(projectPath, '/public'));
     //处理其他自定义复制输出目录的文件
     const copyConfig = customConfig.prod?.copy ?? initConfig.copy;
 
