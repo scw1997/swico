@@ -1,5 +1,6 @@
 import { useLocation as useOriLocation, useParams } from 'react-router-dom';
 import { pathNameList } from './$env/history';
+import type { UseLocationType } from '../../global-type';
 import qs from 'qs';
 
 const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: string) => {

@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
-import { copyDirFiles, toast } from './tools';
+import { copyDirFiles, getFormatRouter, toast } from './tools';
 
 export type ConfigRoutesItemType = {
     component?: string; //页面路径
@@ -182,41 +182,6 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
     };
 };
 
-const getFormatRouter = (routes: ConfigRouterType['routes'], templateType) => {
-    const _main = (item: ConfigRoutesItemType) => {
-        const { path, component, name, children, redirect, decorator } = item;
-
-        return decorator
-            ? {
-                  ...item,
-                  component: `()=>import('${projectPath}/src/pages/${decorator}${templateType === 'vue' ? '.vue' : ''}')`,
-                  children: [
-                      {
-                          path: '',
-                          component: component
-                              ? `()=>import('${projectPath}/src/pages/${component}${templateType === 'vue' ? '.vue' : ''}')`
-                              : undefined,
-                          name,
-                          redirect,
-                          children: children ? children?.map((item) => _main(item)) : undefined
-                      }
-                  ]
-              }
-            : {
-                  path,
-                  component: component
-                      ? `()=>import('${projectPath}/src/pages/${component}${templateType === 'vue' ? '.vue' : ''}')`
-                      : undefined,
-                  name,
-                  redirect,
-                  children: children ? children?.map((item) => _main(item)) : undefined
-              };
-    };
-    return routes.map((item) => {
-        return _main(item);
-    });
-};
-
 //根据template处理脚手架入口文件,暴露必要的api
 const initCliIndexFile = async (
     templateType: GlobalData['templateType'],
@@ -269,7 +234,7 @@ const formatRouterConfig = (
     return new Promise(async (resolve, reject) => {
         //处理路由配置
 
-        const formatRouter = getFormatRouter(routes, templateType);
+        const formatRouter = getFormatRouter(projectPath, routes, templateType);
 
         const textData = `"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });

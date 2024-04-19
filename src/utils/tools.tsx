@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import * as process from 'process';
-import { GlobalData } from './config';
+import { ConfigRouterType, ConfigRoutesItemType, GlobalData } from './config';
 
 //复制文件夹
 export const copyDirFiles = async (src, dest, filter?: (fileName) => boolean) => {
@@ -33,6 +33,46 @@ export const copyDirFiles = async (src, dest, filter?: (fileName) => boolean) =>
         await fs.mkdir(dest, { recursive: true });
     }
     await _copy(src, dest);
+};
+
+//将swico路由配置格式化
+export const getFormatRouter = (
+    projectPath: string,
+    routes: ConfigRouterType['routes'],
+    templateType
+) => {
+    const _main = (item: ConfigRoutesItemType) => {
+        const { path, component, name, children, redirect, decorator } = item;
+
+        return decorator
+            ? {
+                  ...item,
+                  component: `()=>import('${projectPath}/src/pages/${decorator}${templateType === 'vue' ? '.vue' : ''}')`,
+                  children: [
+                      {
+                          path: '',
+                          component: component
+                              ? `()=>import('${projectPath}/src/pages/${component}${templateType === 'vue' ? '.vue' : ''}')`
+                              : undefined,
+                          name,
+                          redirect,
+                          children: children ? children?.map((item) => _main(item)) : undefined
+                      }
+                  ]
+              }
+            : {
+                  path,
+                  component: component
+                      ? `()=>import('${projectPath}/src/pages/${component}${templateType === 'vue' ? '.vue' : ''}')`
+                      : undefined,
+                  name,
+                  redirect,
+                  children: children ? children?.map((item) => _main(item)) : undefined
+              };
+    };
+    return routes.map((item) => {
+        return _main(item);
+    });
 };
 
 //获取随机可用的接口（解决devServer接口占用报错的问题）

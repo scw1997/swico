@@ -50,10 +50,7 @@ const App = () => {
             window.location.replace(`${routerBase}`);
         }
     }
-    //挂载到window的Swico上
-    window.Swico = {
-        history
-    };
+
     return (
         // @ts-ignore
         <HistoryRouter basename={routerBase} history={originalHistory}>
