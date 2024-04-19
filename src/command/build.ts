@@ -11,7 +11,7 @@ export default async function () {
     process.env.SWICO_ENV = 'prod';
     toast.info(`Swico v${packageJson.version}`);
     toast.info('Initializing Swico production config...');
-    await initIndexFile();
+    await initIndexFile('prod');
     const projectConfig = await getProjectConfig('prod');
     const { entryPath, templatePath, projectPath, customConfig, templateType } = projectConfig;
     const buildConfig = await getBuildConfig({

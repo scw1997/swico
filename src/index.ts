@@ -4,6 +4,8 @@ export type CustomConfigType = GlobalData['customConfig'];
 
 export type { GlobalSwicoConfigType };
 
+export { history } from './mock-history';
+
 let Outlet: any, Link: any, useLocation: any;
 export { Outlet, Link, useLocation };
 

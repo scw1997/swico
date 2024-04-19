@@ -3,7 +3,7 @@ import React, { createElement, FC, lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, Outlet, useParams } from 'react-router-dom';
 import routes from './routes';
 import Loading from '../loading';
-import { HistoryRouter, getHistory } from './history';
+import { HistoryRouter, getOriHistory, history } from './history';
 import { routerBase, routerType } from './config';
 import '../../global';
 import Layout from '../../layout';
@@ -43,7 +43,7 @@ const renderChildrenRouteList = (childrenRoutes: RoutesItemType[], ancPathKey: s
 };
 
 const App = () => {
-    const { history, originalHistory } = getHistory(routerBase, routerType);
+    const originalHistory = getOriHistory(routerType);
     //处理含basename的情况，自动重定向
     if (routerBase && routerBase !== '/') {
         if (routerType === 'browser' && window.location.pathname === '/') {

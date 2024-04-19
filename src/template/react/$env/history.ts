@@ -3,7 +3,7 @@ import { RoutesItemType } from './index';
 import qs from 'qs';
 import { createBrowserHistory, createHashHistory } from 'history';
 import routes from './routes';
-import { routerBase } from './config';
+import { routerBase, routerType } from './config';
 
 export { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 
@@ -162,18 +162,15 @@ const getFormatHistoryOption = (
         if (targetPath) {
             obj.pathname = `${formatRouterBase}${targetPath}`;
         } else {
-            throw `An error occurred while executing 'Navigation.${type}' operation: The path for the name "${name}" could not be found`;
+            throw `An error occurred while executing 'history.${type}' operation: The path for the name "${name}" could not be found`;
         }
     }
     return obj;
 };
 
-export const getHistory = (
-    routerBase: ConfigRouterType['base'],
-    routerType: ConfigRouterType['type']
-) => {
-    // eslint-disable-next-line no-undef
-    let history: SwicoHistoryType;
+export let history: SwicoHistoryType;
+
+export const getOriHistory = (routerType: ConfigRouterType['type']) => {
     const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)?.();
 
     history = {
@@ -197,7 +194,7 @@ export const getHistory = (
                     originalHistory.push(formatOption);
                     break;
                 default:
-                    throw `An error occurred while executing Navigation.push operation: unexpected type of 'to':${typeof to}`;
+                    throw `An error occurred while executing history.push operation: unexpected type of 'to':${typeof to}`;
             }
         },
         replace: (to) => {
@@ -216,7 +213,7 @@ export const getHistory = (
                     originalHistory.replace(formatOption);
                     break;
                 default:
-                    throw `An error occurred while executing Navigation.replace operation: unexpected type of 'to':${typeof to}`;
+                    throw `An error occurred while executing history.replace operation: unexpected type of 'to':${typeof to}`;
             }
         },
         // @ts-ignore
@@ -225,5 +222,5 @@ export const getHistory = (
         }
     };
 
-    return { history, originalHistory };
+    return originalHistory;
 };

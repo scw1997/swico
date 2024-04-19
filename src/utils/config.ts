@@ -163,7 +163,7 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
     //在开发端项目生成.secywo配置文件
     await initTemplateConfig(routerConfig, templateType, env);
     //处理脚手架入口文件
-    await initCliIndexFile(templateType);
+    await initCliIndexFile(templateType, env);
 
     const envPath = env === 'dev' ? '.dev/' : '.prod/';
 
@@ -218,7 +218,10 @@ const getFormatRouter = (routes: ConfigRouterType['routes'], templateType) => {
 };
 
 //根据template处理脚手架入口文件,暴露必要的api
-const initCliIndexFile = async (templateType: GlobalData['templateType']) => {
+const initCliIndexFile = async (
+    templateType: GlobalData['templateType'],
+    env: GlobalData['env']
+) => {
     const targetPath = path.resolve(__dirname, '../index.js');
     const targetTypesPath = path.resolve(__dirname, '../index.d.ts');
     let replaceFileText = await fs.readFile(
@@ -229,17 +232,26 @@ const initCliIndexFile = async (templateType: GlobalData['templateType']) => {
         path.resolve(__dirname, `../index.${templateType}.d.ts`),
         'utf8'
     );
-    if (templateType === 'react') {
-        //处理react hooks的引入路径，由从脚手架引入改为从.secywo引入
-        const formatHooksPath = path
-            .resolve(projectPath, './src/.swico/react-hooks')
-            // @ts-ignore
-            .replaceAll('\\', '/');
-        replaceFileText = replaceFileText.replaceAll(
-            'require("./template/react/react-hooks");',
-            `require("${formatHooksPath}");`
-        );
-    }
+
+    //处理react hooks的引入路径，由从脚手架引入改为从.secywo引入
+    const formatHooksPath = path
+        .resolve(projectPath, './src/.swico/react-hooks')
+        // @ts-ignore
+        .replaceAll('\\', '/');
+    replaceFileText = replaceFileText.replaceAll(
+        'require("./template/react/react-hooks");',
+        `require("${formatHooksPath}");`
+    );
+
+    //处理history的引入路径，由从脚手架引入改为从.secywo引入
+    const formatHistoryPath = path
+        .resolve(projectPath, `./src/.swico/.${env}/history`)
+        // @ts-ignore
+        .replaceAll('\\', '/');
+    replaceFileText = replaceFileText.replaceAll(
+        'require("./mock-history");',
+        `require("${formatHistoryPath}");`
+    );
 
     await fs.writeFile(targetPath, replaceFileText);
     await fs.writeFile(targetTypesPath, fileTypesText);

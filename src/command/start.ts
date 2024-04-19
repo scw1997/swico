@@ -73,7 +73,7 @@ export default async function start() {
         toast.info('Initializing Swico development config...');
     }
 
-    await initIndexFile();
+    await initIndexFile('dev');
     //获取可用端口（优先使用重启时的传递的port环境变量）
     availablePort = envPort ?? (await getPort());
     // @ts-ignore

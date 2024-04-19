@@ -20,6 +20,8 @@ export { Outlet } from 'react-router-dom';
 
 export { useLocation } from './template/react/react-hooks';
 
+export { history } from './mock-history';
+
 //swico 配置
 export interface DefineSwicoConfigType {
     (env: 'base', config: CustomConfigType['base']);
