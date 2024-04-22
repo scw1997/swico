@@ -1,3 +1,3 @@
-import { SwicoHistoryType } from './global-type';
+import { SwicoHistoryType } from './typings/global-type';
 
 export const history: SwicoHistoryType = {} as any;

@@ -4,7 +4,11 @@ import qs from 'qs';
 import { createBrowserHistory, createHashHistory } from 'history';
 import routes from './routes';
 import { routerBase, routerType } from './config';
-import { SwicoHistoryOptionType, SwicoHistoryType, SwicoLocationType } from '../../../global-type';
+import {
+    SwicoHistoryOptionType,
+    SwicoHistoryType,
+    SwicoLocationType
+} from '../../../typings/global-type';
 export { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 
 const lastIndexBase = routerBase[routerBase.length - 1];

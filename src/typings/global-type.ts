@@ -1,11 +1,11 @@
 export type SwicoLocationType = {
+    query?: Record<string, any>;
+    params?: Record<string, any>;
+    hash: string;
     name: string; //路由唯一标识
     path: string; //路由path值
     pathname: string; //带basename的路由path值
     search: string;
-    query?: Record<string, any>;
-    hash: string;
-    params?: Record<string, any>;
 };
 
 export type SwicoHistoryOptionType = {
@@ -25,14 +25,4 @@ export type SwicoHistoryType = {
     location: SwicoLocationType;
 };
 
-export type UseLocationType = {
-    (): {
-        name: string; //路由唯一标识
-        path: string; //路由path值
-        pathname: string; //带basename的路由path值
-        search: string;
-        query?: Record<string, any>;
-        hash: string;
-        params?: Record<string, any>;
-    };
-};
+export type UseLocationType = () => SwicoLocationType;
