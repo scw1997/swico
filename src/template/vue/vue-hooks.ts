@@ -1,8 +1,8 @@
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import qs from 'qs';
 import { reactive, watchEffect } from 'vue';
 import { routerBase } from './$env/config';
-import { UseLocationType } from '../../typings/global-type';
+import { UseLocationType, UseNavType } from '../../typings/global-type';
 
 export const getFormatRouterBase = (routerBase) => {
     const lastIndexBase = routerBase[routerBase.length - 1];
@@ -35,4 +35,32 @@ export const useLocation: UseLocationType = () => {
     });
 
     return location;
+};
+
+export const useNav: UseNavType = () => {
+    const router = useRouter();
+    const newNavigate = (to, options?) => {
+        switch (typeof to) {
+            case 'string':
+                if (options?.replace) {
+                    router.replace(to);
+                } else {
+                    router.push(to);
+                }
+                break;
+            case 'number':
+                router.go(to);
+                break;
+            case 'object':
+                if (options?.replace) {
+                    router.replace(to);
+                } else {
+                    router.push(to);
+                }
+                break;
+            default:
+                throw `An error occurred while executing useNav() operation: unexpected type of 'to':${typeof to}`;
+        }
+    };
+    return newNavigate;
 };

@@ -26,3 +26,13 @@ export type SwicoHistoryType = {
 };
 
 export type UseLocationType = () => SwicoLocationType;
+
+export type NavOptionsType = {
+    replace: boolean;
+};
+
+export type UseNavType = () => {
+    (to: string, options?: NavOptionsType): void;
+    (to: number): void;
+    (to: SwicoHistoryOptionType, options?: NavOptionsType): void;
+};

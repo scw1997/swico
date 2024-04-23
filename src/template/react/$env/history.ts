@@ -16,7 +16,7 @@ const lastIndexBase = routerBase[routerBase.length - 1];
 const formatRouterBase =
     lastIndexBase === '/' ? routerBase.slice(0, routerBase.length - 1) : routerBase;
 
-const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: string) => {
+export const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: string) => {
     const patternWithValuesParts = urlPatternWithValues.split('/');
     const patternWithParamsParts = urlPatternWithParams.split('/');
 
@@ -47,7 +47,7 @@ const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: 
 };
 
 //根据params对象和路径模板获取具体的路径值
-const interpolatePath = (pathTemplate: string, params: Record<string, any>) => {
+export const interpolatePath = (pathTemplate: string, params: Record<string, any>) => {
     const pathParts = pathTemplate.split('/');
     const interpolatedParts = pathParts.map((part) => {
         // 查找参数（以:开头和结尾）

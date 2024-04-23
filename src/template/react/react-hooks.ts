@@ -1,37 +1,7 @@
-import { useLocation as useOriLocation, useParams } from 'react-router-dom';
-import { pathNameList } from './$env/history';
-import type { UseLocationType } from '../../typings/global-type';
+import { useLocation as useOriLocation, useParams, useNavigate } from 'react-router-dom';
+import { pathNameList, compareURLPatterns, interpolatePath } from './$env/history';
+import { SwicoLocationType, UseLocationType, UseNavType } from '../../typings/global-type';
 import qs from 'qs';
-
-const compareURLPatterns = (urlPatternWithValues: string, urlPatternWithParams: string) => {
-    const patternWithValuesParts = urlPatternWithValues.split('/');
-    const patternWithParamsParts = urlPatternWithParams.split('/');
-
-    // 确保两个路径具有相同数量的部分
-    if (patternWithValuesParts.length !== patternWithParamsParts.length) {
-        return false;
-    }
-
-    // 遍历每个部分进行比较
-    for (let i = 0; i < patternWithValuesParts.length; i++) {
-        const valuePart = patternWithValuesParts[i];
-        const paramPart = patternWithParamsParts[i];
-
-        // 检查是否是参数占位符，并跳过空部分（比如URL开头或结尾的/）
-        if (paramPart.startsWith(':') && paramPart !== '') {
-            // 是参数占位符，则继续下一个部分的比较
-            continue;
-        }
-
-        // 非参数占位符的部分必须严格相等
-        if (valuePart !== paramPart) {
-            return false;
-        }
-    }
-
-    // 所有部分都匹配
-    return true;
-};
 
 export const useLocation: UseLocationType = () => {
     const location = useOriLocation();
@@ -56,4 +26,37 @@ export const useLocation: UseLocationType = () => {
         hash,
         params
     };
+};
+
+const getFormatNavPath = (to: SwicoLocationType): string => {
+    const { params, path, hash, name, query } = to;
+    const search = query ? `?${qs.stringify(query)}` : '';
+    const formatHash = hash ? (hash.startsWith('#') ? hash : `#${hash}`) : '';
+    const formatPath = name ? pathNameList.find((item) => item.name === name)?.path : path;
+
+    let newPath = formatPath ? interpolatePath(formatPath, params || {}) : null;
+
+    newPath = newPath + search + formatHash;
+
+    return newPath;
+};
+
+export const useNav: UseNavType = () => {
+    const navigate = useNavigate();
+    const newNavigate = (to, options?) => {
+        switch (typeof to) {
+            case 'string':
+                navigate(to, options);
+                break;
+            case 'number':
+                navigate(to);
+                break;
+            case 'object':
+                navigate(getFormatNavPath(to), options);
+                break;
+            default:
+                throw `An error occurred while executing useNav() operation: unexpected type of 'to':${typeof to}`;
+        }
+    };
+    return newNavigate;
 };

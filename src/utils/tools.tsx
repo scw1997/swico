@@ -109,7 +109,7 @@ export const toast = {
     }
 };
 
-export const initIndexFile = async (env: GlobalData['env']) => {
+export const initIndexFile = async () => {
     let fileText = await fs.readFile(path.resolve(__dirname, '../index.js'), 'utf8');
     const targetPath = path.resolve(__dirname, '../index.js');
 
@@ -129,14 +129,26 @@ export const initIndexFile = async (env: GlobalData['env']) => {
     }
 
     //还原react/vue history的引入路径，由从.secywo引入改为从脚手架引入（避免当不存在.swico文件时的引入错误问题）
-    const formatHistoryPath = path
-        .resolve(process.cwd(), `./src/.swico/.${env}/history`)
+    const formatDevHistoryPath = path
+        .resolve(process.cwd(), './src/.swico/.dev/history')
         // @ts-ignore
         .replaceAll('\\', '/');
 
-    if (fileText.includes(`require("${formatHistoryPath}");`)) {
+    const formatProdHistoryPath = path
+        .resolve(process.cwd(), './src/.swico/.prod/history')
+        // @ts-ignore
+        .replaceAll('\\', '/');
+
+    if (fileText.includes(`require("${formatDevHistoryPath}");`)) {
         fileText = fileText.replaceAll(
-            `require("${formatHistoryPath}");`,
+            `require("${formatDevHistoryPath}");`,
+            'require("./mock-history");' //这里是个虚拟的history，反正都用不上，只是过渡修改下，避免引用报错
+        );
+
+        await fs.writeFile(targetPath, fileText);
+    } else if (fileText.includes(`require("${formatProdHistoryPath}");`)) {
+        fileText = fileText.replaceAll(
+            `require("${formatProdHistoryPath}");`,
             'require("./mock-history");' //这里是个虚拟的history，反正都用不上，只是过渡修改下，避免引用报错
         );
 

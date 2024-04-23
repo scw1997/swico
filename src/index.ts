@@ -6,8 +6,8 @@ export type { GlobalSwicoConfigType };
 
 export { history } from './mock-history';
 
-let Outlet: any, Link: any, useLocation: any;
-export { Outlet, Link, useLocation };
+let Outlet: any, Link: any, useLocation: any, useNav: any;
+export { Outlet, Link, useLocation, useNav };
 
 //swico 配置
 export interface DefineSwicoConfigType {
