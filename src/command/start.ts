@@ -8,6 +8,8 @@ import path from 'path';
 import spawn from 'cross-spawn';
 const { PORT: envPort, RESTART } = process.env;
 import packageJson from '../../package.json';
+import { WebpackCompiler } from 'webpack-cli';
+import chalk from 'chalk';
 //监听ts全局声明文件和cli config文件修改
 const handleWatch = (projectPath, devServer) => {
     //监听配置文件修改，重启服务
@@ -65,12 +67,28 @@ const restartServer = () => {
     }
 };
 
+// 覆盖devServer初始输出信息的方法
+const getMockGetLogger = (compiler: WebpackCompiler) => {
+    const logger = compiler.getInfrastructureLogger('name');
+    const { log, debug, error, warn } = logger;
+    return (name) => {
+        return {
+            ...logger,
+            log,
+            debug,
+            error,
+            warn,
+            info: () => {}
+        };
+    };
+};
+
 // 执行start本地启动
 export default async function start() {
     process.env.SWICO_ENV = 'dev';
     if (RESTART !== 'true') {
-        toast.info(`Swico v${packageJson.version}`);
-        toast.info('Initializing Swico development config...');
+        toast.info(`v${packageJson.version}`);
+        toast.info('Initializing development config...');
     }
 
     await initIndexFile();
@@ -83,16 +101,38 @@ export default async function start() {
 
     const startConfig = await getStartConfig(projectConfig);
     const compiler = webpack(startConfig as any);
+
+    const oriLogger = compiler.getInfrastructureLogger;
+
+    // 覆盖devServer初始输出信息的方法
+    // @ts-ignore
+    compiler.getInfrastructureLogger = getMockGetLogger(compiler);
     //启动服务
     const devServer = new WebpackDevServer(
-        // @ts-ignore
         { ...startConfig.devServer, port: availablePort },
         compiler
     );
 
+    compiler.hooks.beforeCompile.tap('beforeCompile', () => {
+        toast.info('Compiling...');
+    });
+    compiler.hooks.done.tap('done', (stats) => {
+        const info = stats.toJson();
+        if (stats.hasErrors() || stats.hasWarnings()) {
+            return;
+        }
+        toast.info(`Compiled successfully in ${info.time}ms`);
+    });
+
     try {
+        //启动
         await devServer.start();
+        // 还原devServer 日志输出
+        compiler.getInfrastructureLogger = oriLogger;
         handleWatch(projectPath, devServer);
+        toast.info(
+            `Project is running at：${chalk.hex('#29abe0')(`${startConfig.devServer.server}://localhost:${availablePort}/`)}`
+        );
     } catch (e) {
         const strErr = e.toString();
         toast.error(strErr);

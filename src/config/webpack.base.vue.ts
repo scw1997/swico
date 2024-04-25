@@ -1,11 +1,12 @@
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
-import WebpackBar from 'webpackbar';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import webpack from 'webpack';
 import { VueLoaderPlugin } from 'vue-loader';
+import WebpackBar from 'webpackbar';
+import { themeColor } from '../utils/tools';
 
 export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
@@ -249,12 +250,12 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 filename: env === 'dev' ? 'css/[name].css' : 'css/[name].[contenthash].css',
                 ignoreOrder: true
             }),
-            // 编译进度条
-            new WebpackBar({
-                name: 'Swico',
-                color: '#5f72f5',
-                profile: false
-            }),
+            // // 编译进度条
+            // new WebpackBar({
+            //     name: 'Swico',
+            //     color: themeColor,
+            //     profile: false
+            // }),
             ...(customBaseConfig?.plugins || initConfig.plugins)
         ]
     };

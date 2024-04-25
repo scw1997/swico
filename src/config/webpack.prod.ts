@@ -5,6 +5,8 @@ import fs from 'fs-extra';
 import { initConfig, GlobalData } from '../utils/config';
 import { merge } from 'webpack-merge';
 import { EsbuildPlugin } from 'esbuild-loader';
+import WebpackBar from 'webpackbar';
+import { themeColor } from '../utils/tools';
 
 const BundleAnalyzerPlugin = BundleAnalyzer.BundleAnalyzerPlugin;
 const isAnalyze = process.env.ANALYZE === 'true';
@@ -112,7 +114,12 @@ export default async function (options: GlobalData) {
                       })
                   ]
                 : []),
-
+            // 编译进度条
+            new WebpackBar({
+                name: 'Swico',
+                color: themeColor,
+                profile: false
+            }),
             ...(customConfig.prod?.plugins ?? [])
         ]
     });

@@ -83,27 +83,32 @@ export const getPort = () => {
     });
 };
 
+export const themeColor = '#7888FCFF';
+
 export const toast = {
     info: (message: string) => {
-        console.log(`> ${chalk.hex('#5f72f5')(message)}\n`);
+        console.log(`${chalk.hex(themeColor).bold('swico')} - ${message}\n`);
+    },
+    success: (message: string) => {
+        console.log(`${chalk.hex('#32f264').bold('swico')} - ${message}\n`);
     },
     error: (message: string | string[]) => {
-        console.log(`\n> ${chalk.hex('#5f72f5')('There are some errors about Swico：')} \n`);
+        console.log(`${chalk.red.bold('error')} - There are some errors about Swico： \n`);
         if (Array.isArray(message)) {
             message.forEach((item) => {
                 console.log(` > ${chalk.red.bold(item)} \n`);
             });
-        } else {
+        } else if (message) {
             console.log(` > ${chalk.red.bold(message)} \n`);
         }
     },
     warning: (message: string | string[]) => {
-        console.log(`\n> ${chalk.hex('#5f72f5')('There are some warnings about Swico：')} \n`);
+        console.log(`${chalk.red.bold('#fb8918')} - There are some errors about Swico： \n`);
         if (Array.isArray(message)) {
             message.forEach((item) => {
                 console.log(` > ${chalk.hex('#fb8918').bold(item)} \n`);
             });
-        } else {
+        } else if (message) {
             console.log(` > ${chalk.hex('#fb8918').bold(message)} \n`);
         }
     }
