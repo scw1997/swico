@@ -6,8 +6,8 @@ import packageJson from '../../package.json';
 // 执行start本地启动
 export default async function () {
     process.env.SWICO_ENV = 'prod';
-    toast.info(`v${packageJson.version}`, { wrap: false });
-    toast.info('Initializing production config...', { wrap: false });
+    toast.info(`v${packageJson.version}`);
+    toast.info('Initializing production config...');
     await initIndexFile();
     const projectConfig = await getProjectConfig('prod');
     const { entryPath, templatePath, projectPath, customConfig, templateType } = projectConfig;

@@ -32,7 +32,8 @@ const handleWatch = (projectPath, devServer) => {
         )
         .on('all', async (path, stats) => {
             toast.warning(
-                'Swico configuration files have been modified. The devServer is being restarted...'
+                'Swico configuration files have been modified. The devServer is being restarted...',
+                { inline: true }
             );
 
             await devServer.stop();
@@ -89,7 +90,7 @@ const getMockGetLogger = (compiler: WebpackCompiler) => {
 const createCompileListener = (compiler: WebpackCompiler) => {
     // @ts-ignore
     compiler.hooks.beforeCompile.tap('beforeCompile', () => {
-        toast.info('Compiling...', { wrap: false });
+        toast.info('Compiling...');
     });
     compiler.hooks.done.tap('done', (stats) => {
         const info = stats?.toJson();
@@ -103,7 +104,7 @@ const createCompileListener = (compiler: WebpackCompiler) => {
             warnings.some((item) => {
                 const msg = item.message || item.stack;
                 if (msg.startsWith('[eslint]')) {
-                    toast.warning(msg, 'ESLint errors');
+                    toast.warning(msg, { title: 'ESLint errors' });
                     return;
                 }
             });
@@ -117,8 +118,8 @@ const createCompileListener = (compiler: WebpackCompiler) => {
 export default async function start() {
     process.env.SWICO_ENV = 'dev';
     if (RESTART !== 'true') {
-        toast.info(`v${packageJson.version}`, { wrap: false });
-        toast.info('Initializing development config...', { wrap: false });
+        toast.info(`v${packageJson.version}`);
+        toast.info('Initializing development config...');
     }
 
     await initIndexFile();
@@ -150,10 +151,11 @@ export default async function start() {
         // 还原devServer 日志输出
         compiler.getInfrastructureLogger = oriLogger;
         handleWatch(projectPath, devServer);
-        toast.info(
-            `Project is running at：${chalk.hex('#29abe0')(`${startConfig.devServer.server}://localhost:${availablePort}/`)}`,
-            { wrap: false }
-        );
+        if (RESTART !== 'true') {
+            toast.info(
+                `Project is running at：${chalk.hex('#29abe0')(`${startConfig.devServer.server}://localhost:${availablePort}/`)}`
+            );
+        }
     } catch (e) {
         const strErr = e.toString();
         toast.error(strErr);

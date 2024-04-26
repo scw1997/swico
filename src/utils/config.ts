@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
-import { copyDirFiles, getFormatRouter, toast } from './tools';
+import { colorConfig, copyDirFiles, getFormatRouter, toast } from './tools';
 
 export type ConfigRoutesItemType = {
     component?: string; //页面路径
@@ -77,7 +77,6 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
 
     const customConfig = {} as GlobalData['customConfig'];
     //读取各环境配置文件并写入
-
     for (const key of Object.keys(configPath)) {
         const curConfigFilePath = configPath[key];
         const exists = await fs.exists(curConfigFilePath);
@@ -110,23 +109,24 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
                     supportedFieldList = ['plugins', 'console', 'copy', 'devtool', 'router'];
                     configFileName = 'swico.prod.ts';
             }
-
+            const toastTitle = `Swico config file => ${chalk.hex(colorConfig.theme)(configFileName)}`;
             const unSupportedField = configFields.find(
                 (field) => !supportedFieldList.includes(field)
             );
             if (configFields.length > 0 && unSupportedField) {
-                const msgText = `\n The Swico configuration file '${chalk.blue(
+                const msgText = `The Swico configuration file '${chalk.blue(
                     configFileName
                 )}' does not support the field '${chalk.red(unSupportedField)}' `;
                 toast.error(msgText);
-                process.exit();
+                process.exit(1);
             }
             //对不支持的template值进行提示
             if (key === 'base' && !['vue', 'react'].includes(configObj['template'])) {
                 toast.error(
-                    `The field '${chalk.blue('template')}' does not support the value '${chalk.red(configObj['template'])}',the value can be 'vue' or 'react' `
+                    `The field '${chalk.blue('template')}' does not support the value '${chalk.red(configObj['template'])}',the value should be 'vue' or 'react' `,
+                    { title: toastTitle }
                 );
-                process.exit();
+                process.exit(1);
             }
             //对不支持的npmType值进行提示
             if (
@@ -134,18 +134,20 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
                 !['npm', 'pnpm'].includes(configObj['npmType'] ?? initConfig.npmType)
             ) {
                 toast.error(
-                    `The field '${chalk.blue('npmType')}' does not support the value '${chalk.red(configObj['npmType'])}',the value can be 'npm' or 'pnpm' `
+                    `The field '${chalk.blue('npmType')}' does not support the value '${chalk.red(configObj['npmType'])}',the value should be 'npm' or 'pnpm' `,
+                    { title: toastTitle }
                 );
-                process.exit();
+                process.exit(1);
             }
             //对不支持的routerType值进行提示
             if (
                 !['hash', 'browser'].includes(configObj['router']?.type ?? initConfig.router.type)
             ) {
                 toast.error(
-                    `The field '${chalk.blue('router.type')}' does not support the value '${chalk.red(configObj['router'].type)}',the value can be 'browser' or 'hash' `
+                    `The field '${chalk.blue('router.type')}' does not support the value '${chalk.red(configObj['router'].type)}',the value should be 'browser' or 'hash' `,
+                    { title: toastTitle }
                 );
-                process.exit();
+                process.exit(1);
             }
 
             customConfig[key] = (await import(curConfigFilePath)).default;

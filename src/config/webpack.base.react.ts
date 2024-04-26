@@ -212,7 +212,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 logger: {
                     log: () => {},
                     error: (message) => {
-                        toast.error(message, 'TypeScript errors');
+                        toast.error(message, { title: 'TypeScript errors' });
                     }
                 },
                 typescript: {

@@ -83,45 +83,65 @@ export const getPort = () => {
     });
 };
 
-export const themeColor = '#7888FCFF';
+export const colorConfig = {
+    theme: '#7888FCFF',
+    warning: '#fb8918',
+    success: '#32f264',
+    error: '#ff0000'
+};
 
 interface ToastOptions {
-    wrap: boolean;
+    wrap?: boolean;
+    inline?: boolean;
+    title?: string;
 }
 export const toast = {
     info: (message: string, options?: ToastOptions) => {
-        const { wrap = true } = options || {};
-        console.log(`${chalk.hex(themeColor).bold('swico')} - ${message}${wrap ? '\n' : ''}`);
+        const { wrap = false } = options || {};
+        console.log(
+            `${chalk.hex(colorConfig.theme).bold('swico')} - ${message}${wrap ? '\n' : ''}`
+        );
     },
     success: (message: string, options?: ToastOptions) => {
         const { wrap = true } = options || {};
-        console.log(`${chalk.hex('#32f264').bold('swico')} - ${message}${wrap ? '\n' : ''}`);
-    },
-    error: (message: string | string[], title?: string) => {
         console.log(
-            `${chalk.red.bold('error')} - ${title || 'There are some errors about Swico'}：`
+            `${chalk.hex(colorConfig.success).bold('swico')} - ${message}${wrap ? '\n' : ''}`
         );
-        if (Array.isArray(message)) {
-            message.forEach((item) => {
-                console.log(`> ${chalk.red.bold(item)}`);
-            });
-        } else if (message) {
-            console.log(`> ${chalk.red.bold(message)}`);
-        }
-        console.log('\n');
     },
-    warning: (message: string | string[], title?: string) => {
-        console.log(
-            `${chalk.hex('#fb8918').bold('warning')} - ${title || 'There are some warnings about Swico'}：`
-        );
-        if (Array.isArray(message)) {
-            message.forEach((item) => {
-                console.log(`> ${chalk.hex('#fb8918').bold(item)}`);
-            });
-        } else if (message) {
-            console.log(`> ${chalk.hex('#fb8918').bold(message)}`);
+    error: (message: string | string[], options?: ToastOptions) => {
+        const { inline, title } = options || {};
+        if (inline) {
+            console.log(`${chalk.red.bold('error')} - ${message}`);
+        } else {
+            console.log(
+                `${chalk.red.bold('error')} - ${title || 'There are some errors about Swico'}：`
+            );
+            if (Array.isArray(message)) {
+                message.forEach((item) => {
+                    console.log(`> ${chalk.red.bold(item)}`);
+                });
+            } else if (message) {
+                console.log(`> ${chalk.red.bold(message)}`);
+            }
         }
-        console.log('\n');
+    },
+    warning: (message: string | string[], options?: ToastOptions) => {
+        const { inline, title } = options || {};
+        const { warning: color } = colorConfig;
+        if (inline) {
+            console.log(`${chalk.hex(color).bold('warning')} - ${message}`);
+        } else {
+            console.log(
+                `${chalk.hex(color).bold('warning')} - ${title || 'There are some warnings about Swico'}：`
+            );
+            if (Array.isArray(message)) {
+                message.forEach((item) => {
+                    console.log(`> ${chalk.hex(color).bold(item)}`);
+                });
+            } else if (message) {
+                console.log(`> ${chalk.hex(color).bold(message)}`);
+            }
+        }
     }
 };
 
@@ -165,7 +185,7 @@ export const initIndexFile = async () => {
     } else if (fileText.includes(`require("${formatProdHistoryPath}");`)) {
         fileText = fileText.replaceAll(
             `require("${formatProdHistoryPath}");`,
-            'require("./mock-history");' //这里是个虚拟的history，反正都用不上，只是过渡修改下，避免引用报错
+            'require("./mock-history");' //这里是个虚拟的history，用不上，只是过渡修改下，避免引用报错
         );
 
         await fs.writeFile(targetPath, fileText);
