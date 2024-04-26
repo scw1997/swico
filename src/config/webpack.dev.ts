@@ -50,7 +50,12 @@ export default async function (options: GlobalData) {
         plugins: [
             new EslintPlugin({
                 context: path.join(projectPath, '/src'),
+                //禁用报错则停止编译，将错误信息传给webpack统一格式化输出
+                failOnError: false,
+                failOnWarning: true,
                 extensions: templateType === 'vue' ? ['vue', 'ts', 'js'] : ['tsx', 'ts', 'js'],
+                // emitError: false,
+                emitWarning: false,
                 // 开启缓存
                 cache: true
                 // 指定缓存目录

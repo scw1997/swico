@@ -6,8 +6,8 @@ import packageJson from '../../package.json';
 // 执行start本地启动
 export default async function () {
     process.env.SWICO_ENV = 'prod';
-    toast.info(`v${packageJson.version}`);
-    toast.info('Initializing production config...');
+    toast.info(`v${packageJson.version}`, { wrap: false });
+    toast.info('Initializing production config...', { wrap: false });
     await initIndexFile();
     const projectConfig = await getProjectConfig('prod');
     const { entryPath, templatePath, projectPath, customConfig, templateType } = projectConfig;
@@ -27,12 +27,12 @@ export default async function () {
         const info = stats.toJson();
 
         if (stats.hasErrors()) {
-            toast.error(info.errors.map((item) => item.stack));
+            toast.error(info.errors.map((item) => item.stack || item.message));
             return;
         }
 
         if (stats.hasWarnings()) {
-            toast.warning(info.warnings.map((item) => item.stack));
+            toast.warning(info.warnings.map((item) => item.stack || item.message));
         }
         toast.success('Building complete');
     });

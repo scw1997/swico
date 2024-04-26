@@ -5,11 +5,14 @@ import { getPort, initIndexFile, toast } from '../utils/tools';
 import { getProjectConfig } from '../utils/config';
 import chokidar from 'chokidar';
 import path from 'path';
+import ora from 'ora';
 import spawn from 'cross-spawn';
 const { PORT: envPort, RESTART } = process.env;
 import packageJson from '../../package.json';
 import { WebpackCompiler } from 'webpack-cli';
 import chalk from 'chalk';
+
+const spinner = ora();
 //监听ts全局声明文件和cli config文件修改
 const handleWatch = (projectPath, devServer) => {
     //监听配置文件修改，重启服务
@@ -83,12 +86,30 @@ const getMockGetLogger = (compiler: WebpackCompiler) => {
     };
 };
 
+const createCompileListener = (compiler: WebpackCompiler) => {
+    // @ts-ignore
+    compiler.hooks.beforeCompile.tap('beforeCompile', () => {
+        toast.info('Compiling...', { wrap: false });
+    });
+    compiler.hooks.done.tap('done', (stats) => {
+        const info = stats?.toJson();
+        if (stats?.hasErrors()) {
+            toast.error(info?.errors.map((item) => item.message || item.stack));
+            return;
+        }
+        if (stats?.hasWarnings()) {
+            toast.warning(info?.warnings.map((item) => item.message || item.stack));
+        }
+        toast.info(`Compiled complete in ${info?.time}ms`);
+    });
+};
+
 // 执行start本地启动
 export default async function start() {
     process.env.SWICO_ENV = 'dev';
     if (RESTART !== 'true') {
-        toast.info(`v${packageJson.version}`);
-        toast.info('Initializing development config...');
+        toast.info(`v${packageJson.version}`, { wrap: false });
+        toast.info('Initializing development config...', { wrap: false });
     }
 
     await initIndexFile();
@@ -113,25 +134,17 @@ export default async function start() {
         compiler
     );
 
-    compiler.hooks.beforeCompile.tap('beforeCompile', () => {
-        toast.info('Compiling...');
-    });
-    compiler.hooks.done.tap('done', (stats) => {
-        const info = stats.toJson();
-        if (stats.hasErrors() || stats.hasWarnings()) {
-            return;
-        }
-        toast.info(`Compiled successfully in ${info.time}ms`);
-    });
-
     try {
         //启动
         await devServer.start();
+        //监听编译细节
+        createCompileListener(compiler);
         // 还原devServer 日志输出
         compiler.getInfrastructureLogger = oriLogger;
         handleWatch(projectPath, devServer);
         toast.info(
-            `Project is running at：${chalk.hex('#29abe0')(`${startConfig.devServer.server}://localhost:${availablePort}/`)}`
+            `Project is running at：${chalk.hex('#29abe0')(`${startConfig.devServer.server}://localhost:${availablePort}/`)}`,
+            { wrap: false }
         );
     } catch (e) {
         const strErr = e.toString();

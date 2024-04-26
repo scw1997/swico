@@ -85,32 +85,43 @@ export const getPort = () => {
 
 export const themeColor = '#7888FCFF';
 
+interface ToastOptions {
+    wrap: boolean;
+}
 export const toast = {
-    info: (message: string) => {
-        console.log(`${chalk.hex(themeColor).bold('swico')} - ${message}\n`);
+    info: (message: string, options?: ToastOptions) => {
+        const { wrap = true } = options || {};
+        console.log(`${chalk.hex(themeColor).bold('swico')} - ${message}${wrap ? '\n' : ''}`);
     },
-    success: (message: string) => {
-        console.log(`${chalk.hex('#32f264').bold('swico')} - ${message}\n`);
+    success: (message: string, options?: ToastOptions) => {
+        const { wrap = true } = options || {};
+        console.log(`${chalk.hex('#32f264').bold('swico')} - ${message}${wrap ? '\n' : ''}`);
     },
-    error: (message: string | string[]) => {
-        console.log(`${chalk.red.bold('error')} - There are some errors about Swico： \n`);
+    error: (message: string | string[], title?: string) => {
+        console.log(
+            `${chalk.red.bold('error')} - ${title || 'There are some errors about Swico'}： \n`
+        );
         if (Array.isArray(message)) {
             message.forEach((item) => {
-                console.log(` > ${chalk.red.bold(item)} \n`);
+                console.log(` > ${chalk.red.bold(item)}`);
             });
         } else if (message) {
-            console.log(` > ${chalk.red.bold(message)} \n`);
+            console.log(` > ${chalk.red.bold(message)}`);
         }
+        console.log('\n');
     },
-    warning: (message: string | string[]) => {
-        console.log(`${chalk.red.bold('#fb8918')} - There are some errors about Swico： \n`);
+    warning: (message: string | string[], title?: string) => {
+        console.log(
+            `${chalk.hex('#fb8918').bold('warning')} - ${title || 'There are some warnings about Swico'}： \n`
+        );
         if (Array.isArray(message)) {
             message.forEach((item) => {
-                console.log(` > ${chalk.hex('#fb8918').bold(item)} \n`);
+                console.log(` > ${chalk.hex('#fb8918').bold(item)}`);
             });
         } else if (message) {
-            console.log(` > ${chalk.hex('#fb8918').bold(message)} \n`);
+            console.log(` > ${chalk.hex('#fb8918').bold(message)}`);
         }
+        console.log('\n');
     }
 };
 
