@@ -4,8 +4,7 @@ import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import webpack from 'webpack';
-import WebpackBar from 'webpackbar';
-import { themeColor } from '../utils/tools';
+import { toast } from '../utils/tools';
 export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
     const customBaseConfig = customConfig.base;
@@ -210,6 +209,12 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             }),
             //ts类型检查
             new ForkTsCheckerWebpackPlugin({
+                logger: {
+                    log: () => {},
+                    error: (message) => {
+                        toast.error(message, 'TypeScript errors');
+                    }
+                },
                 typescript: {
                     diagnosticOptions: {
                         semantic: true,

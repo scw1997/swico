@@ -99,27 +99,27 @@ export const toast = {
     },
     error: (message: string | string[], title?: string) => {
         console.log(
-            `${chalk.red.bold('error')} - ${title || 'There are some errors about Swico'}： \n`
+            `${chalk.red.bold('error')} - ${title || 'There are some errors about Swico'}：`
         );
         if (Array.isArray(message)) {
             message.forEach((item) => {
-                console.log(` > ${chalk.red.bold(item)}`);
+                console.log(`> ${chalk.red.bold(item)}`);
             });
         } else if (message) {
-            console.log(` > ${chalk.red.bold(message)}`);
+            console.log(`> ${chalk.red.bold(message)}`);
         }
         console.log('\n');
     },
     warning: (message: string | string[], title?: string) => {
         console.log(
-            `${chalk.hex('#fb8918').bold('warning')} - ${title || 'There are some warnings about Swico'}： \n`
+            `${chalk.hex('#fb8918').bold('warning')} - ${title || 'There are some warnings about Swico'}：`
         );
         if (Array.isArray(message)) {
             message.forEach((item) => {
-                console.log(` > ${chalk.hex('#fb8918').bold(item)}`);
+                console.log(`> ${chalk.hex('#fb8918').bold(item)}`);
             });
         } else if (message) {
-            console.log(` > ${chalk.hex('#fb8918').bold(message)}`);
+            console.log(`> ${chalk.hex('#fb8918').bold(message)}`);
         }
         console.log('\n');
     }

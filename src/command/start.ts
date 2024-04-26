@@ -97,8 +97,17 @@ const createCompileListener = (compiler: WebpackCompiler) => {
             toast.error(info?.errors.map((item) => item.message || item.stack));
             return;
         }
+        // 对webpack warning只处理eslint报错，其余忽略且不提示
         if (stats?.hasWarnings()) {
-            toast.warning(info?.warnings.map((item) => item.message || item.stack));
+            const warnings = info.warnings;
+            warnings.some((item) => {
+                const msg = item.message || item.stack;
+                if (msg.startsWith('[eslint]')) {
+                    toast.warning(msg, 'ESLint errors');
+                    return;
+                }
+            });
+            return;
         }
         toast.info(`Compiled complete in ${info?.time}ms`);
     });
@@ -123,9 +132,8 @@ export default async function start() {
     const startConfig = await getStartConfig(projectConfig);
     const compiler = webpack(startConfig as any);
 
-    const oriLogger = compiler.getInfrastructureLogger;
-
     // 覆盖devServer初始输出信息的方法
+    const oriLogger = compiler.getInfrastructureLogger;
     // @ts-ignore
     compiler.getInfrastructureLogger = getMockGetLogger(compiler);
     //启动服务

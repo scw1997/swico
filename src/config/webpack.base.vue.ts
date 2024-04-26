@@ -6,7 +6,7 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import webpack from 'webpack';
 import { VueLoaderPlugin } from 'vue-loader';
 import WebpackBar from 'webpackbar';
-import { themeColor } from '../utils/tools';
+import { themeColor, toast } from '../utils/tools';
 
 export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
@@ -238,6 +238,12 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             }),
             //ts类型检查
             new ForkTsCheckerWebpackPlugin({
+                logger: {
+                    log: () => {},
+                    error: (message) => {
+                        toast.error(message, 'TypeScript errors');
+                    }
+                },
                 typescript: {
                     diagnosticOptions: {
                         semantic: true,
