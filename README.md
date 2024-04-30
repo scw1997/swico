@@ -7,13 +7,13 @@ Swico，发音类似于“斯威扣”。
 
 ## 主要特性
 
-- 构建工具基于[Webpack5]，并配合[esbuild-loader]和[swc-loader]提升编译构建速率。
+- 构建工具基于Webpack5，并配合esbuild-loader和swc-loader提升编译构建速率。
 
-- 提供[Vue3]和[React18]两种开发模板选择，默认集成[TypeScript5]。同时最大化统一这两种模板的开发API。
+- 提供Vue3和React18两种开发模板选择，默认集成TypeScript5。同时最大化统一这两种模板的开发API。
 
-- 提供可配置化路由方案，基于[React-Router6]和[Vue-Router4]进行二次封装，支持路由嵌套，懒加载，动态参数，装饰校验等功能。
+- 提供可配置化路由方案，基于React-Router6和Vue-Router4进行二次封装，支持路由嵌套，懒加载，动态参数，装饰校验等功能。
 
-- 内置[ESLint] + [Prettier] + [Husky]三大前端编码风格以及代码提交规范约束插件，保证代码风格统一以及 Git 提交规范。
+- 内置ESLint + Prettier + Husky三大前端编码风格以及代码提交规范约束插件，保证代码风格统一以及 Git 提交规范。
 
 - 提供配置文件可对部分项目配置进行修改扩展，例如Alias映射，本地请求代理等。
 
