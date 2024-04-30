@@ -2,10 +2,8 @@ import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import webpack from 'webpack';
 import { VueLoaderPlugin } from 'vue-loader';
-import { toast } from '../utils/tools';
 
 export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
@@ -235,21 +233,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 },
                 hash: true //对html引用的js文件添加hash戳
             }),
-            //ts类型检查
-            new ForkTsCheckerWebpackPlugin({
-                logger: {
-                    log: () => {},
-                    error: (message) => {
-                        toast.error(message, { title: 'TypeScript errors' });
-                    }
-                },
-                typescript: {
-                    diagnosticOptions: {
-                        semantic: true,
-                        syntactic: true
-                    }
-                }
-            }),
+
             //提取css文件
             new MiniCssExtractPlugin({
                 filename: env === 'dev' ? 'css/[name].css' : 'css/[name].[contenthash].css',

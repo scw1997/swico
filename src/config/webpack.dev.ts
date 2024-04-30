@@ -2,6 +2,8 @@ import { initConfig, GlobalData } from '../utils/config';
 import path from 'path';
 import { merge } from 'webpack-merge';
 import EslintPlugin from 'eslint-webpack-plugin';
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import { toast } from '../utils/tools';
 
 export default async function (options: GlobalData) {
     const { projectPath, customConfig, templateType, entryPath, env } = options;
@@ -48,6 +50,21 @@ export default async function (options: GlobalData) {
             server: customConfig.dev.https === true ? 'https' : 'http'
         },
         plugins: [
+            //ts类型检查
+            new ForkTsCheckerWebpackPlugin({
+                logger: {
+                    log: () => {},
+                    error: (message) => {
+                        toast.error(message, { title: 'TypeScript errors' });
+                    }
+                },
+                typescript: {
+                    diagnosticOptions: {
+                        semantic: true,
+                        syntactic: true
+                    }
+                }
+            }),
             new EslintPlugin({
                 context: path.join(projectPath, '/src'),
                 //禁用报错则停止编译，将错误信息传给webpack统一格式化输出
