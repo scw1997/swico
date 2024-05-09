@@ -103,9 +103,9 @@ export default async function (options: GlobalData) {
                       new BundleAnalyzerPlugin({
                           analyzerMode: 'server',
                           analyzerHost: '127.0.0.1',
-                          analyzerPort: 8888, // 运行后的端口号
+                          analyzerPort: 'auto', // 运行后的端口号
                           reportFilename: 'report.html',
-                          defaultSizes: 'parsed',
+                          defaultSizes: 'stat',
                           openAnalyzer: true,
                           generateStatsFile: false, //是否生成分析文件
                           statsFilename: 'analyze.json',
