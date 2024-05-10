@@ -17,18 +17,18 @@ export const getRouter = () => {
             if (typeof options === 'string') {
                 router.push(options);
             } else {
-                const { query, name, hash, params, path } = options;
+                const { query, name, hash, params, path, state } = options;
                 // @ts-ignore
-                router.push({ name, path, query, hash, params });
+                router.push({ name, path, query, hash, params, state });
             }
         },
         replace: (options) => {
             if (typeof options === 'string') {
                 router.replace(options);
             } else {
-                const { query, name, hash, params, path } = options;
+                const { query, name, hash, params, path, state } = options;
                 // @ts-ignore
-                router.replace({ name, path, query, hash, params });
+                router.replace({ name, path, query, hash, params, state });
             }
         },
         go: router.go,
@@ -48,6 +48,7 @@ export const getRouter = () => {
                 query,
                 name,
                 hash,
+                state: window.history.state ?? {},
                 search: query ? qs.stringify(query) : ''
             };
         }

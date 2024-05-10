@@ -124,7 +124,7 @@ const getPathNameList: (routes: RoutesItemType[]) => Array<{ path: string; name:
 export const pathNameList = getPathNameList(routes);
 
 const getLocation = (originalHistory): SwicoLocationType => {
-    const { pathname, hash, search } = originalHistory.location;
+    const { pathname, hash, search, state } = originalHistory.location;
     const routerBaseLength = formatRouterBase.length;
     const path = pathname.slice(routerBaseLength);
     const matchPathNameItem = pathNameList.find(
@@ -133,6 +133,7 @@ const getLocation = (originalHistory): SwicoLocationType => {
     // console.log('matchPathNameItem', matchPathNameItem);
     const params = interpolatePathParams(matchPathNameItem?.path, path);
     return {
+        state: state ?? {},
         hash,
         search,
         pathname,
@@ -151,9 +152,10 @@ const getFormatHistoryOption = (
     pathList: ReturnType<typeof getPathNameList>,
     type: 'push' | 'replace'
 ) => {
-    const { params, path, hash, name, query } = to;
+    const { params, path, hash, name, query, state } = to;
     let obj: any = {
         hash,
+        state,
         search: query ? qs.stringify(query) : undefined
     };
     if (path) {

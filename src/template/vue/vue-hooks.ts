@@ -16,6 +16,7 @@ export const useLocation: UseLocationType = () => {
         name: '',
         path: '',
         search: '',
+        state: {},
         hash: '',
         pathname: '',
         params: {},
@@ -32,6 +33,7 @@ export const useLocation: UseLocationType = () => {
         location.query = query;
         location.hash = hash;
         location.params = params;
+        location.state = window.history.state || {};
     });
 
     return location;

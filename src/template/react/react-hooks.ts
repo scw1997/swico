@@ -7,7 +7,7 @@ export const useLocation: UseLocationType = () => {
     const location = useOriLocation();
     const params = useParams();
 
-    const { search, hash, pathname } = location;
+    const { search, hash, pathname, state } = location;
 
     const name = pathNameList.find(
         (item) =>
@@ -19,6 +19,7 @@ export const useLocation: UseLocationType = () => {
 
     return {
         name,
+        state: state ?? {},
         path: pathname,
         pathname: window?.location?.pathname,
         search: '',
@@ -52,7 +53,7 @@ export const useNav: UseNavType = () => {
                 navigate(to);
                 break;
             case 'object':
-                navigate(getFormatNavPath(to), options);
+                navigate(getFormatNavPath(to), { ...(options || {}), state: to.state });
                 break;
             default:
                 throw `An error occurred while executing useNav() operation: unexpected type of 'to':${typeof to}`;
