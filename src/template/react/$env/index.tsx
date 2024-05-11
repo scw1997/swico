@@ -1,12 +1,18 @@
 import { createRoot } from 'react-dom/client';
-import React, { createElement, FC, lazy, Suspense } from 'react';
-import { Navigate, Route, Routes, Outlet, useParams } from 'react-router-dom';
-import routes from './routes';
+import React, { createElement, FC, lazy, Suspense, useLayoutEffect } from 'react';
+import {
+    createBrowserRouter,
+    createHashRouter,
+    Navigate,
+    Outlet,
+    RouterProvider
+} from 'react-router-dom';
 import Loading from '../loading';
-import { HistoryRouter, getOriHistory, history } from './history';
+import { getHistory, history } from './history';
 import { routerBase, routerType } from './config';
 import '../../global';
 import Layout from '../../layout';
+import routes from './routes';
 
 export type RoutesItemType = {
     component?: () => Promise<{ default: FC }>; //页面路径
@@ -16,51 +22,47 @@ export type RoutesItemType = {
     name?: string;
 };
 
-const renderChildrenRouteList = (childrenRoutes: RoutesItemType[], ancPathKey: string) => {
+export const getChildrenRouteList = (childrenRoutes: RoutesItemType[], ancPathKey: string) => {
     return childrenRoutes?.map((item) => {
         const { component, path, children, redirect } = item;
         const newAncPathKey = `${ancPathKey}-${path}`;
-        return (
-            <Route
-                element={
-                    redirect ? (
-                        <Navigate to={redirect} replace />
-                    ) : component ? (
-                        <Suspense fallback={createElement(Loading)}>
-                            {createElement(lazy(component))}
-                        </Suspense>
-                    ) : (
-                        <Outlet />
-                    )
-                }
-                key={newAncPathKey}
-                path={path}
-            >
-                {renderChildrenRouteList(children, newAncPathKey)}
-            </Route>
-        );
+        return {
+            element: redirect ? (
+                <Navigate to={redirect} replace />
+            ) : component ? (
+                <Suspense fallback={<Loading />}>{createElement(lazy(component))}</Suspense>
+            ) : (
+                <Outlet />
+            ),
+            key: newAncPathKey,
+            path: path.startsWith('/') ? path.slice(1) : path,
+            children: getChildrenRouteList(children, newAncPathKey)
+        };
     });
 };
 
 const App = () => {
-    const originalHistory = getOriHistory(routerType);
+    const routeList = [
+        {
+            element: <Layout />,
+            path: '/',
+            children: getChildrenRouteList(routes, '')
+        }
+    ];
+    const router = (routerType === 'hash' ? createHashRouter : createBrowserRouter)(routeList, {
+        basename: routerBase
+    });
     //处理含basename的情况，自动重定向
     if (routerBase && routerBase !== '/') {
         if (routerType === 'browser' && window.location.pathname === '/') {
             window.location.replace(`${routerBase}`);
         }
     }
-
-    return (
+    useLayoutEffect(() => {
         // @ts-ignore
-        <HistoryRouter basename={routerBase} history={originalHistory}>
-            <Routes>
-                <Route element={<Layout />} path={''}>
-                    {renderChildrenRouteList(routes, '')}
-                </Route>
-            </Routes>
-        </HistoryRouter>
-    );
+        history = getHistory(router);
+    });
+    return <RouterProvider router={router} />;
 };
 
 const root = createRoot(document.getElementById('root'));

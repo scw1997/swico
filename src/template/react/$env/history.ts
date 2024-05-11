@@ -1,15 +1,12 @@
-import { ConfigRouterType } from '../../../utils/config';
 import { RoutesItemType } from './index';
 import qs from 'qs';
-import { createBrowserHistory, createHashHistory } from 'history';
 import routes from './routes';
-import { routerBase, routerType } from './config';
+import { routerBase } from './config';
 import {
     SwicoHistoryOptionType,
     SwicoHistoryType,
     SwicoLocationType
 } from '../../../typings/global-type';
-export { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 
 const lastIndexBase = routerBase[routerBase.length - 1];
 //如果Base末尾为/，则忽略
@@ -123,8 +120,9 @@ const getPathNameList: (routes: RoutesItemType[]) => Array<{ path: string; name:
 
 export const pathNameList = getPathNameList(routes);
 
-const getLocation = (originalHistory): SwicoLocationType => {
-    const { pathname, hash, search, state } = originalHistory.location;
+const getLocation = (historyLocation): SwicoLocationType => {
+    console.log('historyLocation', historyLocation);
+    const { pathname, hash, search, state } = historyLocation;
     const routerBaseLength = formatRouterBase.length;
     const path = pathname.slice(routerBaseLength);
     const matchPathNameItem = pathNameList.find(
@@ -148,25 +146,23 @@ const getLocation = (originalHistory): SwicoLocationType => {
 const getFormatHistoryOption = (
     // eslint-disable-next-line no-undef
     to: SwicoHistoryOptionType,
-    formatRouterBase,
     pathList: ReturnType<typeof getPathNameList>,
     type: 'push' | 'replace'
 ) => {
-    const { params, path, hash, name, query, state } = to;
+    const { params, path, hash, name, query } = to;
     let obj: any = {
         hash,
-        state,
         search: query ? qs.stringify(query) : undefined
     };
     if (path) {
         //只有path无name时，params需要开发者自行加到path里
-        obj.pathname = `${formatRouterBase}${path}`;
+        obj.pathname = path;
     }
     if (name) {
         const fullPath = pathList.find((item) => item.name === name)?.path;
         const targetPath = fullPath ? interpolatePath(fullPath, params) : null;
         if (targetPath) {
-            obj.pathname = `${formatRouterBase}${targetPath}`;
+            obj.pathname = targetPath;
         } else {
             throw `An error occurred while executing 'history.${type}' operation: The path for the name "${name}" could not be found`;
         }
@@ -174,30 +170,27 @@ const getFormatHistoryOption = (
     return obj;
 };
 
-export let history: SwicoHistoryType;
-
-export const getOriHistory = (routerType: ConfigRouterType['type']) => {
-    const originalHistory = (routerType === 'hash' ? createHashHistory : createBrowserHistory)?.();
-
-    history = {
-        go: originalHistory.go,
-        forward: originalHistory.forward,
-        back: originalHistory.back,
+export const getHistory = (router) => {
+    return {
+        go: (delta) => {
+            router.navigate(delta);
+        },
+        forward: () => {
+            router.navigate(1);
+        },
+        back: () => {
+            router.navigate(-1);
+        },
         push: (to) => {
             switch (typeof to) {
                 case 'string':
-                    originalHistory.push(`${formatRouterBase}${to}`);
+                    router.navigate(to);
                     break;
                 case 'object':
                     // eslint-disable-next-line no-case-declarations
-                    const formatOption = getFormatHistoryOption(
-                        to,
-                        formatRouterBase,
-                        pathNameList,
-                        'push'
-                    );
+                    const formatOption = getFormatHistoryOption(to, pathNameList, 'push');
 
-                    originalHistory.push(formatOption);
+                    router.navigate(formatOption, { state: to.state });
                     break;
                 default:
                     throw `An error occurred while executing history.push operation: unexpected type of 'to':${typeof to}`;
@@ -206,17 +199,13 @@ export const getOriHistory = (routerType: ConfigRouterType['type']) => {
         replace: (to) => {
             switch (typeof to) {
                 case 'string':
-                    originalHistory.replace(`${formatRouterBase}${to}`);
+                    router.navigate(to, { replace: true });
                     break;
                 case 'object':
                     // eslint-disable-next-line no-case-declarations
-                    const formatOption = getFormatHistoryOption(
-                        to,
-                        formatRouterBase,
-                        pathNameList,
-                        'replace'
-                    );
-                    originalHistory.replace(formatOption);
+                    const formatOption = getFormatHistoryOption(to, pathNameList, 'replace');
+
+                    router.navigate(formatOption, { state: to.state, replace: true });
                     break;
                 default:
                     throw `An error occurred while executing history.replace operation: unexpected type of 'to':${typeof to}`;
@@ -224,9 +213,8 @@ export const getOriHistory = (routerType: ConfigRouterType['type']) => {
         },
         // @ts-ignore
         get location() {
-            return getLocation(originalHistory);
+            return getLocation(router.state.location);
         }
     };
-
-    return originalHistory;
 };
+export let history: SwicoHistoryType;
