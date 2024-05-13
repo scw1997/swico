@@ -9,10 +9,10 @@ import {
 } from 'react-router-dom';
 import Loading from '../loading';
 import { getHistory, history } from './history';
-import { routerBase, routerType } from './config';
 import '../../global';
 import Layout from '../../layout';
 import routes from './routes';
+import { routerBase, routerType } from './config';
 
 export type RoutesItemType = {
     component?: () => Promise<{ default: FC }>; //页面路径
@@ -41,7 +41,7 @@ export const getChildrenRouteList = (childrenRoutes: RoutesItemType[], ancPathKe
     });
 };
 
-const App = () => {
+const App: FC = () => {
     const routeList = [
         {
             element: <Layout />,

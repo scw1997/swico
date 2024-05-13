@@ -1,4 +1,5 @@
 import { GlobalData, GlobalSwicoConfigType } from './utils/config';
+import { UseLocationType, UseNavType } from './typings/global-type';
 
 export type CustomConfigType = GlobalData['customConfig'];
 
@@ -6,7 +7,7 @@ export type { GlobalSwicoConfigType };
 
 export { history } from './mock-history';
 
-let Outlet: any, Link: any, useLocation: any, useNav: any;
+let Outlet: any, Link: any, useLocation: UseLocationType, useNav: UseNavType;
 export { Outlet, Link, useLocation, useNav };
 
 //swico 配置

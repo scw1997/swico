@@ -1,7 +1,7 @@
 import { RoutesItemType } from './index';
 import qs from 'qs';
 import routes from './routes';
-import { routerBase } from './config';
+import { routerBase, routerType } from './config';
 import {
     SwicoHistoryOptionType,
     SwicoHistoryType,
