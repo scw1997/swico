@@ -19,7 +19,7 @@ export const getRouter = () => {
             } else {
                 const { query, name, hash, params, path, state } = options;
                 // @ts-ignore
-                router.push({ name, path, query, hash, params, state });
+                router.push({ name, path, query, hash, params, state: { swicoState: state } });
             }
         },
         replace: (options) => {
@@ -28,7 +28,7 @@ export const getRouter = () => {
             } else {
                 const { query, name, hash, params, path, state } = options;
                 // @ts-ignore
-                router.replace({ name, path, query, hash, params, state });
+                router.replace({ name, path, query, hash, params, state: { swicoState: state } });
             }
         },
         go: router.go,
@@ -48,7 +48,7 @@ export const getRouter = () => {
                 query,
                 name,
                 hash,
-                state: window.history.state ?? {},
+                state: window.history.state?.swicoState ?? {},
                 search: query ? qs.stringify(query) : ''
             };
         }

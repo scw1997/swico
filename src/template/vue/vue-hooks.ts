@@ -33,7 +33,7 @@ export const useLocation: UseLocationType = () => {
         location.query = query;
         location.hash = hash;
         location.params = params;
-        location.state = window.history.state || {};
+        location.state = window.history.state?.swicoState || {};
     });
 
     return location;
@@ -57,7 +57,7 @@ export const useNav: UseNavType = () => {
                 if (options?.replace) {
                     router.replace(to);
                 } else {
-                    router.push(to);
+                    router.push({ ...to, state: { swicoState: to.state } });
                 }
                 break;
             default:
