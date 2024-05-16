@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import React, { createElement, FC, lazy, Suspense, useLayoutEffect } from 'react';
+import React, { createElement, FC, lazy, ReactNode, Suspense, useLayoutEffect } from 'react';
 import {
     createBrowserRouter,
     createHashRouter,
@@ -13,6 +13,22 @@ import '../../global';
 import Layout from '../../layout';
 import routes from './routes';
 import { routerBase, routerType } from './config';
+
+class Container extends React.Component<{ children: ReactNode }> {
+    state = {
+        error: null
+    };
+    static getDerivedStateFromError(error) {
+        return { error: (error as Error).toString() };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+        //
+    }
+    render() {
+        return this.state.error ? null : this.props.children;
+    }
+}
 
 export type RoutesItemType = {
     component?: () => Promise<{ default: FC }>; //页面路径
@@ -44,7 +60,11 @@ export const getChildrenRouteList = (childrenRoutes: RoutesItemType[], ancPathKe
 const App: FC = () => {
     const routeList = [
         {
-            element: <Layout />,
+            element: (
+                <Container>
+                    <Layout />
+                </Container>
+            ),
             path: '/',
             children: getChildrenRouteList(routes, '')
         }
