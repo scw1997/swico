@@ -31,10 +31,9 @@ const handleWatch = (projectPath, devServer) => {
             }
         )
         .on('all', async (path, stats) => {
-            toast.warning(
-                'Swico configuration files have been modified. The devServer is being restarted...',
-                { inline: true }
-            );
+            toast.warning('Swico configuration files changed, restarting server...', {
+                inline: true
+            });
 
             await devServer.stop();
             await configFilesWatcher.close();
