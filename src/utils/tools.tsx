@@ -98,14 +98,12 @@ interface ToastOptions {
 export const toast = {
     info: (message: string, options?: ToastOptions) => {
         const { wrap = false } = options || {};
-        console.log(
-            `${chalk.hex(colorConfig.theme).bold('swico')} - ${message}${wrap ? '\n' : ''}`
-        );
+        console.log(`${chalk.hex(colorConfig.theme).bold('info')} - ${message}${wrap ? '\n' : ''}`);
     },
     success: (message: string, options?: ToastOptions) => {
         const { wrap = true } = options || {};
         console.log(
-            `${chalk.hex(colorConfig.success).bold('swico')} - ${message}${wrap ? '\n' : ''}`
+            `${chalk.hex(colorConfig.success).bold('info')} - ${message}${wrap ? '\n' : ''}`
         );
     },
     error: (message: string | string[], options?: ToastOptions) => {

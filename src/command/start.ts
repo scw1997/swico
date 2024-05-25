@@ -117,7 +117,7 @@ const createCompileListener = (compiler: WebpackCompiler) => {
 export default async function start() {
     process.env.SWICO_ENV = 'dev';
     if (RESTART !== 'true') {
-        toast.info(`v${packageJson.version}`);
+        toast.info(`Swico v${packageJson.version}`);
         toast.info('Initializing development config...');
     }
 

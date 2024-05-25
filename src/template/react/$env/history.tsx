@@ -121,7 +121,6 @@ const getPathNameList: (routes: RoutesItemType[]) => Array<{ path: string; name:
 export const pathNameList = getPathNameList(routes);
 
 const getLocation = (historyLocation): SwicoLocationType => {
-    console.log('historyLocation', historyLocation);
     const { pathname, hash, search, state } = historyLocation;
     const routerBaseLength = formatRouterBase.length;
     const path = pathname.slice(routerBaseLength);
