@@ -21,8 +21,7 @@ const handleWatch = (projectPath, devServer) => {
             [
                 path.join(projectPath, '/config/*.ts'),
                 path.join(projectPath, '/.eslintrc'),
-                path.join(projectPath, '/src/loading/index.tsx'),
-                path.join(projectPath, '/src/global.less')
+                path.join(projectPath, '/src/loading/index.tsx')
             ],
             {
                 interval: 500,
