@@ -280,6 +280,30 @@ exports.default  = ${JSON.stringify(formatRouter)};`;
     });
 };
 
+const getGlobalStyleFilePath = () => {
+    let filePath, fileType: 'css' | 'less' | 'scss';
+    const cssPath = path.resolve(projectPath, './src/global.css');
+    const lessPath = path.resolve(projectPath, './src/global.less');
+    const scssPath = path.resolve(projectPath, './src/global.scss');
+    switch (true) {
+        case fs.existsSync(cssPath):
+            filePath = cssPath;
+            fileType = 'css';
+            break;
+        case fs.existsSync(lessPath):
+            filePath = lessPath;
+            fileType = 'less';
+            break;
+        case fs.existsSync(scssPath):
+            filePath = scssPath;
+            fileType = 'scss';
+            break;
+        default:
+            break;
+    }
+    return { filePath, fileType };
+};
+
 //在开发端项目生成模板路由配置
 const initTemplateConfig = (
     routerConfig,
@@ -327,16 +351,23 @@ const initTemplateConfig = (
         replaceHooksText = replaceHooksText.replaceAll('$env', `.${env}`);
         await fs.writeFile(hooksFilePath, replaceHooksText);
 
-        //处理global.less文件
-        //先判断开发端是否存在global.less
-        try {
-            await fs.access(path.resolve(projectPath, './src/global.less'), fs.constants.F_OK);
+        //处理global.css/less/scss文件
+        //先判断开发端是否存在global.css/less/scss
+
+        const { filePath: styleFilePath, fileType: styleFileType } = getGlobalStyleFilePath();
+        if (styleFilePath) {
             //存在则先重置状态，再添加引入
-            replaceIndexText = replaceIndexText.replaceAll('require("../../global.less");', '');
-            replaceIndexText = 'require("../../global.less");\n' + replaceIndexText;
-        } catch (e) {
+            replaceIndexText = replaceIndexText.replaceAll(
+                `require("../../global.${styleFileType}");`,
+                ''
+            );
+            replaceIndexText = `require("../../global.${styleFileType}");\n${replaceIndexText}`;
+        } else {
             //不存在则取消引入
-            replaceIndexText = replaceIndexText.replaceAll('require("../../global.less");', '');
+            replaceIndexText = replaceIndexText.replaceAll(
+                /require\("\.\.\/\.\.\/global.(less|scss|css)"\);/g,
+                ''
+            );
         }
 
         //处理Container组件，将ts换成vue（因为vue文件默认包内不支持引入）

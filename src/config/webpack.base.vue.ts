@@ -170,7 +170,55 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                 }
                             ]
                         },
+                        {
+                            test: /\.scss$/,
 
+                            oneOf: [
+                                // 这里匹配 `<style module>`
+                                {
+                                    resourceQuery: /module/,
+                                    use: [
+                                        'vue-style-loader',
+                                        {
+                                            loader: 'css-loader',
+                                            options: {
+                                                modules: {
+                                                    localIdentName:
+                                                        'moduleStyle_[local]_[contenthash:8]'
+                                                }
+                                            }
+                                        },
+                                        {
+                                            loader: 'postcss-loader',
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
+                                        },
+                                        'sass-loader'
+                                    ]
+                                },
+                                // 这里匹配普通的 `<style>` 或 `<style scoped>`
+                                {
+                                    use: [
+                                        env === 'dev'
+                                            ? 'vue-style-loader'
+                                            : MiniCssExtractPlugin.loader,
+                                        'css-loader',
+                                        {
+                                            loader: 'postcss-loader',
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
+                                        },
+                                        'sass-loader'
+                                    ]
+                                }
+                            ]
+                        },
                         {
                             test: /\.(jpg|png|gif|webp|bmp|jpeg|svg)$/,
                             type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择

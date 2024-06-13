@@ -1,6 +1,6 @@
 {
   "name": "swico",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Simple, efficient, and practical front-end framework",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
@@ -73,6 +73,8 @@
     "postcss-loader": "8.1.0",
     "postcss-preset-env": "9.3.0",
     "prettier": "3.2.5",
+    "sass": "1.77.5",
+    "sass-loader": "14.2.1",
     "style-loader": "3.3.0",
     "swc-loader": "0.2.6",
     "ts-node": "10.9.1",

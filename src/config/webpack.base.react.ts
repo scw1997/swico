@@ -154,6 +154,46 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                             ]
                         },
                         {
+                            test: /\.module\.scss$/,
+                            use: [
+                                env === 'dev' ? 'style-loader' : MiniCssExtractPlugin.loader,
+                                {
+                                    loader: 'css-loader',
+                                    options: {
+                                        modules: {
+                                            localIdentName: 'moduleStyle_[local]_[contenthash:8]'
+                                        }
+                                    }
+                                },
+
+                                {
+                                    loader: 'postcss-loader',
+                                    options: {
+                                        postcssOptions: {
+                                            plugins: [['postcss-preset-env', 'autoprefixer']]
+                                        }
+                                    }
+                                },
+                                'sass-loader'
+                            ]
+                        },
+                        {
+                            test: /\.scss$/,
+                            use: [
+                                env === 'dev' ? 'style-loader' : MiniCssExtractPlugin.loader,
+                                'css-loader',
+                                {
+                                    loader: 'postcss-loader',
+                                    options: {
+                                        postcssOptions: {
+                                            plugins: [['autoprefixer']]
+                                        }
+                                    }
+                                },
+                                'sass-loader'
+                            ]
+                        },
+                        {
                             test: /\.(jpg|png|gif|webp|bmp|jpeg|svg)$/,
                             type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择
                             generator: {
