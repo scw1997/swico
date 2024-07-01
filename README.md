@@ -18,4 +18,4 @@ Swico，发音类似于“斯威扣”。
 - 提供配置文件可对部分项目配置进行修改扩展，例如Alias映射，本地请求代理等。
 
 
-详见：[SWICO 官方文档](https://scw1997.github.io/swico-docs)
+官方文档：[SWICO 官方文档](https://scw1997.github.io/swico-docs)
