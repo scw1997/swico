@@ -49,7 +49,7 @@ export default async function (options: GlobalData) {
             assetsSort: '!size',
             chunksSort: '!size'
         },
-        devtool: customDevtool ?? 'nosources-source-map', // production
+        devtool: customDevtool ?? undefined, // production
         optimization: {
             //减少 entry chunk 体积，提高性能。
             runtimeChunk: true,

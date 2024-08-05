@@ -197,7 +197,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                             test: /\.(jpg|png|gif|webp|bmp|jpeg|svg)$/,
                             type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择
                             generator: {
-                                filename: 'images/[name]_[hash][ext]' // 独立的配置
+                                filename: 'images/[name]_[contenthash][ext]' // 独立的配置
                             }
                         },
                         // 字体文件
@@ -205,7 +205,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                             test: /\.(otf|eot|woff2?|ttf)$/i,
                             type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择
                             generator: {
-                                filename: 'fonts/[name]_[hash][ext]'
+                                filename: 'fonts/[name]_[contenthash][ext]'
                             }
                         },
                         // 数据文件

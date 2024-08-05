@@ -33,23 +33,24 @@ const handleWatch = (projectPath, devServer) => {
             restartServer();
         });
     //监听ts声明重命名或新建操作(解决声明文件重命名等特殊情况下Ts类型校验延迟的异常）和部分其他文件，重启服务
+    const watchFiles = [
+        path.join(projectPath, '/src/loading/index.tsx'),
+        path.join(projectPath, '/src/global.css'),
+        path.join(projectPath, '/src/global.less'),
+        path.join(projectPath, '/src/global.scss')
+    ];
     const tsTypingsWatcher = chokidar
-        .watch(
-            [
-                path.join(projectPath, '/src/**/*.d.ts'),
-                path.join(projectPath, '/src/loading/index.tsx'),
-                path.join(projectPath, '/src/global.css'),
-                path.join(projectPath, '/src/global.less'),
-                path.join(projectPath, '/src/global.scss')
-            ],
-            {
-                interval: 500,
-                binaryInterval: 500,
-                ignoreInitial: true
-            }
-        )
+        .watch([path.join(projectPath, '/src/**/*')], {
+            interval: 500,
+            binaryInterval: 500,
+            ignoreInitial: true
+        })
         .on('all', async (eventName, path, stats) => {
-            if (['add', 'unlink'].includes(eventName)) {
+            // console.log('eventName', eventName, path);
+            if (
+                (watchFiles.includes(path) || path.endsWith('.d.ts')) &&
+                ['add', 'unlink'].includes(eventName)
+            ) {
                 await devServer.stop();
                 await tsTypingsWatcher.close();
                 restartServer();
