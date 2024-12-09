@@ -9,16 +9,17 @@ export const useLocation: UseLocationType = () => {
 
     const { search, hash, pathname, state } = location;
 
-    const name = pathNameList.find(
+    const matchItem = pathNameList.find(
         (item) =>
             (Object.keys(params).length > 0 && compareURLPatterns(pathname, item.path)) ||
             item.path === pathname
-    )?.name;
+    );
 
     const query = search ? qs.parse(search.startsWith('?') ? search.slice(1) : search) : {};
 
     return {
-        name,
+        name: matchItem?.name,
+        custom: matchItem?.custom,
         state: state ?? {},
         path: pathname,
         pathname: window?.location?.pathname,

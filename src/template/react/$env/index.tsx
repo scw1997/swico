@@ -36,6 +36,7 @@ export type RoutesItemType = {
     path: string; //路由地址
     redirect?: string; // 重定向路由地址
     name?: string;
+    custom?: any;
 };
 
 export const getChildrenRouteList = (childrenRoutes: RoutesItemType[], ancPathKey: string) => {

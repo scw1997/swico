@@ -7,6 +7,7 @@ export type SwicoLocationType = {
     pathname: string; //带basename的路由path值
     search: string;
     state?: Record<string, any>;
+    custom?: any;
 };
 
 export type SwicoHistoryOptionType = {
@@ -16,6 +17,7 @@ export type SwicoHistoryOptionType = {
     path?: string;
     name?: string;
     state?: Record<string, any>;
+    custom?: any;
 };
 
 export type SwicoHistoryType = {

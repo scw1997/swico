@@ -24,7 +24,7 @@ export const useLocation: UseLocationType = () => {
     });
 
     watchEffect(() => {
-        const { hash, path, params, fullPath, query, name } = route;
+        const { hash, path, params, fullPath, query, name, meta } = route;
         const search = query ? qs.stringify(query) : '';
         location.name = name as string;
         location.path = path;
@@ -34,6 +34,7 @@ export const useLocation: UseLocationType = () => {
         location.hash = hash;
         location.params = params;
         location.state = window.history.state?.swicoState || {};
+        location.custom = meta;
     });
 
     return location;

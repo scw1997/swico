@@ -6,10 +6,22 @@ import { SwicoHistoryType } from '../../../typings/global-type';
 
 export let history: SwicoHistoryType;
 
+const transformRouteItemCustomToMeta = (routeItem) => {
+    const newRouteItem = { ...routeItem };
+    const { custom, children } = routeItem;
+    newRouteItem.meta = custom;
+    return {
+        ...newRouteItem,
+        children: children?.map((item) => transformRouteItemCustomToMeta(item))
+    };
+};
+
+const formatRoutes = routes.map((routeItem) => transformRouteItemCustomToMeta(routeItem));
+
 export const getRouter = () => {
     const router = createRouter({
         history: (routerType === 'hash' ? createWebHashHistory : createWebHistory)(routerBase),
-        routes
+        routes: formatRoutes
     });
 
     history = {
@@ -37,12 +49,14 @@ export const getRouter = () => {
         // @ts-ignore
         get location() {
             const lastIndexBase = routerBase[routerBase.length - 1];
+
             //如果Base末尾为/，则忽略
             const formatRouterBase =
                 lastIndexBase === '/' ? routerBase.slice(0, routerBase.length - 1) : routerBase;
-            const { path, params, query, name, hash, fullPath } = router.currentRoute.value;
+            const { path, params, query, name, hash, fullPath, meta } = router.currentRoute.value;
             return {
                 path,
+                custom: meta,
                 pathname: formatRouterBase + path,
                 params,
                 query,

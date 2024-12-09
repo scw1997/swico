@@ -22,7 +22,8 @@ const handleWatch = (projectPath, devServer) => {
         .watch([path.join(projectPath, '/config/*.ts'), path.join(projectPath, '/.eslintrc')], {
             interval: 500,
             binaryInterval: 500,
-            ignoreInitial: true
+            ignoreInitial: true,
+            ignored: [path.join(projectPath, '/config/swico.prod.ts')] //生产环境配置改变不需要重启
         })
         .on('all', async (path, stats) => {
             toast.warning('Swico configuration files changed, restarting server...', {

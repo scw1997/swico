@@ -102,14 +102,14 @@ export const formatAncPath = (ancPath: string) => {
 };
 
 //根据全体路由配置生成含完整path和name的集合数据
-const getPathNameList: (routes: RoutesItemType[]) => Array<{ path: string; name: string }> = (
-    routes
-) => {
+const getPathNameList: (
+    routes: RoutesItemType[]
+) => Array<{ path: string; name: string; custom?: any }> = (routes) => {
     const list = [];
     const checkRouteItem = (item: RoutesItemType, ancPath: string) => {
-        const { path, name, children } = item;
+        const { path, name, children, custom } = item;
         const newAncPath = `${formatAncPath(ancPath)}${path.startsWith('/') ? path : '/' + path}`;
-        list.push({ path: newAncPath, name });
+        list.push({ path: newAncPath, name, custom });
         if (children) {
             children.some((item) => checkRouteItem(item, newAncPath));
         }
@@ -137,7 +137,8 @@ const getLocation = (historyLocation): SwicoLocationType => {
         query: search ? qs.parse(search.startsWith('?') ? search.slice(1) : search) : {},
         name: matchPathNameItem?.name,
         params,
-        path
+        path,
+        custom: matchPathNameItem?.custom
     };
 };
 
