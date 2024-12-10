@@ -55,7 +55,7 @@ const handleWatch = (projectPath, devServer, env) => {
             ignoreInitial: true
         })
         .on('all', async (eventName, filePath, stats) => {
-            console.log('eventName', eventName, filePath);
+            // console.log('eventName', eventName, filePath);
 
             let replaceIndexText = await fs.readFile(
                 path.resolve(projectPath, `./src/.swico${envPath}index.js`),
@@ -210,7 +210,7 @@ export default async function start() {
         currentPort = availablePort;
     } catch (e) {
         const strErr = e.toString();
-        console.log('2', strErr);
+        // console.log('2', strErr);
         if (!filterStyleFileList.find((item) => strErr.includes(item))) {
             toast.error(strErr);
         }
