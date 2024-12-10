@@ -2,7 +2,12 @@ import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import getStartConfig from '../config/webpack.dev';
 import { getPort, initIndexFile, toast } from '../utils/tools';
-import { getProjectConfig } from '../utils/config';
+import {
+    getProjectConfig,
+    handleGlobalStyleFile,
+    handleLoadingFile,
+    updateIndexFileText
+} from '../utils/config';
 import chokidar from 'chokidar';
 import spawn from 'cross-spawn';
 import path from 'path';
@@ -10,13 +15,16 @@ const { SWICO_PORT, SWICO_RESTART, SWICO_ROUTER_BASE } = process.env;
 import packageJson from '../../package.json';
 import { WebpackCompiler } from 'webpack-cli';
 import chalk from 'chalk';
+import fs from 'fs-extra';
 
 // 当前开发服务器的端口号和routerBase值的缓存
 let currentPort,
     currentRouterBase = '/';
 
 //监听ts全局声明文件和cli config文件修改
-const handleWatch = (projectPath, devServer) => {
+const handleWatch = (projectPath, devServer, env) => {
+    const envPath = env === 'dev' ? '/.dev/' : '/.prod/';
+
     //监听配置文件修改，重启服务
     const configFilesWatcher = chokidar
         .watch([path.join(projectPath, '/config/*.ts'), path.join(projectPath, '/.eslintrc')], {
@@ -34,27 +42,43 @@ const handleWatch = (projectPath, devServer) => {
             restartServer();
         });
     //监听ts声明重命名或新建操作(解决声明文件重命名等特殊情况下Ts类型校验延迟的异常）和部分其他文件，重启服务
-    const watchFiles = [
-        path.join(projectPath, '/src/loading/index.tsx'),
+    const globalStyleFilesPathList = [
         path.join(projectPath, '/src/global.css'),
         path.join(projectPath, '/src/global.less'),
         path.join(projectPath, '/src/global.scss')
     ];
+    const loadingFilePath = path.join(projectPath, '/src/loading/index.tsx');
     const tsTypingsWatcher = chokidar
         .watch([path.join(projectPath, '/src/**/*')], {
             interval: 500,
             binaryInterval: 500,
             ignoreInitial: true
         })
-        .on('all', async (eventName, path, stats) => {
-            // console.log('eventName', eventName, path);
-            if (
-                (watchFiles.includes(path) || path.endsWith('.d.ts')) &&
-                ['add', 'unlink'].includes(eventName)
-            ) {
-                await devServer.stop();
-                await tsTypingsWatcher.close();
-                restartServer();
+        .on('all', async (eventName, filePath, stats) => {
+            console.log('eventName', eventName, filePath);
+
+            let replaceIndexText = await fs.readFile(
+                path.resolve(projectPath, `./src/.swico${envPath}index.js`),
+                'utf8'
+            );
+
+            if (['add', 'unlink'].includes(eventName)) {
+                switch (true) {
+                    case filePath.endsWith('.d.ts'):
+                        await devServer.stop();
+                        await tsTypingsWatcher.close();
+                        restartServer();
+                        break;
+                    case globalStyleFilesPathList.includes(filePath):
+                        replaceIndexText = handleGlobalStyleFile(replaceIndexText);
+                        //更新index.js
+                        await updateIndexFileText(envPath, replaceIndexText);
+                        break;
+                    case filePath === loadingFilePath:
+                        replaceIndexText = handleLoadingFile(replaceIndexText, envPath);
+                        //更新index.js
+                        await updateIndexFileText(envPath, replaceIndexText);
+                }
             }
         });
 };
@@ -96,6 +120,11 @@ const getMockGetLogger = (compiler: WebpackCompiler) => {
     };
 };
 
+const filterStyleFileList = [
+    "Can't resolve '../../global.less'",
+    "Can't resolve '../../global.css'",
+    "Can't resolve '../../global.scss'"
+];
 const createCompileListener = (compiler: WebpackCompiler) => {
     // @ts-ignore
     compiler.hooks.beforeCompile.tap('beforeCompile', () => {
@@ -104,7 +133,14 @@ const createCompileListener = (compiler: WebpackCompiler) => {
     compiler.hooks.done.tap('done', (stats) => {
         const info = stats?.toJson();
         if (stats?.hasErrors()) {
-            toast.error(info?.errors.map((item) => item.message || item.stack));
+            // 将关于全局样式文件global.css|less|scss路径错误的相关问题过滤，不显示报错，交给上述handleWatch种监听处理
+
+            toast.error(
+                info?.errors
+
+                    .map((item) => item.message || item.stack)
+                    .filter((item1) => !filterStyleFileList.find((item2) => item1.includes(item2)))
+            );
             return;
         }
         // 对webpack warning只处理eslint报错，其余忽略且不提示
@@ -119,7 +155,7 @@ const createCompileListener = (compiler: WebpackCompiler) => {
             });
             return;
         }
-        toast.info(`Compiled complete in ${info?.time}ms`);
+        toast.info(`Compiled successfully in ${info?.time}ms`);
     });
 };
 
@@ -138,7 +174,7 @@ export default async function start() {
     // @ts-ignore
     const projectConfig = await getProjectConfig('dev');
 
-    const { projectPath, customConfig } = projectConfig;
+    const { projectPath, customConfig, env } = projectConfig;
     const newRouterBase =
         customConfig['dev']?.router?.base ?? customConfig['base']?.router?.base ?? '/';
     const startConfig = await getStartConfig(projectConfig);
@@ -161,7 +197,7 @@ export default async function start() {
         createCompileListener(compiler);
         // 还原devServer 日志输出
         compiler.getInfrastructureLogger = oriLogger;
-        handleWatch(projectPath, devServer);
+        handleWatch(projectPath, devServer, env);
         if (
             SWICO_RESTART !== 'true' ||
             (SWICO_RESTART === 'true' && newRouterBase !== SWICO_ROUTER_BASE)
@@ -174,6 +210,9 @@ export default async function start() {
         currentPort = availablePort;
     } catch (e) {
         const strErr = e.toString();
-        toast.error(strErr);
+        console.log('2', strErr);
+        if (!filterStyleFileList.find((item) => strErr.includes(item))) {
+            toast.error(strErr);
+        }
     }
 }

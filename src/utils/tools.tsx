@@ -42,7 +42,7 @@ export const getFormatRouter = (
     templateType
 ) => {
     const _main = (item: ConfigRoutesItemType) => {
-        const { path, component, name, children, redirect, decorator } = item;
+        const { component, name, children, redirect, decorator } = item;
 
         return decorator
             ? {
@@ -61,7 +61,7 @@ export const getFormatRouter = (
                   ]
               }
             : {
-                  path,
+                  ...item,
                   component: component
                       ? `()=>import('${projectPath}/src/pages/${component}${templateType === 'vue' ? '.vue' : ''}')`
                       : undefined,

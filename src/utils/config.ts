@@ -10,6 +10,7 @@ export type ConfigRoutesItemType = {
     redirect?: string; // 重定向路由地址
     name?: string;
     decorator?: string; //装饰组件
+    custom?: any; //自定义数据
     [key: string]: any;
 };
 
@@ -176,6 +177,7 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
     const templatePath = path.join(projectPath, '/src/index.ejs');
 
     return {
+        env,
         projectPath,
         entryPath,
         templatePath,
@@ -280,6 +282,7 @@ exports.default  = ${JSON.stringify(formatRouter)};`;
     });
 };
 
+// 获取全局样式文件的信息
 const getGlobalStyleFilePath = () => {
     let filePath, fileType: 'css' | 'less' | 'scss';
     const cssPath = path.resolve(projectPath, './src/global.css');
@@ -302,6 +305,47 @@ const getGlobalStyleFilePath = () => {
             break;
     }
     return { filePath, fileType };
+};
+
+export const handleLoadingFile = async (replaceIndexText, envPath) => {
+    //处理React Router 的loading组件
+    //先判断开发端是否存在loading组件
+    let newReplaceIndexText = replaceIndexText;
+    try {
+        await fs.access(path.resolve(projectPath, './src/loading/index.tsx'), fs.constants.F_OK);
+        //存在则将template中引入的loading组件路径替换
+        newReplaceIndexText = newReplaceIndexText.replace('"../loading"', '"../../loading"');
+    } catch (e) {
+        //不存在也要替换成原值
+        newReplaceIndexText = newReplaceIndexText.replace('"../../loading"', '"../loading"');
+    }
+    return newReplaceIndexText;
+};
+
+// 处理全局样式文件的删除/添加及时更新
+export const handleGlobalStyleFile = (replaceIndexText) => {
+    const { filePath: styleFilePath, fileType: styleFileType } = getGlobalStyleFilePath();
+    let newReplaceIndexText = replaceIndexText;
+    if (styleFilePath) {
+        //存在则先重置状态，再添加引入
+        newReplaceIndexText = newReplaceIndexText.replaceAll(
+            `require("../../global.${styleFileType}");`,
+            ''
+        );
+        newReplaceIndexText = `require("../../global.${styleFileType}");\n${replaceIndexText}`;
+    } else {
+        //不存在则取消引入
+        newReplaceIndexText = newReplaceIndexText.replaceAll(
+            /require\("\.\.\/\.\.\/global.(less|scss|css)"\);/g,
+            ''
+        );
+    }
+    return newReplaceIndexText;
+};
+
+// 更新开发环境下swico.dev.index.js内容
+export const updateIndexFileText = async (envPath, newFileText) => {
+    await fs.writeFile(path.resolve(projectPath, `./src/.swico${envPath}index.js`), newFileText);
 };
 
 //在开发端项目生成模板路由配置
@@ -354,49 +398,17 @@ const initTemplateConfig = (
         //处理global.css/less/scss文件
         //先判断开发端是否存在global.css/less/scss
 
-        const { filePath: styleFilePath, fileType: styleFileType } = getGlobalStyleFilePath();
-        if (styleFilePath) {
-            //存在则先重置状态，再添加引入
-            replaceIndexText = replaceIndexText.replaceAll(
-                `require("../../global.${styleFileType}");`,
-                ''
-            );
-            replaceIndexText = `require("../../global.${styleFileType}");\n${replaceIndexText}`;
-        } else {
-            //不存在则取消引入
-            replaceIndexText = replaceIndexText.replaceAll(
-                /require\("\.\.\/\.\.\/global.(less|scss|css)"\);/g,
-                ''
-            );
-        }
+        replaceIndexText = handleGlobalStyleFile(replaceIndexText);
 
         //处理Container组件，将ts换成vue（因为vue文件默认包内不支持引入）
         if (templateType === 'vue') {
             replaceIndexText = replaceIndexText.replace('"../Container"', '"../Container.vue"');
-            await fs.writeFile(
-                path.resolve(projectPath, `./src/.swico${envPath}index.js`),
-                replaceIndexText
-            );
+            await updateIndexFileText(envPath, replaceIndexText);
         } else if (templateType === 'react') {
             //处理React Router 的loading组件
-            //先判断开发端是否存在loading组件
-            try {
-                await fs.access(
-                    path.resolve(projectPath, './src/loading/index.tsx'),
-                    fs.constants.F_OK
-                );
-                //存在则将template中引入的loading组件路径替换
-                replaceIndexText = replaceIndexText.replace('"../loading"', '"../../loading"');
-            } catch (e) {
-                //不存在也要替换成原值
-                replaceIndexText = replaceIndexText.replace('"../../loading"', '"../loading"');
-            } finally {
-                //更新index.js
-                await fs.writeFile(
-                    path.resolve(projectPath, `./src/.swico${envPath}index.js`),
-                    replaceIndexText
-                );
-            }
+            const newReplaceIndexText = await handleLoadingFile(replaceIndexText, envPath);
+            //更新index.js
+            await updateIndexFileText(envPath, newReplaceIndexText);
         }
         resolve(null);
     });
