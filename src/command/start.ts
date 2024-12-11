@@ -1,7 +1,7 @@
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import getStartConfig from '../config/webpack.dev';
-import { getPort, initIndexFile, toast } from '../utils/tools';
+import { colorConfig, getPort, initIndexFile, toast } from '../utils/tools';
 import {
     getProjectConfig,
     handleGlobalStyleFile,
@@ -164,6 +164,7 @@ export default async function start() {
     // console.log('env', SWICO_RESTART, SWICO_PORT, SWICO_ROUTER_BASE);
     process.env.SWICO_ENV = 'dev';
     if (SWICO_RESTART !== 'true') {
+        console.log('\n');
         toast.info(`Swico v${packageJson.version}`);
         toast.info('Initializing development config...');
     }
