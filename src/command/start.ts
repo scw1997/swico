@@ -134,7 +134,7 @@ const createCompileListener = (compiler: WebpackCompiler) => {
         const info = stats?.toJson();
         if (stats?.hasErrors()) {
             // 将关于全局样式文件global.css|less|scss路径错误的相关问题过滤，不显示报错，交给上述handleWatch种监听处理
-
+            // console.log('1', info);
             toast.error(
                 info?.errors
 
@@ -145,6 +145,7 @@ const createCompileListener = (compiler: WebpackCompiler) => {
         }
         // 对webpack warning只处理eslint报错，其余忽略且不提示
         if (stats?.hasWarnings()) {
+            // console.log('2', info);
             const warnings = info.warnings;
             warnings.some((item) => {
                 const msg = item.message || item.stack;
@@ -153,7 +154,6 @@ const createCompileListener = (compiler: WebpackCompiler) => {
                     return;
                 }
             });
-            return;
         }
         toast.info(`Compiled successfully in ${info?.time}ms`);
     });
