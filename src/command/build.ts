@@ -34,6 +34,6 @@ export default async function () {
         if (stats.hasWarnings()) {
             toast.warning(info.warnings.map((item) => item.stack || item.message));
         }
-        toast.success('Building complete');
+        toast.success('Build complete');
     });
 }

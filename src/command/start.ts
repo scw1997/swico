@@ -155,7 +155,9 @@ const createCompileListener = (compiler: WebpackCompiler) => {
                 }
             });
         }
-        toast.info(`Compiled successfully in ${info?.time}ms`);
+        toast.info(
+            `Compiled successfully ${info?.time ? `in ${(info.time / 1000).toFixed(2)}s` : ''}`
+        );
     });
 };
 
