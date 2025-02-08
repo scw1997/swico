@@ -17,7 +17,6 @@ export type SwicoHistoryOptionType = {
     path?: string;
     name?: string;
     state?: Record<string, any>;
-    custom?: any;
 };
 
 export type SwicoHistoryType = {
