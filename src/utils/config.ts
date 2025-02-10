@@ -23,7 +23,7 @@ export type ConfigRouterType = {
 //swico所有可配置选项
 export interface GlobalSwicoConfigType {
     template: 'react' | 'vue'; //模板类型
-    npmType?: 'npm'; //包管理工具
+    npmType?: 'npm' | 'pnpm'; //包管理工具
     plugins?: any[]; //webpack插件
     publicPath?: string; //非根路径部署所需要定义的base路径
     console?: boolean; //是否需要保留console
@@ -130,9 +130,12 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
                 process.exit(1);
             }
             //对不支持的npmType值进行提示
-            if (key === 'base' && !['npm'].includes(configObj['npmType'] ?? initConfig.npmType)) {
+            if (
+                key === 'base' &&
+                !['npm', 'pnpm'].includes(configObj['npmType'] ?? initConfig.npmType)
+            ) {
                 toast.error(
-                    `The field '${chalk.blue('npmType')}' does not support the value '${chalk.red(configObj['npmType'])}',the value should be 'npm'  `,
+                    `The field '${chalk.blue('npmType')}' does not support the value '${chalk.red(configObj['npmType'])}',the value should be 'npm' or 'pnpm'  `,
                     { title: toastTitle }
                 );
                 process.exit(1);

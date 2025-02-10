@@ -82,7 +82,7 @@ export const getPort = () => {
         stopPort: 3333 //
     });
 };
-
+export const getLoaderPath = (loader) => require.resolve(loader);
 export const colorConfig = {
     theme: '#7888FCFF',
     warning: '#fb8918',
