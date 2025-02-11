@@ -3,7 +3,11 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack from 'webpack';
-import { getLoaderPath } from '../utils/tools';
+const styleLoader = require.resolve('style-loader');
+const cssLoader = require.resolve('css-loader');
+const lessLoader = require.resolve('less-loader');
+const sassLoader = require.resolve('sass-loader');
+const postcssLoader = require.resolve('postcss-loader');
 
 export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
@@ -52,7 +56,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                     exclude: /node_modules/,
                     use: [
                         {
-                            loader: getLoaderPath('swc-loader'),
+                            loader: require.resolve('swc-loader'),
                             options: {
                                 jsc: {
                                     parser: {
@@ -79,11 +83,9 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                         {
                             test: /\.module\.css$/,
                             use: [
-                                env === 'dev'
-                                    ? getLoaderPath('style-loader')
-                                    : MiniCssExtractPlugin.loader,
+                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
                                 {
-                                    loader: getLoaderPath('css-loader'),
+                                    loader: cssLoader,
                                     options: {
                                         modules: {
                                             localIdentName: 'moduleStyle_[local]_[contenthash:8]'
@@ -91,7 +93,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                     }
                                 },
                                 {
-                                    loader: getLoaderPath('postcss-loader'),
+                                    loader: postcssLoader,
                                     options: {
                                         postcssOptions: {
                                             plugins: [['autoprefixer']]
@@ -103,12 +105,10 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                         {
                             test: /\.css$/,
                             use: [
-                                env === 'dev'
-                                    ? getLoaderPath('style-loader')
-                                    : MiniCssExtractPlugin.loader,
-                                getLoaderPath('css-loader'),
+                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
+                                cssLoader,
                                 {
-                                    loader: getLoaderPath('postcss-loader'),
+                                    loader: postcssLoader,
                                     options: {
                                         postcssOptions: {
                                             plugins: [['autoprefixer']]
@@ -121,11 +121,9 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                             test: /\.module\.less$/,
 
                             use: [
-                                env === 'dev'
-                                    ? getLoaderPath('style-loader')
-                                    : MiniCssExtractPlugin.loader,
+                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
                                 {
-                                    loader: getLoaderPath('css-loader'),
+                                    loader: cssLoader,
                                     options: {
                                         modules: {
                                             localIdentName: 'moduleStyle_[local]_[contenthash:8]'
@@ -134,42 +132,38 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                 },
 
                                 {
-                                    loader: getLoaderPath('postcss-loader'),
+                                    loader: postcssLoader,
                                     options: {
                                         postcssOptions: {
                                             plugins: [['postcss-preset-env', 'autoprefixer']]
                                         }
                                     }
                                 },
-                                getLoaderPath('less-loader')
+                                lessLoader
                             ]
                         },
                         {
                             test: /\.less$/,
                             use: [
-                                env === 'dev'
-                                    ? getLoaderPath('style-loader')
-                                    : MiniCssExtractPlugin.loader,
-                                getLoaderPath('css-loader'),
+                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
+                                cssLoader,
                                 {
-                                    loader: getLoaderPath('postcss-loader'),
+                                    loader: postcssLoader,
                                     options: {
                                         postcssOptions: {
                                             plugins: [['autoprefixer']]
                                         }
                                     }
                                 },
-                                getLoaderPath('less-loader')
+                                lessLoader
                             ]
                         },
                         {
                             test: /\.module\.scss$/,
                             use: [
-                                env === 'dev'
-                                    ? getLoaderPath('style-loader')
-                                    : MiniCssExtractPlugin.loader,
+                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
                                 {
-                                    loader: getLoaderPath('css-loader'),
+                                    loader: cssLoader,
                                     options: {
                                         modules: {
                                             localIdentName: 'moduleStyle_[local]_[contenthash:8]'
@@ -178,32 +172,30 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                 },
 
                                 {
-                                    loader: getLoaderPath('postcss-loader'),
+                                    loader: postcssLoader,
                                     options: {
                                         postcssOptions: {
                                             plugins: [['postcss-preset-env', 'autoprefixer']]
                                         }
                                     }
                                 },
-                                getLoaderPath('sass-loader')
+                                sassLoader
                             ]
                         },
                         {
                             test: /\.scss$/,
                             use: [
-                                env === 'dev'
-                                    ? getLoaderPath('style-loader')
-                                    : MiniCssExtractPlugin.loader,
-                                getLoaderPath('css-loader'),
+                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
+                                cssLoader,
                                 {
-                                    loader: getLoaderPath('postcss-loader'),
+                                    loader: postcssLoader,
                                     options: {
                                         postcssOptions: {
                                             plugins: [['autoprefixer']]
                                         }
                                     }
                                 },
-                                getLoaderPath('sass-loader')
+                                lessLoader
                             ]
                         },
                         {
@@ -228,7 +220,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                         },
                         {
                             test: /\.html$/,
-                            loader: getLoaderPath('html-loader')
+                            loader: require.resolve('html-loader')
                         }
                     ]
                 }
@@ -238,11 +230,8 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
             alias: {
                 '@': path.join(projectPath, '/src'),
-                react: path.dirname(require.resolve('react')),
-                'react-dom': path.dirname(require.resolve('react-dom')),
                 'react-router-dom': path.dirname(require.resolve('react-router-dom')),
                 qs: path.dirname(require.resolve('qs')),
-                husky: path.dirname(require.resolve('husky')),
                 ...getCustomAliasConfig()
             }
         },

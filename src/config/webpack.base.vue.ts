@@ -4,7 +4,11 @@ import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack from 'webpack';
 import { VueLoaderPlugin } from 'vue-loader';
-import { getLoaderPath } from '../utils/tools';
+const vueStyleLoader = require.resolve('vue-style-loader');
+const cssLoader = require.resolve('css-loader');
+const lessLoader = require.resolve('less-loader');
+const sassLoader = require.resolve('sass-loader');
+const postcssLoader = require.resolve('postcss-loader');
 
 export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
     //开发者的自定义配置
@@ -50,7 +54,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             rules: [
                 {
                     test: /\.vue$/,
-                    loader: getLoaderPath('vue-loader'),
+                    loader: require.resolve('vue-loader'),
                     exclude: /node_modules/
                 },
                 {
@@ -58,7 +62,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                     exclude: /node_modules/,
                     use: [
                         {
-                            loader: getLoaderPath('swc-loader'),
+                            loader: require.resolve('swc-loader'),
                             options: {
                                 jsc: {
                                     parser: {
@@ -83,9 +87,9 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                 {
                                     resourceQuery: /module/,
                                     use: [
-                                        getLoaderPath('vue-style-loader'),
+                                        vueStyleLoader,
                                         {
-                                            loader: getLoaderPath('css-loader'),
+                                            loader: cssLoader,
                                             options: {
                                                 modules: {
                                                     localIdentName:
@@ -94,7 +98,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                             }
                                         },
                                         {
-                                            loader: getLoaderPath('postcss-loader'),
+                                            loader: postcssLoader,
                                             options: {
                                                 postcssOptions: {
                                                     plugins: [['autoprefixer']]
@@ -107,11 +111,11 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                 {
                                     use: [
                                         env === 'dev'
-                                            ? getLoaderPath('vue-style-loader')
+                                            ? vueStyleLoader
                                             : MiniCssExtractPlugin.loader,
-                                        getLoaderPath('css-loader'),
+                                        cssLoader,
                                         {
-                                            loader: getLoaderPath('postcss-loader'),
+                                            loader: postcssLoader,
                                             options: {
                                                 postcssOptions: {
                                                     plugins: [['autoprefixer']]
@@ -130,9 +134,9 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                 {
                                     resourceQuery: /module/,
                                     use: [
-                                        getLoaderPath('vue-style-loader'),
+                                        vueStyleLoader,
                                         {
-                                            loader: getLoaderPath('css-loader'),
+                                            loader: cssLoader,
                                             options: {
                                                 modules: {
                                                     localIdentName:
@@ -141,32 +145,32 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                             }
                                         },
                                         {
-                                            loader: getLoaderPath('postcss-loader'),
+                                            loader: postcssLoader,
                                             options: {
                                                 postcssOptions: {
                                                     plugins: [['autoprefixer']]
                                                 }
                                             }
                                         },
-                                        getLoaderPath('less-loader')
+                                        lessLoader
                                     ]
                                 },
                                 // 这里匹配普通的 `<style>` 或 `<style scoped>`
                                 {
                                     use: [
                                         env === 'dev'
-                                            ? getLoaderPath('vue-style-loader')
+                                            ? vueStyleLoader
                                             : MiniCssExtractPlugin.loader,
-                                        getLoaderPath('css-loader'),
+                                        cssLoader,
                                         {
-                                            loader: getLoaderPath('postcss-loader'),
+                                            loader: postcssLoader,
                                             options: {
                                                 postcssOptions: {
                                                     plugins: [['autoprefixer']]
                                                 }
                                             }
                                         },
-                                        getLoaderPath('less-loader')
+                                        lessLoader
                                     ]
                                 }
                             ]
@@ -179,9 +183,9 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                 {
                                     resourceQuery: /module/,
                                     use: [
-                                        getLoaderPath('vue-style-loader'),
+                                        vueStyleLoader,
                                         {
-                                            loader: getLoaderPath('css-loader'),
+                                            loader: cssLoader,
                                             options: {
                                                 modules: {
                                                     localIdentName:
@@ -190,32 +194,32 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                             }
                                         },
                                         {
-                                            loader: getLoaderPath('postcss-loader'),
+                                            loader: postcssLoader,
                                             options: {
                                                 postcssOptions: {
                                                     plugins: [['autoprefixer']]
                                                 }
                                             }
                                         },
-                                        getLoaderPath('sass-loader')
+                                        sassLoader
                                     ]
                                 },
                                 // 这里匹配普通的 `<style>` 或 `<style scoped>`
                                 {
                                     use: [
                                         env === 'dev'
-                                            ? getLoaderPath('vue-style-loader')
+                                            ? vueStyleLoader
                                             : MiniCssExtractPlugin.loader,
-                                        getLoaderPath('css-loader'),
+                                        cssLoader,
                                         {
-                                            loader: getLoaderPath('postcss-loader'),
+                                            loader: postcssLoader,
                                             options: {
                                                 postcssOptions: {
                                                     plugins: [['autoprefixer']]
                                                 }
                                             }
                                         },
-                                        getLoaderPath('sass-loader')
+                                        sassLoader
                                     ]
                                 }
                             ]
@@ -242,7 +246,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                         },
                         {
                             test: /\.html$/,
-                            loader: getLoaderPath('html-loader')
+                            loader: require.resolve('html-loader')
                         }
                     ]
                 }
@@ -253,11 +257,9 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             alias: {
                 '@': path.join(projectPath, '/src'),
                 // 兼容 支持vue运行时Options语法
-                // vue: 'vue/dist/vue.esm-bundler.js',
-                vue: path.dirname(require.resolve('vue')),
+                vue: 'vue/dist/vue.esm-bundler.js',
                 'vue-router': path.dirname(require.resolve('vue-router')),
                 qs: path.dirname(require.resolve('qs')),
-                husky: path.dirname(require.resolve('husky')),
                 ...getCustomAliasConfig()
             }
         },

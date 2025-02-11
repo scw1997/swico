@@ -99,7 +99,7 @@ const restartServer = () => {
         }
     );
     if (result.error) {
-        toast.error(result.error.message());
+        toast.error(result.error.message);
         process.exit(1);
     }
 };
@@ -155,9 +155,7 @@ const createCompileListener = (compiler: WebpackCompiler) => {
                 }
             });
         }
-        toast.info(
-            `Compiled successfully ${info?.time ? `in ${(info.time / 1000).toFixed(2)}s` : ''}`
-        );
+        toast.info(`Compiled ${info?.time ? `in ${(info.time / 1000).toFixed(2)}s` : ''}`);
     });
 };
 
