@@ -17,6 +17,7 @@ import { WebpackCompiler } from 'webpack-cli';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 
+
 // 当前开发服务器的端口号和routerBase值的缓存
 let currentPort,
     currentRouterBase = '/';
@@ -58,7 +59,7 @@ const handleWatch = (projectPath, devServer, env) => {
             // console.log('eventName', eventName, filePath);
 
             let replaceIndexText = await fs.readFile(
-                path.resolve(projectPath, `./src/.swico${envPath}index.js`),
+                path.resolve(projectPath, `./.swico${envPath}index.js`),
                 'utf8'
             );
 
@@ -121,9 +122,9 @@ const getMockGetLogger = (compiler: WebpackCompiler) => {
 };
 
 const filterStyleFileList = [
-    "Can't resolve '../../global.less'",
-    "Can't resolve '../../global.css'",
-    "Can't resolve '../../global.scss'"
+    'Can\'t resolve \'../../global.less\'',
+    'Can\'t resolve \'../../global.css\'',
+    'Can\'t resolve \'../../global.scss\''
 ];
 const createCompileListener = (compiler: WebpackCompiler) => {
     // @ts-ignore

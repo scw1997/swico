@@ -145,10 +145,11 @@ export const toast = {
 export const initIndexFile = async () => {
     let fileText = await fs.readFile(path.resolve(__dirname, '../index.js'), 'utf8');
     const targetPath = path.resolve(__dirname, '../index.js');
+    const projectPath = process.cwd();
 
-    //还原react hooks的引入路径，由从.secywo引入改为从脚手架引入（避免当不存在.swico文件时的引入错误问题）
+    //还原node-modules中swico包里react hooks的引入路径，由从.swico引入改为从脚手架引入（避免当不存在.swico文件时的引入错误问题）
     const formatHooksPath = path
-        .resolve(process.cwd(), './src/.swico/react-hooks')
+        .resolve(projectPath, './.swico/react-hooks')
         // @ts-ignore
         .replaceAll('\\', '/');
 
@@ -161,21 +162,21 @@ export const initIndexFile = async () => {
         await fs.writeFile(targetPath, fileText);
     }
 
-    //还原react/vue history的引入路径，由从.secywo引入改为从脚手架引入（避免当不存在.swico文件时的引入错误问题）
+    //还原node-modules中swico包里react/vue history的引入路径，由从.swico引入改为从脚手架引入（避免当不存在.swico文件时的引入错误问题）
     const formatDevHistoryPath = path
-        .resolve(process.cwd(), './src/.swico/.dev/history')
+        .resolve(projectPath, './.swico/.dev/history')
         // @ts-ignore
         .replaceAll('\\', '/');
 
     const formatProdHistoryPath = path
-        .resolve(process.cwd(), './src/.swico/.prod/history')
+        .resolve(projectPath, './.swico/.prod/history')
         // @ts-ignore
         .replaceAll('\\', '/');
 
     if (fileText.includes(`require("${formatDevHistoryPath}");`)) {
         fileText = fileText.replaceAll(
             `require("${formatDevHistoryPath}");`,
-            'require("./mock-history");' //这里是个虚拟的history，反正都用不上，只是过渡修改下，避免引用报错
+            'require("./mock-history");' //这里是个虚拟的history，都用不上，只是过渡修改下，避免引用报错
         );
 
         await fs.writeFile(targetPath, fileText);
