@@ -4,7 +4,7 @@ import { Router, RouterLink } from 'vue-router';
 
 export type CustomConfigType = GlobalData['customConfig'];
 export { RouterView as Outlet } from 'vue-router';
-export { useLocation, useNav } from './template/vue/vue-hooks';
+export { useLocation, useNav } from './project-path/.swico-vue/vue-hooks';
 export { history } from './mock-history';
 export type { GlobalSwicoConfigType };
 //二次封装link组件，只支持部分属性

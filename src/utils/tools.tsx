@@ -156,7 +156,7 @@ export const initIndexFile = async () => {
     if (fileText.includes(`require("${formatHooksPath}");`)) {
         fileText = fileText.replaceAll(
             `require("${formatHooksPath}");`,
-            'require("./template/react/react-hooks");'
+            'require("./project-path/.swico-react/react-hooks");'
         );
 
         await fs.writeFile(targetPath, fileText);

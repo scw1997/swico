@@ -18,7 +18,7 @@ export const Link: FC<{
 
 export { Outlet } from 'react-router-dom';
 
-export { useLocation, useNav } from './template/react/react-hooks';
+export { useLocation, useNav } from './project-path/.swico-react/react-hooks';
 
 export { history } from './mock-history';
 

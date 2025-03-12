@@ -192,14 +192,17 @@ const initCliIndexFile = async (
     );
 
     //处理react hooks的引入路径，由从脚手架引入改为从.swico引入
-    const formatHooksPath = path
-        .resolve(projectPath, './.swico/react-hooks')
-        // @ts-ignore
-        .replaceAll('\\', '/');
-    replaceFileText = replaceFileText.replaceAll(
-        'require("./template/react/react-hooks");',
-        `require("${formatHooksPath}");`
-    );
+    if(templateType==='react'){
+        const formatHooksPath = path
+            .resolve(projectPath, './.swico/react-hooks')
+            // @ts-ignore
+            .replaceAll('\\', '/');
+        replaceFileText = replaceFileText.replaceAll(
+            'require("./project-path/.swico-react/react-hooks");',
+            `require("${formatHooksPath}");`
+        );
+    }
+
 
     //处理history的引入路径，由从脚手架引入改为从.swico引入
     const formatHistoryPath = path
@@ -308,8 +311,7 @@ export const handleLoadingFile = async (replaceIndexText, envPath) => {
     let newReplaceIndexText = replaceIndexText;
     try {
         await fs.access(path.resolve(projectPath, './src/loading/index.tsx'), fs.constants.F_OK);
-        //存在则将template中引入的loading组件路径替换
-        newReplaceIndexText = newReplaceIndexText.replace('"../loading"', '"../../src/loading"');
+        //存在则无需处理
     } catch (e) {
         //不存在也要替换成原值
         newReplaceIndexText = newReplaceIndexText.replace('"../../src/loading"', '"../loading"');
@@ -324,7 +326,7 @@ export const handleGlobalStyleFile = (replaceIndexText) => {
     if (styleFilePath) {
         //存在则先重置状态，再添加引入
         newReplaceIndexText = newReplaceIndexText.replaceAll(
-            `require("../../global.${styleFileType}");`,
+            `require("../../src/global.${styleFileType}");`,
             ''
         );
         newReplaceIndexText = `require("../../src/global.${styleFileType}");\n${replaceIndexText}`;
@@ -360,7 +362,7 @@ const initTemplateConfig = (
 
         //将template路径中跟环境相关的文件复制到开发端相应env路径
         await copyDirFiles(
-            path.resolve(__dirname, `../template/${templateType}/$env`),
+            path.resolve(__dirname, `../project-path/.swico-${templateType}/$env`),
             copyTargetPath,
             (fileName) =>
                 !fileName.endsWith('.d.ts') &&
@@ -371,7 +373,7 @@ const initTemplateConfig = (
 
         //将template路径中跟环境无关的配置文件复制到开发端固定路径
         await copyDirFiles(
-            path.resolve(__dirname, `../template/${templateType}`),
+            path.resolve(__dirname, `../project-path/.swico-${templateType}`),
             path.resolve(projectPath, './.swico'),
             (fileName) =>
                 ['react-hooks.js', 'vue-hooks.js', 'loading.js', 'Container.vue'].includes(fileName)
@@ -395,23 +397,23 @@ const initTemplateConfig = (
         replaceHooksText = replaceHooksText.replaceAll('$env', `.${env}`);
         await fs.writeFile(hooksFilePath, replaceHooksText);
 
-        //修正.swico-index.js中对global.ts的引入路径
-        replaceIndexText = replaceIndexText.replace(
-            'require("../../global")',
-            'require("../../src/global")'
-        );
-        //修正.swico-index.js中对layout文件的引入路径
-        if(templateType === 'vue'){
-            replaceIndexText = replaceIndexText.replace(
-                'require("../../layout/Layout")',
-                'require("../../src/layout/Layout")'
-            );
-        }else if(templateType === 'react'){
-            replaceIndexText = replaceIndexText.replace(
-                'require("../../layout")',
-                'require("../../src/layout")'
-            );
-        }
+        // //修正.swico-index.js中对global.ts的引入路径
+        // replaceIndexText = replaceIndexText.replace(
+        //     'require("../../global")',
+        //     'require("../../src/global")'
+        // );
+        // //修正.swico-index.js中对layout文件的引入路径
+        // if(templateType === 'vue'){
+        //     replaceIndexText = replaceIndexText.replace(
+        //         'require("../../layout/Layout")',
+        //         'require("../../src/layout/Layout")'
+        //     );
+        // }else if(templateType === 'react'){
+        //     replaceIndexText = replaceIndexText.replace(
+        //         'require("../../layout")',
+        //         'require("../../src/layout")'
+        //     );
+        // }
 
 
         //修正.swico-index.js中对global.css/less/scss的引入路径

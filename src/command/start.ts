@@ -48,6 +48,7 @@ const handleWatch = (projectPath, devServer, env) => {
         path.join(projectPath, '/src/global.less'),
         path.join(projectPath, '/src/global.scss')
     ];
+    // 监听react模板中loading文件变化
     const loadingFilePath = path.join(projectPath, '/src/loading/index.tsx');
     const tsTypingsWatcher = chokidar
         .watch([path.join(projectPath, '/src/**/*')], {

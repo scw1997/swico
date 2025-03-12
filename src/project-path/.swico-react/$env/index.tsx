@@ -9,8 +9,8 @@ import {
 } from 'react-router-dom';
 import Loading from '../loading';
 import { getHistory, history } from './history';
-import '../../global';
-import Layout from '../../layout';
+import '../../src/global';
+import Layout from '../../src/layout';
 import routes from './routes';
 import { routerBase, routerType } from './config';
 

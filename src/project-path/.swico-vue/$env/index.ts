@@ -1,7 +1,7 @@
 import { createApp, defineComponent } from 'vue';
 import Container from '../Container';
-import Layout from '../../layout/Layout';
-import global from '../../global';
+import Layout from '../../src/layout/Layout';
+import global from '../../src/global';
 import { getRouter } from './history';
 
 const router = getRouter();
