@@ -110,14 +110,20 @@ export const toast = {
         if (inline) {
             console.log(`${chalk.red.bold('error')} - ${message}`);
         } else {
-            console.log(
-                `${chalk.red.bold('error')} - ${title || 'There are some errors about Swico'}：`
-            );
+            // console.log('message',message);
             if (Array.isArray(message)) {
+               if(message.length>0){
+                   console.log(
+                       `${chalk.red.bold('error')} - ${title || 'There are some errors about Swico'}：`
+                   );
+               }
                 message.forEach((item) => {
                     console.log(`> ${chalk.red.bold(item)}`);
                 });
             } else if (message) {
+                console.log(
+                    `${chalk.red.bold('error')} - ${title || 'There are some errors about Swico'}：`
+                );
                 console.log(`> ${chalk.red.bold(message)}`);
             }
         }

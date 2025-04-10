@@ -23,7 +23,7 @@ export default async function (options: GlobalData) {
     return merge(baseConfig, {
         // @ts-ignore
         mode: 'development',
-        stats: 'errors-only',
+        stats: 'none', //不输出打包信息，自主捕获处理报错信息
         devtool:
             templateType === 'vue'
                 ? customDevtool ?? 'cheap-module-source-map'

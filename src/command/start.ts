@@ -123,9 +123,9 @@ const getMockGetLogger = (compiler: WebpackCompiler) => {
 };
 
 const filterStyleFileList = [
-    'Can\'t resolve \'../../global.less\'',
-    'Can\'t resolve \'../../global.css\'',
-    'Can\'t resolve \'../../global.scss\''
+    'Can\'t resolve \'../../src/global.less\'',
+    'Can\'t resolve \'../../src/global.css\'',
+    'Can\'t resolve \'../../src/global.scss\''
 ];
 const createCompileListener = (compiler: WebpackCompiler) => {
     // @ts-ignore
@@ -135,7 +135,7 @@ const createCompileListener = (compiler: WebpackCompiler) => {
     compiler.hooks.done.tap('done', (stats) => {
         const info = stats?.toJson();
         if (stats?.hasErrors()) {
-            // 将关于全局样式文件global.css|less|scss路径错误的相关问题过滤，不显示报错，交给上述handleWatch种监听处理
+            // 将关于全局样式文件global.css|less|scss删除后路径错误的相关问题过滤，不显示报错，交给上述handleWatch做监听处理
             // console.log('1', info);
             toast.error(
                 info?.errors
@@ -147,7 +147,7 @@ const createCompileListener = (compiler: WebpackCompiler) => {
         }
         // 对webpack warning只处理eslint报错，其余忽略且不提示
         if (stats?.hasWarnings()) {
-            // console.log('2', info);
+            // console.log('111111', info);
             const warnings = info.warnings;
             warnings.some((item) => {
                 const msg = item.message || item.stack;
@@ -159,6 +159,8 @@ const createCompileListener = (compiler: WebpackCompiler) => {
         }
         toast.info(`Compiled ${info?.time ? `in ${(info.time / 1000).toFixed(2)}s` : ''}`);
     });
+
+
 };
 
 // 执行start本地启动
@@ -213,7 +215,7 @@ export default async function start() {
         currentPort = availablePort;
     } catch (e) {
         const strErr = e.toString();
-        // console.log('2', strErr);
+        // console.log('2222222', strErr);
         if (!filterStyleFileList.find((item) => strErr.includes(item))) {
             toast.error(strErr);
         }
