@@ -311,7 +311,8 @@ export const handleLoadingFile = async (replaceIndexText, envPath) => {
     let newReplaceIndexText = replaceIndexText;
     try {
         await fs.access(path.resolve(projectPath, './src/loading/index.tsx'), fs.constants.F_OK);
-        //存在则无需处理
+        //存在则将template中引入的loading组件路径替换
+        newReplaceIndexText = newReplaceIndexText.replace('"../loading"', '"../../src/loading"');
     } catch (e) {
         //不存在也要替换成原值
         newReplaceIndexText = newReplaceIndexText.replace('"../../src/loading"', '"../loading"');
@@ -397,23 +398,6 @@ const initTemplateConfig = (
         replaceHooksText = replaceHooksText.replaceAll('$env', `.${env}`);
         await fs.writeFile(hooksFilePath, replaceHooksText);
 
-        // //修正.swico-index.js中对global.ts的引入路径
-        // replaceIndexText = replaceIndexText.replace(
-        //     'require("../../global")',
-        //     'require("../../src/global")'
-        // );
-        // //修正.swico-index.js中对layout文件的引入路径
-        // if(templateType === 'vue'){
-        //     replaceIndexText = replaceIndexText.replace(
-        //         'require("../../layout/Layout")',
-        //         'require("../../src/layout/Layout")'
-        //     );
-        // }else if(templateType === 'react'){
-        //     replaceIndexText = replaceIndexText.replace(
-        //         'require("../../layout")',
-        //         'require("../../src/layout")'
-        //     );
-        // }
 
 
         //修正.swico-index.js中对global.css/less/scss的引入路径
@@ -425,7 +409,7 @@ const initTemplateConfig = (
             replaceIndexText = replaceIndexText.replace('"../Container"', '"../Container.vue"');
             await updateIndexFileText(envPath, replaceIndexText);
         } else if (templateType === 'react') {
-            ////修正.swico-index.js中对React Router 的loading组件引入路径
+            //修正.swico-index.js中对React Router 的loading组件引入路径
             const newReplaceIndexText = await handleLoadingFile(replaceIndexText, envPath);
             //更新index.js
             await updateIndexFileText(envPath, newReplaceIndexText);

@@ -77,7 +77,7 @@ const handleWatch = (projectPath, devServer, env) => {
                         await updateIndexFileText(envPath, replaceIndexText);
                         break;
                     case filePath === loadingFilePath:
-                        replaceIndexText = handleLoadingFile(replaceIndexText, envPath);
+                        replaceIndexText = await handleLoadingFile(replaceIndexText, envPath);
                         //更新index.js
                         await updateIndexFileText(envPath, replaceIndexText);
                 }
@@ -125,7 +125,8 @@ const getMockGetLogger = (compiler: WebpackCompiler) => {
 const filterStyleFileList = [
     'Can\'t resolve \'../../src/global.less\'',
     'Can\'t resolve \'../../src/global.css\'',
-    'Can\'t resolve \'../../src/global.scss\''
+    'Can\'t resolve \'../../src/global.scss\'',
+    'Can\'t resolve \'../../src/loading\''
 ];
 const createCompileListener = (compiler: WebpackCompiler) => {
     // @ts-ignore
