@@ -1,32 +1,32 @@
 {
   "compilerOptions": {
     "removeComments": true, //去掉注释
-    "experimentalDecorators": true,
+    "experimentalDecorators": true, //启用装饰器
     "module": "CommonJS", //指定生成哪个模块系统代码： "None"， "CommonJS"， "AMD"， "System"， "UMD"， "ES6"或 "ES2015"。
-    "target": "ES5", //指定ECMAScript目标版本 "ES3"（默认）， "ES5"， "ES6"/ "ES2015"， "ES2016"， "ES2017"或 "ESNext"。
+    "target": "ES2015", //指定ECMAScript目标版本 "ES3"（默认）， "ES5"， "ES6"/ "ES2015"， "ES2016"， "ES2017"或 "ESNext"。
     "sourceMap": false, //生成相应的 .map文件
-    "allowJs": true,
+    "allowJs": true, //允许编译js文件
     "skipLibCheck": false, //忽略所有的声明文件（ *.d.ts）的类型检查。
-    "esModuleInterop": true,
+    "esModuleInterop": true, //允许从没有设置默认导出的模块中默认导入。这并不影响代码的输出，仅为了类型检查。
     "allowSyntheticDefaultImports": true, //允许从没有设置默认导出的模块中默认导入。这并不影响代码的输出，仅为了类型检查。
     "strict": false, //启用所有严格类型检查选项。
     "forceConsistentCasingInFileNames": true, //禁止对同一个文件的不一致的引用。
     "noFallthroughCasesInSwitch": true, //报告switch语句的fallthrough错误。（即，不允许switch的case语句贯穿）
     "noUnusedLocals": false, //若有未使用的局部变量则抛错。
     "noUnusedParameters": false, //若有未使用的参数则抛错
-    "noEmit": false, //不生成输出文件。
-    "moduleResolution": "Node",
-    "baseUrl": "./",
-    "resolveJsonModule": true,
-    "outDir": "./dist",
-    "declaration": true,
-    "types": ["node"],
-    "jsx": "react"
+    "noEmit": false, //是否不生成输出文件。
+    "moduleResolution": "Node", //指定模块解析策略。
+    "baseUrl": "./", //指定一个或更多的基本目录，以解析非相对模块名称。
+    "resolveJsonModule": true, //允许从json文件导入数据。
+    "outDir": "./dist", //输出文件目录
+    "declaration": true, //生成声明文件
+    "types": ["node"], //指定一个或多个包含类型声明文件的目录。
+    "jsx": "react" //指定JSX代码所使用的React实例。
   },
-  "include": [
+  "include": [ //指定要编译的文件
     "src",
     "src/project-path/.swico-vue/**/*", //不知道为啥tsc编译时会忽略这里路径的部分文件，所以这里要写上
     "./package.json"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"]//指定要排除的文件
 }

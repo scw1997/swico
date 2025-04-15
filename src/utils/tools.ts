@@ -114,7 +114,7 @@ export const toast = {
             if (Array.isArray(message)) {
                if(message.length>0){
                    console.log(
-                       `${chalk.red.bold('error')} - ${title || 'There are some errors about Swico'}：`
+                       `${chalk.red.bold('error')} - ${title || 'Swico errors'}：`
                    );
                }
                 message.forEach((item) => {
@@ -122,7 +122,7 @@ export const toast = {
                 });
             } else if (message) {
                 console.log(
-                    `${chalk.red.bold('error')} - ${title || 'There are some errors about Swico'}：`
+                    `${chalk.red.bold('error')} - ${title || 'Swico errors'}：`
                 );
                 console.log(`> ${chalk.red.bold(message)}`);
             }
@@ -135,7 +135,7 @@ export const toast = {
             console.log(`${chalk.hex(color).bold('warning')} - ${message}`);
         } else {
             console.log(
-                `${chalk.hex(color).bold('warning')} - ${title || 'There are some warnings about Swico'}：`
+                `${chalk.hex(color).bold('warning')} - ${title || ' Swico warnings'}：`
             );
             if (Array.isArray(message)) {
                 message.forEach((item) => {

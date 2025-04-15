@@ -1,6 +1,5 @@
-import webpack from 'webpack';
-import WebpackDevServer from 'webpack-dev-server';
-import getStartConfig from '../config/webpack.dev';
+
+import getStartConfig from '../config/rsbpack.dev';
 import { colorConfig, getPort, initIndexFile, toast } from '../utils/tools';
 import {
     getProjectConfig,
@@ -13,9 +12,10 @@ import spawn from 'cross-spawn';
 import path from 'path';
 const { SWICO_PORT, SWICO_RESTART, SWICO_ROUTER_BASE } = process.env;
 import packageJson from '../../package.json';
-import { WebpackCompiler } from 'webpack-cli';
 import chalk from 'chalk';
+import { RspackDevServer } from '@rspack/dev-server';
 import fs from 'fs-extra';
+import {Compiler, MultiCompiler, rspack} from '@rspack/core';
 
 
 // 当前开发服务器的端口号和routerBase值的缓存
@@ -35,7 +35,7 @@ const handleWatch = (projectPath, devServer, env) => {
             ignored: [path.join(projectPath, '/config/swico.prod.ts')] //生产环境配置改变不需要重启
         })
         .on('all', async (path, stats) => {
-            toast.warning('Swico configuration files changed, restarting server...', {
+            toast.warning('Configuration files changed, restarting server...', {
                 inline: true
             });
             await devServer.stop();
@@ -58,7 +58,6 @@ const handleWatch = (projectPath, devServer, env) => {
         })
         .on('all', async (eventName, filePath, stats) => {
             // console.log('eventName', eventName, filePath);
-
             let replaceIndexText = await fs.readFile(
                 path.resolve(projectPath, `./.swico${envPath}index.js`),
                 'utf8'
@@ -107,7 +106,7 @@ const restartServer = () => {
 };
 
 // 覆盖devServer初始输出信息的方法
-const getMockGetLogger = (compiler: WebpackCompiler) => {
+const getMockGetLogger = (compiler: Compiler) => {
     const logger = compiler.getInfrastructureLogger('name');
     const { log, debug, error, warn } = logger;
     return (name) => {
@@ -128,19 +127,19 @@ const filterStyleFileList = [
     'Can\'t resolve \'../../src/global.scss\'',
     'Can\'t resolve \'../../src/loading\''
 ];
-const createCompileListener = (compiler: WebpackCompiler) => {
+const createCompileListener = (compiler: MultiCompiler) => {
     // @ts-ignore
     compiler.hooks.beforeCompile.tap('beforeCompile', () => {
         toast.info('Compiling...');
     });
     compiler.hooks.done.tap('done', (stats) => {
+        // @ts-ignore
         const info = stats?.toJson();
         if (stats?.hasErrors()) {
             // 将关于全局样式文件global.css|less|scss删除后路径错误的相关问题过滤，不显示报错，交给上述handleWatch做监听处理
             // console.log('1', info);
             toast.error(
                 info?.errors
-
                     .map((item) => item.message || item.stack)
                     .filter((item1) => !filterStyleFileList.find((item2) => item1.includes(item2)))
             );
@@ -148,11 +147,11 @@ const createCompileListener = (compiler: WebpackCompiler) => {
         }
         // 对webpack warning只处理eslint报错，其余忽略且不提示
         if (stats?.hasWarnings()) {
-            // console.log('111111', info);
+            // console.log('warning', info);
             const warnings = info.warnings;
             warnings.some((item) => {
                 const msg = item.message || item.stack;
-                if (msg.startsWith('[eslint]')) {
+                if (msg.includes('[eslint]')) {
                     toast.warning(msg, { title: 'ESLint errors' });
                     return;
                 }
@@ -184,14 +183,14 @@ export default async function start() {
     const newRouterBase =
         customConfig['dev']?.router?.base ?? customConfig['base']?.router?.base ?? '/';
     const startConfig = await getStartConfig(projectConfig);
-    const compiler = webpack(startConfig as any);
+    const compiler = rspack(startConfig as any);
 
     // 覆盖devServer初始输出信息的方法
     const oriLogger = compiler.getInfrastructureLogger;
     // @ts-ignore
     compiler.getInfrastructureLogger = getMockGetLogger(compiler);
     //启动服务
-    const devServer = new WebpackDevServer(
+    const devServer = new RspackDevServer(
         { ...startConfig.devServer, port: availablePort },
         compiler
     );

@@ -1,9 +1,6 @@
 import path from 'path';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import webpack from 'webpack';
-const styleLoader = require.resolve('style-loader');
+import { rspack} from '@rspack/core';
 const cssLoader = require.resolve('css-loader');
 const lessLoader = require.resolve('less-loader');
 const sassLoader = require.resolve('sass-loader');
@@ -30,7 +27,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
     const defineConfigData = customConfig?.base?.define ?? {};
     const formatObj = await getFormatDefineVars(defineConfigData);
     if (Object.keys(formatObj).length !== 0) {
-        basicPlugins.push(new webpack.DefinePlugin(formatObj));
+        basicPlugins.push(new rspack.DefinePlugin(formatObj));
     }
 
     return {
@@ -39,24 +36,36 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         //打包后文件路径
         output: {
             path: path.join(projectPath, '/dist'),
+            //配置bundle js输出路径和名称
             filename: 'js/[name].[chunkhash].js',
+            chunkFilename: 'js/[name].[chunkhash].js',
+            //配置css文件输出路径和名称
+            cssFilename:'css/[name].[contenthash].css',
+            cssChunkFilename:'css/[name].[contenthash].css',
             // 静态文件打包后的路径及文件名（默认是走全局的，如果有独立的设置就按照自己独立的设置来。）
             assetModuleFilename: 'assets/[name]_[chunkhash][ext]',
             publicPath,
             clean: true
         },
-        target: ['web', 'es5'], //webpack5默认生成es6，设置编译打包生成es5代码
-        cache: {
-            type: 'filesystem' // 使用文件缓存
+        // 开启原生支持css
+        experiments: {
+            css: true
         },
+        target: ['web', 'es2015'], //webpack5默认生成es6，设置编译打包生成es5代码
+
         module: {
+            parser:{
+                'css/auto': {
+                    namedExports: false //支持css modules默认导入
+                }
+            },
             rules: [
                 {
                     test: /\.(tsx|ts|jsx)$/,
                     exclude: /node_modules/,
                     use: [
                         {
-                            loader: require.resolve('swc-loader'),
+                            loader: 'builtin:swc-loader',
                             options: {
                                 jsc: {
                                     parser: {
@@ -81,31 +90,9 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 {
                     oneOf: [
                         {
-                            test: /\.module\.css$/,
-                            use: [
-                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
-                                {
-                                    loader: cssLoader,
-                                    options: {
-                                        modules: {
-                                            localIdentName: 'moduleStyle_[local]_[contenthash:8]'
-                                        }
-                                    }
-                                },
-                                {
-                                    loader: postcssLoader,
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['autoprefixer']]
-                                        }
-                                    }
-                                }
-                            ]
-                        },
-                        {
                             test: /\.css$/,
+                            type: 'css/auto', // 智能识别普通css和module.css
                             use: [
-                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
                                 cssLoader,
                                 {
                                     loader: postcssLoader,
@@ -117,36 +104,11 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                 }
                             ]
                         },
-                        {
-                            test: /\.module\.less$/,
 
-                            use: [
-                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
-                                {
-                                    loader: cssLoader,
-                                    options: {
-                                        modules: {
-                                            localIdentName: 'moduleStyle_[local]_[contenthash:8]'
-                                        }
-                                    }
-                                },
-
-                                {
-                                    loader: postcssLoader,
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['postcss-preset-env', 'autoprefixer']]
-                                        }
-                                    }
-                                },
-                                lessLoader
-                            ]
-                        },
                         {
                             test: /\.less$/,
+                            type: 'css/auto', // 👈
                             use: [
-                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
-                                cssLoader,
                                 {
                                     loader: postcssLoader,
                                     options: {
@@ -156,37 +118,12 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                     }
                                 },
                                 lessLoader
-                            ]
-                        },
-                        {
-                            test: /\.module\.scss$/,
-                            use: [
-                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
-                                {
-                                    loader: cssLoader,
-                                    options: {
-                                        modules: {
-                                            localIdentName: 'moduleStyle_[local]_[contenthash:8]'
-                                        }
-                                    }
-                                },
-
-                                {
-                                    loader: postcssLoader,
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['postcss-preset-env', 'autoprefixer']]
-                                        }
-                                    }
-                                },
-                                sassLoader
                             ]
                         },
                         {
                             test: /\.scss$/,
+                            type: 'css/auto', // 👈
                             use: [
-                                env === 'dev' ? styleLoader : MiniCssExtractPlugin.loader,
-                                cssLoader,
                                 {
                                     loader: postcssLoader,
                                     options: {
@@ -195,7 +132,15 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                                         }
                                     }
                                 },
-                                lessLoader
+                                {
+                                    loader: sassLoader,
+                                    options: {
+                                        // 同时使用 `modern-compiler` 和 `sass-embedded` 可以显著提升构建性能
+                                        // 需要 `sass-loader >= 14.2.1`
+                                        api: 'modern-compiler',
+                                        implementation: require.resolve('sass-embedded')
+                                    }
+                                }
                             ]
                         },
                         {
@@ -238,26 +183,16 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         externals: customConfig.base.externals,
         plugins: [
             ...basicPlugins,
-            new HtmlWebpackPlugin({
+            new rspack.HtmlRspackPlugin({
                 //不使用默认html文件，使用自己定义的html模板并自动引入打包后的js/css
                 template: path.join(projectPath, '/src/index.ejs'),
                 filename: 'index.html', //打包后的文件名
-                minify: {
-                    //压缩和简化代码
-                    collapseWhitespace: true, //是否去掉空行和空格
-                    removeAttributeQuotes: true //是否去掉html标签属性的引号
-                },
+                minify: true,
                 templateParameters: {
                     publicPath,
                     routerBase
                 },
                 hash: true //对html引用的js文件添加hash戳
-            }),
-
-            //提取css文件
-            new MiniCssExtractPlugin({
-                filename: env === 'dev' ? 'css/[name].css' : 'css/[name].[contenthash].css',
-                ignoreOrder: true
             }),
 
             ...(customBaseConfig?.plugins || initConfig.plugins)

@@ -1,8 +1,8 @@
-import webpack from 'webpack';
-import getBuildConfig from '../config/webpack.prod';
+import getBuildConfig from '../config/rspack.prod';
 import { getProjectConfig, GlobalData } from '../utils/config';
 import { initIndexFile, toast } from '../utils/tools';
 import packageJson from '../../package.json';
+import {rspack} from '@rspack/core';
 // 执行start本地启动
 export default async function () {
     process.env.SWICO_ENV = 'prod';
@@ -18,12 +18,13 @@ export default async function () {
         customConfig,
         templateType
     });
-    const compiler = webpack(buildConfig as any);
+    const compiler = rspack(buildConfig as any);
     compiler.run((err, stats) => {
         if (err) {
             toast.error(err.stack || err.toString());
             return;
         }
+        // @ts-ignore
         const info = stats.toJson();
 
         if (stats.hasErrors()) {
