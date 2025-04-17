@@ -1,9 +1,7 @@
 import path from 'path';
 import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
 import { VueLoaderPlugin } from 'vue-loader';
-import {CssExtractRspackPlugin, rspack} from '@rspack/core';
-const vueStyleLoader = require.resolve('vue-style-loader');
-const cssLoader = require.resolve('css-loader');
+import { rspack } from '@rspack/core';
 const lessLoader = require.resolve('less-loader');
 const sassLoader = require.resolve('sass-loader');
 const postcssLoader = require.resolve('postcss-loader');
@@ -41,9 +39,9 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             //配置bundle js输出路径和名称
             filename: 'js/[name].[chunkhash].js',
             chunkFilename: 'js/[name].[chunkhash].js',
-            //配置css文件输出路径和名称
-            cssFilename:'css/[name].[contenthash].css',
-            cssChunkFilename:'css/[name].[contenthash].css',
+            //配置主入口和chunk css文件输出路径和名称（这里开发环境使用contenthash/chunkhash会有报错bug，所以暂切使用id）
+            cssFilename: 'css/[id].css',
+            cssChunkFilename: 'css/[id].css',
             // 静态文件打包后的路径及文件名（默认是走全局的，如果有独立的设置就按照自己独立的设置来。）
             assetModuleFilename: 'assets/[name]_[id][ext]',
             publicPath,
@@ -55,7 +53,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         },
         target: ['web', 'es5'], //webpack5默认生成es6，设置编译打包生成es5代码
         module: {
-            parser:{
+            parser: {
                 'css/auto': {
                     namedExports: false //支持css modules默认导入
                 }
@@ -96,18 +94,40 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                         {
                             test: /\.less$/,
                             type: 'css', //
-                            loader:lessLoader
+                            use: [
+                                {
+                                    loader: postcssLoader,
+                                    options: {
+                                        postcssOptions: {
+                                            plugins: [['autoprefixer']]
+                                        }
+                                    }
+                                },
+                                lessLoader
+                            ]
                         },
                         {
                             test: /\.scss$/,
                             type: 'css', //
-                            loader:sassLoader,
-                            options: {
-                                // 同时使用 `modern-compiler` 和 `sass-embedded` 可以显著提升构建性能
-                                // 需要 `sass-loader >= 14.2.1`
-                                api: 'modern-compiler',
-                                implementation: require.resolve('sass-embedded')
-                            }
+                            use: [
+                                {
+                                    loader: postcssLoader,
+                                    options: {
+                                        postcssOptions: {
+                                            plugins: [['autoprefixer']]
+                                        }
+                                    }
+                                },
+                                {
+                                    loader: sassLoader,
+                                    options: {
+                                        // 同时使用 `modern-compiler` 和 `sass-embedded` 可以显著提升构建性能
+                                        // 需要 `sass-loader >= 14.2.1`
+                                        api: 'modern-compiler',
+                                        implementation: require.resolve('sass-embedded')
+                                    }
+                                }
+                            ]
                         },
 
                         {

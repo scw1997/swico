@@ -1,10 +1,9 @@
 import { initConfig, GlobalData } from '../utils/config';
 import path from 'path';
 import { merge } from 'webpack-merge';
-import EslintPlugin from 'eslint-webpack-plugin';
+import EslintPlugin from 'eslint-rspack-plugin';
 import {TsCheckerRspackPlugin} from 'ts-checker-rspack-plugin';
 import { toast } from '../utils/tools';
-import {rspack} from '@rspack/core';
 
 export default async function (options: GlobalData) {
     const { projectPath, customConfig, templateType, entryPath, env } = options;
@@ -29,9 +28,6 @@ export default async function (options: GlobalData) {
             templateType === 'vue'
                 ? customDevtool ?? 'cheap-module-source-map'
                 : customDevtool ?? 'eval-cheap-module-source-map', // development
-        optimization: {
-            runtimeChunk: 'single'
-        },
         devServer: {
             //使用HTML5 History API时，index.html可能需要提供页面来代替任何404响应。
             historyApiFallback: {
@@ -45,9 +41,9 @@ export default async function (options: GlobalData) {
             },
             proxy: customConfig?.dev?.proxy ?? initConfig.proxy,
             compress: true, //启动gzip压缩
-            hot: true, //开启热更新
+            hot: true, //是否开启热更新
             open: false, //是否自动打开浏览器,
-            liveReload:false, //禁止每次修改自动刷新页面
+            liveReload:false, //每次修改自动刷新页面
             static: {
                 //提供静态文件服务的路径
                 directory: path.join(projectPath, '/public')
@@ -55,7 +51,6 @@ export default async function (options: GlobalData) {
             server: customConfig.dev.https === true ? 'https' : 'http'
         },
         plugins: [
-            new rspack.HotModuleReplacementPlugin(),
             //ts类型检查
             new TsCheckerRspackPlugin({
                 logger: {
@@ -72,12 +67,14 @@ export default async function (options: GlobalData) {
                 }
             }),
             new EslintPlugin({
+                configType:'flat',
                 context: path.join(projectPath, '/src'),
                 //禁用报错则停止编译，将错误信息传给webpack统一格式化输出
                 failOnError: false,
                 failOnWarning: true,
                 extensions: templateType === 'vue' ? ['vue', 'ts', 'js'] : ['tsx', 'ts', 'js'],
                 // emitError: false,
+
                 emitWarning: false,
                 // 开启缓存
                 cache: true

@@ -1,5 +1,5 @@
 import { GlobalData, GlobalSwicoConfigType } from './utils/config';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router';
 import React, { CSSProperties, FC, ReactNode } from 'react';
 
 export type CustomConfigType = GlobalData['customConfig'];
@@ -16,7 +16,7 @@ export const Link: FC<{
 }> = ({ replace, to, style, className, children }) =>
     React.createElement(RouterLink, { replace, to, style, className }, children);
 
-export { Outlet } from 'react-router-dom';
+export { Outlet } from 'react-router';
 
 export { useLocation, useNav } from './project-path/.swico-react/react-hooks';
 
@@ -32,6 +32,7 @@ export interface DefineSwicoConfigType {
 export const defineConfig: DefineSwicoConfigType = (env, config) => config;
 
 //swico global.ts 配置
-export interface DefineGlobalConfigType {}
+
+export type DefineGlobalConfigType = object;
 export const defineGlobal: (config: DefineGlobalConfigType) => DefineGlobalConfigType = (config) =>
     config;

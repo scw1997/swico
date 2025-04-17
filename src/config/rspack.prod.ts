@@ -33,8 +33,11 @@ export default async function (options: GlobalData) {
 
     return merge(baseConfig, {
         // @ts-ignore
-        //控制输出文件大小的警告提示，单位字节
-
+        output:{
+            //配置主入口和chunk css文件输出路径和名称
+            cssFilename:'css/[name].[contenthash].css',
+            cssChunkFilename:'css/[name].[contenthash].css'
+        },
         performance: {
             hints: false //不显示性能警告信息
         },

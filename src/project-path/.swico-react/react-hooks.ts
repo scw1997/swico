@@ -1,4 +1,4 @@
-import { useLocation as useOriLocation, useParams, useNavigate } from 'react-router-dom';
+import { useLocation as useOriLocation, useParams, useNavigate } from 'react-router';
 import { pathNameList, compareURLPatterns, interpolatePath } from './$env/history';
 import { SwicoLocationType, UseLocationType, UseNavType } from '../../typings/global-type';
 import qs from 'qs';

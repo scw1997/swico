@@ -28,7 +28,7 @@ const handleWatch = (projectPath, devServer, env) => {
 
     //监听配置文件修改，重启服务
     const configFilesWatcher = chokidar
-        .watch([path.join(projectPath, '/config/*.ts'), path.join(projectPath, '/.eslintrc')], {
+        .watch([path.join(projectPath, '/config/*.ts'), path.join(projectPath, '/.eslint.config.mjs')], {
             interval: 500,
             binaryInterval: 500,
             ignoreInitial: true,

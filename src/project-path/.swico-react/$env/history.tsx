@@ -48,7 +48,7 @@ export const interpolatePath = (pathTemplate: string, params: Record<string, any
     const pathParts = pathTemplate.split('/');
     const interpolatedParts = pathParts.map((part) => {
         // 查找参数（以:开头和结尾）
-        const paramMatch = part.match(/^\:(.+)$/);
+        const paramMatch = part.match(/^:(.+)$/);
         if (paramMatch) {
             // 如果找到了参数，使用params对象中的对应值替换
             const paramName = paramMatch[1];
@@ -144,7 +144,7 @@ const getLocation = (historyLocation): SwicoLocationType => {
 
 //格式化处理option
 const getFormatHistoryOption = (
-    // eslint-disable-next-line no-undef
+
     to: SwicoHistoryOptionType,
     pathList: ReturnType<typeof getPathNameList>,
     type: 'push' | 'replace'

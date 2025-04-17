@@ -6,7 +6,7 @@ import {
     Navigate,
     Outlet,
     RouterProvider
-} from 'react-router-dom';
+} from 'react-router';
 import Loading from '../loading';
 import { getHistory, history } from './history';
 import '../../src/global';

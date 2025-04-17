@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router';
 import React from 'react';
 
 // react模板的layout/index.ts的模拟文件

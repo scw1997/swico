@@ -36,12 +36,12 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         //打包后文件路径
         output: {
             path: path.join(projectPath, '/dist'),
-            //配置bundle js输出路径和名称
+            //配置主入口和chunk js输出路径和名称
             filename: 'js/[name].[chunkhash].js',
             chunkFilename: 'js/[name].[chunkhash].js',
-            //配置css文件输出路径和名称
-            cssFilename:'css/[name].[contenthash].css',
-            cssChunkFilename:'css/[name].[contenthash].css',
+            //配置主入口和chunk css文件输出路径和名称（这里开发环境使用contenthash/chunkhash会有报错bug，所以暂切使用id）
+            cssFilename:'css/[id].css',
+            cssChunkFilename:'css/[id].css',
             // 静态文件打包后的路径及文件名（默认是走全局的，如果有独立的设置就按照自己独立的设置来。）
             assetModuleFilename: 'assets/[name]_[chunkhash][ext]',
             publicPath,
@@ -51,7 +51,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         experiments: {
             css: true
         },
-        target: ['web', 'es2015'], //webpack5默认生成es6，设置编译打包生成es5代码
+        target: ['web', 'es2015'], //设置编译打包生成es2015代码
 
         module: {
             parser:{
@@ -175,7 +175,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
             alias: {
                 '@': path.join(projectPath, '/src'),
-                'react-router-dom': path.dirname(require.resolve('react-router-dom')),
+                'react-router': path.dirname(require.resolve('react-router')),
                 qs: path.dirname(require.resolve('qs')),
                 ...getCustomAliasConfig()
             }
