@@ -3,9 +3,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { initConfig, GlobalData } from '../utils/config';
 import { merge } from 'webpack-merge';
-import WebpackBar from 'webpackbar';
-import { colorConfig } from '../utils/tools';
-import {rspack} from '@rspack/core';
+import { rspack } from '@rspack/core';
 
 const BundleAnalyzerPlugin = BundleAnalyzer.BundleAnalyzerPlugin;
 const isAnalyze = process.env.ANALYZE === 'true';
@@ -22,7 +20,7 @@ export default async function (options: GlobalData) {
         ...options,
         env: 'prod'
     } as GlobalData);
-
+    const consoleAvailable = customConfig.prod?.console ?? initConfig.console;
     //处理public文件夹（静态资源）
     const isPublicDirExist = await fs.exists(path.join(projectPath, '/public'));
     //处理其他自定义复制输出目录的文件
@@ -30,13 +28,12 @@ export default async function (options: GlobalData) {
 
     //自定义的sourcemap生成方式
     const customDevtool = customConfig.prod.devtool ?? customConfig.base.devtool;
-
     return merge(baseConfig, {
         // @ts-ignore
-        output:{
+        output: {
             //配置主入口和chunk css文件输出路径和名称
-            cssFilename:'css/[name].[contenthash].css',
-            cssChunkFilename:'css/[name].[contenthash].css'
+            cssFilename: 'css/[name].[contenthash].css',
+            cssChunkFilename: 'css/[name].[contenthash].css'
         },
         performance: {
             hints: false //不显示性能警告信息
@@ -47,6 +44,24 @@ export default async function (options: GlobalData) {
             //减少 entry chunk 体积，提高性能。
             runtimeChunk: true,
             minimize: true,
+
+            minimizer: [
+                new rspack.SwcJsMinimizerRspackPlugin({
+                    minimizerOptions: {
+                        minify: true,
+                        mangle: true,
+                        compress: {
+                            passes: 2,
+                            // 是否需要移除console
+                            drop_console: !consoleAvailable
+                        },
+                        format: {
+                            //是否移除注释,false表示是
+                            comments: false
+                        }
+                    }
+                })
+            ],
             splitChunks: {
                 chunks: 'all', //将多入口文件共享的模块提取到公共块
                 // 定义缓存组，如将第三方库打包到单独的文件。解决重复打包问题
@@ -98,12 +113,7 @@ export default async function (options: GlobalData) {
                       })
                   ]
                 : []),
-            // 编译进度条
-            new WebpackBar({
-                name: 'Swico',
-                color: colorConfig.theme,
-                profile: false
-            }),
+
             ...(customConfig.prod?.plugins ?? [])
         ]
     });

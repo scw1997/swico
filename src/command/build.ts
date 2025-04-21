@@ -2,7 +2,7 @@ import getBuildConfig from '../config/rspack.prod';
 import { getProjectConfig, GlobalData } from '../utils/config';
 import { initIndexFile, toast } from '../utils/tools';
 import packageJson from '../../package.json';
-import {rspack} from '@rspack/core';
+import { rspack } from '@rspack/core';
 // 执行start本地启动
 export default async function () {
     process.env.SWICO_ENV = 'prod';
@@ -19,6 +19,7 @@ export default async function () {
         templateType
     });
     const compiler = rspack(buildConfig as any);
+    toast.info('Building...');
     compiler.run((err, stats) => {
         if (err) {
             toast.error(err.stack || err.toString());
@@ -35,6 +36,6 @@ export default async function () {
         if (stats.hasWarnings()) {
             toast.warning(info.warnings.map((item) => item.stack || item.message));
         }
-        toast.success('Build complete');
+        toast.success(`Build complete ${info?.time ? `in ${(info.time / 1000).toFixed(2)}s` : ''}`);
     });
 }

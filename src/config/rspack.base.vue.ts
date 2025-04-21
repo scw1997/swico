@@ -1,7 +1,9 @@
 import path from 'path';
 import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
 import { VueLoaderPlugin } from 'vue-loader';
-import { rspack } from '@rspack/core';
+import { CssExtractRspackPlugin, DefinePlugin, HtmlRspackPlugin } from '@rspack/core';
+const vueStyleLoader = require.resolve('vue-style-loader');
+const cssLoader = require.resolve('css-loader');
 const lessLoader = require.resolve('less-loader');
 const sassLoader = require.resolve('sass-loader');
 const postcssLoader = require.resolve('postcss-loader');
@@ -27,7 +29,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
     const defineConfigData = customConfig?.base?.define ?? {};
     const formatObj = await getFormatDefineVars(defineConfigData);
     if (Object.keys(formatObj).length !== 0) {
-        basicPlugins.push(new rspack.DefinePlugin(formatObj));
+        basicPlugins.push(new DefinePlugin(formatObj));
     }
 
     return {
@@ -47,17 +49,8 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             publicPath,
             clean: true
         },
-        // 开启原生支持css
-        experiments: {
-            css: true
-        },
         target: ['web', 'es5'], //webpack5默认生成es6，设置编译打包生成es5代码
         module: {
-            parser: {
-                'css/auto': {
-                    namedExports: false //支持css modules默认导入
-                }
-            },
             rules: [
                 {
                     test: /\.vue$/,
@@ -89,72 +82,182 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                     ]
                 },
 
+                // rspack提供的原生css不支持vue style module，所以这里还是得按照webpack类似的配置来
                 {
                     oneOf: [
                         {
-                            test: /\.less$/,
-                            type: 'css', //
-                            use: [
+                            test: /\.css$/,
+                            oneOf: [
+                                // 这里匹配 `<style module>`
                                 {
-                                    loader: postcssLoader,
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['autoprefixer']]
+                                    resourceQuery: /module/,
+                                    use: [
+                                        vueStyleLoader,
+                                        {
+                                            loader: cssLoader,
+                                            options: {
+                                                modules: {
+                                                    localIdentName:
+                                                        'moduleStyle_[local]_[contenthash:8]',
+                                                    namedExport: false
+                                                }
+                                            }
+                                        },
+                                        {
+                                            loader: postcssLoader,
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
                                         }
-                                    }
+                                    ]
                                 },
-                                lessLoader
+                                // 这里匹配普通的 `<style>` 或 `<style scoped>`
+                                {
+                                    use: [
+                                        env === 'dev'
+                                            ? vueStyleLoader
+                                            : CssExtractRspackPlugin.loader,
+                                        cssLoader,
+                                        {
+                                            loader: postcssLoader,
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            test: /\.less$/,
+
+                            oneOf: [
+                                // 这里匹配 `<style module>`
+                                {
+                                    resourceQuery: /module/,
+                                    use: [
+                                        vueStyleLoader,
+                                        {
+                                            loader: cssLoader,
+                                            options: {
+                                                modules: {
+                                                    localIdentName:
+                                                        'moduleStyle_[local]_[contenthash:8]',
+                                                    namedExport: false
+                                                }
+                                            }
+                                        },
+                                        {
+                                            loader: postcssLoader,
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
+                                        },
+                                        lessLoader
+                                    ]
+                                },
+                                // 这里匹配普通的 `<style>` 或 `<style scoped>`
+                                {
+                                    use: [
+                                        env === 'dev'
+                                            ? vueStyleLoader
+                                            : CssExtractRspackPlugin.loader,
+                                        cssLoader,
+                                        {
+                                            loader: postcssLoader,
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
+                                        },
+                                        lessLoader
+                                    ]
+                                }
                             ]
                         },
                         {
                             test: /\.scss$/,
-                            type: 'css', //
-                            use: [
+
+                            oneOf: [
+                                // 这里匹配 `<style module>`
                                 {
-                                    loader: postcssLoader,
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['autoprefixer']]
-                                        }
-                                    }
+                                    resourceQuery: /module/,
+                                    use: [
+                                        vueStyleLoader,
+                                        {
+                                            loader: cssLoader,
+                                            options: {
+                                                modules: {
+                                                    localIdentName:
+                                                        'moduleStyle_[local]_[contenthash:8]',
+                                                    namedExport: false
+                                                }
+                                            }
+                                        },
+                                        {
+                                            loader: postcssLoader,
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
+                                        },
+                                        sassLoader
+                                    ]
                                 },
+                                // 这里匹配普通的 `<style>` 或 `<style scoped>`
                                 {
-                                    loader: sassLoader,
-                                    options: {
-                                        // 同时使用 `modern-compiler` 和 `sass-embedded` 可以显著提升构建性能
-                                        // 需要 `sass-loader >= 14.2.1`
-                                        api: 'modern-compiler',
-                                        implementation: require.resolve('sass-embedded')
-                                    }
+                                    use: [
+                                        env === 'dev'
+                                            ? vueStyleLoader
+                                            : CssExtractRspackPlugin.loader,
+                                        cssLoader,
+                                        {
+                                            loader: postcssLoader,
+                                            options: {
+                                                postcssOptions: {
+                                                    plugins: [['autoprefixer']]
+                                                }
+                                            }
+                                        },
+                                        sassLoader
+                                    ]
                                 }
                             ]
-                        },
-
-                        {
-                            test: /\.(jpg|png|gif|webp|bmp|jpeg|svg)$/,
-                            type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择
-                            generator: {
-                                filename: 'images/[name]_[contenthash][ext]' // 独立的配置
-                            }
-                        },
-                        // 字体文件
-                        {
-                            test: /\.(otf|eot|woff2?|ttf)$/i,
-                            type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择
-                            generator: {
-                                filename: 'fonts/[name]_[contenthash][ext]'
-                            }
-                        },
-                        // 数据文件
-                        {
-                            test: /\.(txt|xml)$/i,
-                            type: 'asset/source'
-                        },
-                        {
-                            test: /\.html$/,
-                            loader: require.resolve('html-loader')
                         }
                     ]
+                },
+
+                {
+                    test: /\.(jpg|png|gif|webp|bmp|jpeg|svg)$/,
+                    type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择
+                    generator: {
+                        filename: 'images/[name]_[contenthash][ext]' // 独立的配置
+                    }
+                },
+                // 字体文件
+                {
+                    test: /\.(otf|eot|woff2?|ttf)$/i,
+                    type: 'asset', //在导出一个 data URI 和发送一个单独的文件之间自动选择
+                    generator: {
+                        filename: 'fonts/[name]_[contenthash][ext]'
+                    }
+                },
+                // 数据文件
+                {
+                    test: /\.(txt|xml)$/i,
+                    type: 'asset/source'
+                },
+                {
+                    test: /\.html$/,
+                    loader: require.resolve('html-loader')
                 }
             ]
         },
@@ -172,14 +275,18 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         externals: customConfig.base.externals,
         plugins: [
             ...basicPlugins,
+            new CssExtractRspackPlugin({
+                filename: env === 'dev' ? 'css/[name].css' : 'css/[name].[contenthash].css',
+                ignoreOrder: true
+            }),
             new VueLoaderPlugin(),
             //正在运行 Vue 的 esm-bundler 构建，它希望这些编译时的功能标志通过 bundler 配置全局注入，以便在生产包中获得更好的摇树优化
-            new rspack.DefinePlugin({
+            new DefinePlugin({
                 __VUE_OPTIONS_API__: true, //启用选项式 API 支持
                 __VUE_PROD_DEVTOOLS__: false, //在生产环境中禁用开发者工具支持
                 __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false //禁用生产环境构建下激活 (hydration) 不匹配的详细警告
             }),
-            new rspack.HtmlRspackPlugin({
+            new HtmlRspackPlugin({
                 //不使用默认html文件，使用自己定义的html模板并自动引入打包后的js/css
                 template: path.join(projectPath, '/src/index.ejs'),
                 filename: 'index.html', //打包后的文件名

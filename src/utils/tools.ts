@@ -112,18 +112,14 @@ export const toast = {
         } else {
             // console.log('message',message);
             if (Array.isArray(message)) {
-               if(message.length>0){
-                   console.log(
-                       `${chalk.red.bold('error')} - ${title || 'Swico errors'}：`
-                   );
-               }
+                if (message.length > 0) {
+                    console.log(`${chalk.red.bold('error')} - ${title || 'Swico errors'}：`);
+                }
                 message.forEach((item) => {
                     console.log(`> ${chalk.red.bold(item)}`);
                 });
             } else if (message) {
-                console.log(
-                    `${chalk.red.bold('error')} - ${title || 'Swico errors'}：`
-                );
+                console.log(`${chalk.red.bold('error')} - ${title || 'Swico errors'}：`);
                 console.log(`> ${chalk.red.bold(message)}`);
             }
         }
@@ -134,9 +130,7 @@ export const toast = {
         if (inline) {
             console.log(`${chalk.hex(color).bold('warning')} - ${message}`);
         } else {
-            console.log(
-                `${chalk.hex(color).bold('warning')} - ${title || ' Swico warnings'}：`
-            );
+            console.log(`${chalk.hex(color).bold('warning')} - ${title || ' Swico warnings'}：`);
             if (Array.isArray(message)) {
                 message.forEach((item) => {
                     console.log(`> ${chalk.hex(color).bold(item)}`);
@@ -164,8 +158,6 @@ export const initIndexFile = async () => {
             `require("${formatHooksPath}");`,
             'require("./project-path/.swico-react/react-hooks");'
         );
-
-        await fs.writeFile(targetPath, fileText);
     }
 
     //还原node-modules中swico包里react/vue history的引入路径，由从.swico引入改为从脚手架引入（避免当不存在.swico文件时的引入错误问题）
@@ -184,14 +176,12 @@ export const initIndexFile = async () => {
             `require("${formatDevHistoryPath}");`,
             'require("./mock-history");' //这里是个虚拟的history，都用不上，只是过渡修改下，避免引用报错
         );
-
-        await fs.writeFile(targetPath, fileText);
     } else if (fileText.includes(`require("${formatProdHistoryPath}");`)) {
         fileText = fileText.replaceAll(
             `require("${formatProdHistoryPath}");`,
             'require("./mock-history");' //这里是个虚拟的history，用不上，只是过渡修改下，避免引用报错
         );
-
-        await fs.writeFile(targetPath, fileText);
     }
+    // 最终整合写入
+    await fs.writeFile(targetPath, fileText);
 };

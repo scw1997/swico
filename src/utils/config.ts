@@ -60,8 +60,6 @@ export interface GlobalData {
     };
 }
 
-
-
 //获取开发者的自定义项目配置和相关参数
 export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> = async (env) => {
     // 当前命令行选择的目录(即项目根路径)
@@ -192,7 +190,7 @@ const initCliIndexFile = async (
     );
 
     //处理react hooks的引入路径，由从脚手架引入改为从.swico引入
-    if(templateType==='react'){
+    if (templateType === 'react') {
         const formatHooksPath = path
             .resolve(projectPath, './.swico/react-hooks')
             // @ts-ignore
@@ -202,7 +200,6 @@ const initCliIndexFile = async (
             `require("${formatHooksPath}");`
         );
     }
-
 
     //处理history的引入路径，由从脚手架引入改为从.swico引入
     const formatHistoryPath = path
@@ -239,10 +236,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default  = ${JSON.stringify(formatRouter)};`;
         let modifiedText = textData.replace(/"(\(\)=>import\('[^']+'\))"/g, '$1');
 
-        await fs.writeFile(
-            path.resolve(projectPath, `./.swico${envPath}routes.js`),
-            modifiedText
-        );
+        // 写入路由列表文件
+        await fs.writeFile(path.resolve(projectPath, `./.swico${envPath}routes.js`), modifiedText);
 
         //读取template/config文件的内容，根据routerType和routerBase的值动态替换里面的部分文本，从而更换路由模式
         const configFilePath = path.resolve(projectPath, `./.swico${envPath}config.js`);
@@ -270,7 +265,7 @@ exports.default  = ${JSON.stringify(formatRouter)};`;
             );
         }
 
-        //最后写入修改后的内容
+        //写入路由配置页面
         await fs.writeFile(configFilePath, replaceConfigText);
         resolve(null);
     });
@@ -385,12 +380,10 @@ const initTemplateConfig = (
         //处理路由相关
         await formatRouterConfig(routerConfig, templateType, env);
 
-
         let replaceIndexText = await fs.readFile(
             path.resolve(projectPath, `./.swico${envPath}index.js`),
             'utf8'
         );
-
 
         //修正.swico中hooks.js内部的引入
         const hooksFilePath = path.resolve(projectPath, `./.swico/${templateType}-hooks.js`);
@@ -398,11 +391,8 @@ const initTemplateConfig = (
         replaceHooksText = replaceHooksText.replaceAll('$env', `.${env}`);
         await fs.writeFile(hooksFilePath, replaceHooksText);
 
-
-
         //修正.swico-index.js中对global.css/less/scss的引入路径
         replaceIndexText = handleGlobalStyleFile(replaceIndexText);
-
 
         //修正.swico-index.js中Container组件引用路径，将ts换成vue（因为vue文件默认包内不支持引入）
         if (templateType === 'vue') {
