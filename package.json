@@ -10,9 +10,7 @@
     "ecmascript",
     "react",
     "vue",
-    "cli",
     "swico",
-    "template",
     "rspack"
   ],
   "bin": {
