@@ -60,7 +60,8 @@ export default async function (options: GlobalData) {
                             comments: false
                         }
                     }
-                })
+                }),
+                new rspack.LightningCssMinimizerRspackPlugin({})
             ],
             splitChunks: {
                 chunks: 'all', //将多入口文件共享的模块提取到公共块
