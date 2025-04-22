@@ -62,28 +62,8 @@ export default async function (options: GlobalData) {
                     }
                 }),
                 new rspack.LightningCssMinimizerRspackPlugin({})
-            ],
-            splitChunks: {
-                chunks: 'all', //将多入口文件共享的模块提取到公共块
-                // 定义缓存组，如将第三方库打包到单独的文件。解决重复打包问题
-                cacheGroups: {
-                    // 抽取第三方模块
-                    vendors: {
-                        test: /[\\/]node_modules[\\/]/,
-                        priority: -10,
-                        chunks: 'all',
-                        reuseExistingChunk: true
-                    },
-                    // 抽取
-                    commons: {
-                        minSize: 0, // 抽取的chunk最小大小
-                        minChunks: 2, // 最小引用数
-                        priority: -20,
-                        chunks: 'all',
-                        reuseExistingChunk: true
-                    }
-                }
-            }
+            ]
+            //代码分割相关配置rspack已内置，不再需要手动配置
         },
         plugins: [
             //复制静态资源文件
