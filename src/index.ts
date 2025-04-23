@@ -1,6 +1,6 @@
 import { GlobalData, GlobalSwicoConfigType } from './utils/config';
 import { UseLocationType, UseNavType } from './typings/global-type';
-
+export { rspack } from '@rspack/core';
 export type CustomConfigType = GlobalData['customConfig'];
 
 export type { GlobalSwicoConfigType };

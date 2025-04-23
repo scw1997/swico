@@ -28,7 +28,7 @@ export interface GlobalSwicoConfigType {
     console?: boolean; //是否需要保留console
     define?: Record<string, any>; //定义代码中可直接使用的变量，属性值会默认被JSON.stringify()
     alias?: Record<string, any>; //定义import映射
-    proxy?: Record<string, any>; //devServer中用到的proxy代理
+    proxy?: Array<Record<string, any>>; //devServer中用到的proxy代理
     https?: boolean; //是否使用https开发服务器
     copy?: Array<string | { from: string; to: string }>; //复制指定文件(夹)到指定目录
     devtool?: string; //设置 sourcemap 生成方式

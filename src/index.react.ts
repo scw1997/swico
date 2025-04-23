@@ -1,7 +1,7 @@
 import { GlobalData, GlobalSwicoConfigType } from './utils/config';
 import { Link as RouterLink } from 'react-router';
 import React, { CSSProperties, FC, ReactNode } from 'react';
-
+export { rspack } from '@rspack/core';
 export type CustomConfigType = GlobalData['customConfig'];
 
 export type { GlobalSwicoConfigType };

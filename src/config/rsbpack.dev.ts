@@ -2,7 +2,7 @@ import { initConfig, GlobalData } from '../utils/config';
 import path from 'path';
 import { merge } from 'webpack-merge';
 import EslintPlugin from 'eslint-rspack-plugin';
-import {TsCheckerRspackPlugin} from 'ts-checker-rspack-plugin';
+import { TsCheckerRspackPlugin } from 'ts-checker-rspack-plugin';
 import { toast } from '../utils/tools';
 
 export default async function (options: GlobalData) {
@@ -26,16 +26,16 @@ export default async function (options: GlobalData) {
         stats: 'none', //不输出打包信息，自主捕获处理报错信息
         devtool:
             templateType === 'vue'
-                ? customDevtool ?? 'cheap-module-source-map'
-                : customDevtool ?? 'eval-cheap-module-source-map', // development
+                ? (customDevtool ?? 'cheap-module-source-map')
+                : (customDevtool ?? 'eval-cheap-module-source-map'), // development
         devServer: {
             //使用HTML5 History API时，index.html可能需要提供页面来代替任何404响应。
             historyApiFallback: {
                 index: `${baseConfig.output.publicPath}index.html`
             },
             client: {
-                logging: 'error',
-                progress: false, //显示进度条
+                logging: 'error', //浏览器控制台只输出报错信息
+                progress: false, //不显示进度条
                 //错误，警告不会覆盖页面
                 overlay: false
             },
@@ -43,7 +43,7 @@ export default async function (options: GlobalData) {
             compress: true, //启动gzip压缩
             hot: true, //是否开启热更新
             open: false, //是否自动打开浏览器,
-            liveReload:false, //每次修改自动刷新页面
+            liveReload: false, //每次修改自动刷新页面
             static: {
                 //提供静态文件服务的路径
                 directory: path.join(projectPath, '/public')
@@ -67,7 +67,7 @@ export default async function (options: GlobalData) {
                 }
             }),
             new EslintPlugin({
-                configType:'flat',
+                configType: 'flat',
                 context: path.join(projectPath, '/src'),
                 //禁用报错则停止编译，将错误信息传给webpack统一格式化输出
                 failOnError: false,
