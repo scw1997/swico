@@ -1,6 +1,6 @@
 import path from 'path';
 import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
-import { rspack} from '@rspack/core';
+import { rspack } from '@rspack/core';
 const cssLoader = require.resolve('css-loader');
 const lessLoader = require.resolve('less-loader');
 const sassLoader = require.resolve('sass-loader');
@@ -40,8 +40,8 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             filename: 'js/[name].[chunkhash].js',
             chunkFilename: 'js/[name].[chunkhash].js',
             //配置主入口和chunk css文件输出路径和名称（这里开发环境使用contenthash/chunkhash会有报错bug，所以暂切使用id）
-            cssFilename:'css/[id].css',
-            cssChunkFilename:'css/[id].css',
+            cssFilename: 'css/[id].css',
+            cssChunkFilename: 'css/[id].css',
             // 静态文件打包后的路径及文件名（默认是走全局的，如果有独立的设置就按照自己独立的设置来。）
             assetModuleFilename: 'assets/[name]_[chunkhash][ext]',
             publicPath,
@@ -54,7 +54,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         target: ['web', 'es2015'], //设置编译打包生成es2015代码
 
         module: {
-            parser:{
+            parser: {
                 'css/auto': {
                     namedExports: false //支持css modules默认导入
                 }

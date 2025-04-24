@@ -5,7 +5,6 @@ export type CustomConfigType = GlobalData['customConfig'];
 export { RouterView as Outlet } from 'vue-router';
 export { useLocation, useNav } from './project-path/.swico-vue/vue-hooks';
 export { history } from './mock-history';
-export { rspack } from '@rspack/core';
 export type { GlobalSwicoConfigType };
 //二次封装link组件，只支持部分属性
 export const Link = defineComponent({
