@@ -60,6 +60,7 @@ export default async function (options: GlobalData) {
                     }
                 },
                 typescript: {
+                    memoryLimit: 15000, //增加进程内存限制，默认为8192
                     diagnosticOptions: {
                         semantic: true,
                         syntactic: true
