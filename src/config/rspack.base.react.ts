@@ -1,7 +1,6 @@
 import path from 'path';
 import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
 import { rspack } from '@rspack/core';
-const cssLoader = require.resolve('css-loader');
 const lessLoader = require.resolve('less-loader');
 const sassLoader = require.resolve('sass-loader');
 const postcssLoader = require.resolve('postcss-loader');
@@ -93,7 +92,6 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                             test: /\.css$/,
                             type: 'css/auto', // 智能识别普通css和module.css
                             use: [
-                                cssLoader,
                                 {
                                     loader: postcssLoader,
                                     options: {
