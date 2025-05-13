@@ -20,22 +20,25 @@ export default async function () {
     });
     const compiler = rspack(buildConfig as any);
     toast.info('Building...');
+    const now = Date.now();
     compiler.run((err, stats) => {
         if (err) {
             toast.error(err.stack || err.toString());
             return;
         }
-        // @ts-ignore
-        const info = stats.toJson();
-
         if (stats.hasErrors()) {
+            // @ts-ignore
+            const info = stats.toJson();
             toast.error(info.errors.map((item) => item.stack || item.message));
             return;
         }
-
         if (stats.hasWarnings()) {
+            // @ts-ignore
+            const info = stats.toJson();
             toast.warning(info.warnings.map((item) => item.stack || item.message));
         }
-        toast.success(`Build complete ${info?.time ? `in ${(info.time / 1000).toFixed(2)}s` : ''}`);
+
+        const duration = Date.now() - now;
+        toast.success(`Build complete in ${(duration / 1000).toFixed(2)}s`);
     });
 }
