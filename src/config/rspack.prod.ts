@@ -72,7 +72,7 @@ export default async function (options: GlobalData) {
                       new rspack.CopyRspackPlugin({
                           patterns: [
                               ...(isPublicDirExist ? [path.join(projectPath, '/public')] : []),
-                              ...copyConfig
+                              ...(copyConfig || [])
                           ]
                       })
                   ]

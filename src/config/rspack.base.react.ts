@@ -19,8 +19,8 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         }
         return custAliasConfig;
     };
-    const publicPath = customBaseConfig?.publicPath || initConfig.publicPath;
-    const routerBase = customBaseConfig?.router?.base || initConfig.router.base;
+    const publicPath = customBaseConfig?.publicPath ?? initConfig.publicPath;
+    const routerBase = customBaseConfig?.router?.base ?? initConfig.router.base;
     const basicPlugins = [];
     //处理自定义变量设置
     const defineConfigData = customConfig?.base?.define ?? {};
@@ -91,45 +91,19 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                         {
                             test: /\.css$/,
                             type: 'css/auto', // 智能识别普通css和module.css
-                            use: [
-                                {
-                                    loader: postcssLoader,
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['autoprefixer']]
-                                        }
-                                    }
-                                }
-                            ]
+                            use: [postcssLoader]
                         },
 
                         {
                             test: /\.less$/,
                             type: 'css/auto', // 👈
-                            use: [
-                                {
-                                    loader: postcssLoader,
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['autoprefixer']]
-                                        }
-                                    }
-                                },
-                                lessLoader
-                            ]
+                            use: [postcssLoader, lessLoader]
                         },
                         {
                             test: /\.scss$/,
                             type: 'css/auto', // 👈
                             use: [
-                                {
-                                    loader: postcssLoader,
-                                    options: {
-                                        postcssOptions: {
-                                            plugins: [['autoprefixer']]
-                                        }
-                                    }
-                                },
+                                postcssLoader,
                                 {
                                     loader: sassLoader,
                                     options: {
@@ -193,7 +167,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 hash: true //对html引用的js文件添加hash戳
             }),
 
-            ...(customBaseConfig?.plugins || initConfig.plugins)
+            ...(customBaseConfig?.plugins ?? initConfig.plugins)
         ]
     };
 }

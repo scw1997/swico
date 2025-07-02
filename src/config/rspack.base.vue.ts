@@ -22,11 +22,11 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         }
         return custAliasConfig;
     };
-    const publicPath = customBaseConfig?.publicPath || initConfig.publicPath;
-    const routerBase = customBaseConfig?.router?.base || initConfig.router.base;
+    const publicPath = customBaseConfig?.publicPath ?? initConfig.publicPath;
+    const routerBase = customBaseConfig?.router?.base ?? initConfig.router.base;
     const basicPlugins = [];
     //处理自定义变量设置
-    const defineConfigData = customConfig?.base?.define ?? {};
+    const defineConfigData = customBaseConfig?.define ?? {};
     const formatObj = await getFormatDefineVars(defineConfigData);
     if (Object.keys(formatObj).length !== 0) {
         basicPlugins.push(new DefinePlugin(formatObj));
@@ -272,7 +272,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 ...getCustomAliasConfig()
             }
         },
-        externals: customConfig.base.externals,
+        externals: customBaseConfig?.externals,
         plugins: [
             ...basicPlugins,
             new CssExtractRspackPlugin({
@@ -298,7 +298,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 hash: true //对html引用的js文件添加hash戳
             }),
 
-            ...(customBaseConfig?.plugins || initConfig.plugins)
+            ...(customBaseConfig?.plugins ?? initConfig.plugins)
         ]
     };
 }

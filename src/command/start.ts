@@ -1,4 +1,3 @@
-
 import getStartConfig from '../config/rsbpack.dev';
 import { colorConfig, getPort, initIndexFile, toast } from '../utils/tools';
 import {
@@ -15,8 +14,7 @@ import packageJson from '../../package.json';
 import chalk from 'chalk';
 import { RspackDevServer } from '@rspack/dev-server';
 import fs from 'fs-extra';
-import {Compiler, MultiCompiler, rspack} from '@rspack/core';
-
+import { Compiler, MultiCompiler, rspack } from '@rspack/core';
 
 // 当前开发服务器的端口号和routerBase值的缓存
 let currentPort,
@@ -28,12 +26,15 @@ const handleWatch = (projectPath, devServer, env) => {
 
     //监听配置文件修改，重启服务
     const configFilesWatcher = chokidar
-        .watch([path.join(projectPath, '/config/*.ts'), path.join(projectPath, '/.eslint.config.mjs')], {
-            interval: 500,
-            binaryInterval: 500,
-            ignoreInitial: true,
-            ignored: [path.join(projectPath, '/config/swico.prod.ts')] //生产环境配置改变不需要重启
-        })
+        .watch(
+            [path.join(projectPath, '/config/*.ts'), path.join(projectPath, '/.eslint.config.mjs')],
+            {
+                interval: 500,
+                binaryInterval: 500,
+                ignoreInitial: true,
+                ignored: [path.join(projectPath, '/config/swico.prod.ts')] //生产环境配置改变不需要重启
+            }
+        )
         .on('all', async (path, stats) => {
             toast.warning('Configuration files changed, restarting server...', {
                 inline: true
@@ -122,20 +123,22 @@ const getMockGetLogger = (compiler: Compiler) => {
 };
 
 const filterStyleFileList = [
-    'Can\'t resolve \'../../src/global.less\'',
-    'Can\'t resolve \'../../src/global.css\'',
-    'Can\'t resolve \'../../src/global.scss\'',
-    'Can\'t resolve \'../../src/loading\''
+    "Can't resolve '../../src/global.less'",
+    "Can't resolve '../../src/global.css'",
+    "Can't resolve '../../src/global.scss'",
+    "Can't resolve '../../src/loading'"
 ];
 const createCompileListener = (compiler: MultiCompiler) => {
+    let now = Date.now();
     // @ts-ignore
     compiler.hooks.beforeCompile.tap('beforeCompile', () => {
+        now = Date.now();
         toast.info('Compiling...');
     });
     compiler.hooks.done.tap('done', (stats) => {
-        // @ts-ignore
-        const info = stats?.toJson();
         if (stats?.hasErrors()) {
+            // @ts-ignore
+            const info = stats?.toJson();
             // 将关于全局样式文件global.css|less|scss删除后路径错误的相关问题过滤，不显示报错，交给上述handleWatch做监听处理
             // console.log('1', info);
             toast.error(
@@ -147,6 +150,8 @@ const createCompileListener = (compiler: MultiCompiler) => {
         }
         // 对webpack warning只处理eslint报错，其余忽略且不提示
         if (stats?.hasWarnings()) {
+            // @ts-ignore
+            const info = stats?.toJson();
             // console.log('warning', info);
             const warnings = info.warnings;
             warnings.some((item) => {
@@ -157,10 +162,9 @@ const createCompileListener = (compiler: MultiCompiler) => {
                 }
             });
         }
-        toast.info(`Compiled ${info?.time ? `in ${(info.time / 1000).toFixed(2)}s` : ''}`);
+        const duration = Date.now() - now;
+        toast.info(`Compiled ${duration ? `in ${(duration / 1000).toFixed(2)}s` : ''}`);
     });
-
-
 };
 
 // 执行start本地启动
