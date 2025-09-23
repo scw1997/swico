@@ -39,6 +39,7 @@ export default async function (options: GlobalData) {
                 //错误，警告不会覆盖页面
                 overlay: false
             },
+            headers: customConfig?.dev?.responseHeaders ?? initConfig.responseHeaders,
             proxy: customConfig?.dev?.proxy ?? initConfig.proxy,
             compress: true, //启动gzip压缩
             hot: true, //是否开启热更新

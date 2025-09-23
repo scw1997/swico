@@ -9,11 +9,17 @@ export const useLocation: UseLocationType = () => {
 
     const { search, hash, pathname, state } = location;
 
-    const matchItem = pathNameList.find(
+    let matchItem = pathNameList.find(
         (item) =>
             (Object.keys(params).length > 0 && compareURLPatterns(pathname, item.path)) ||
             item.path === pathname
     );
+    // 处理路由通配符*的匹配逻辑
+    const generalItem = pathNameList.find((item) => item.path === '*');
+    if (!matchItem && generalItem) {
+        //若当前没有匹配到路由项且又有通配符*的路由项，则重定向到该项
+        matchItem = generalItem;
+    }
 
     const query = search ? qs.parse(search.startsWith('?') ? search.slice(1) : search) : {};
 
@@ -23,7 +29,7 @@ export const useLocation: UseLocationType = () => {
         state: state ?? {},
         path: pathname,
         pathname: window?.location?.pathname,
-        search: '',
+        search: window?.location?.search,
         query,
         hash,
         params
@@ -35,8 +41,7 @@ const getFormatNavPath = (to: SwicoLocationType): string => {
     const search = query ? `?${qs.stringify(query)}` : '';
     const formatHash = hash ? (hash.startsWith('#') ? hash : `#${hash}`) : '';
     const formatPath = name ? pathNameList.find((item) => item.name === name)?.path : path;
-
-    let newPath = formatPath ? interpolatePath(formatPath, params || {}) : null;
+    let newPath = formatPath ? interpolatePath(formatPath, params || {}) : '';
 
     newPath = newPath + search + formatHash;
 

@@ -144,7 +144,6 @@ const getLocation = (historyLocation): SwicoLocationType => {
 
 //格式化处理option
 const getFormatHistoryOption = (
-
     to: SwicoHistoryOptionType,
     pathList: ReturnType<typeof getPathNameList>,
     type: 'push' | 'replace'
@@ -166,6 +165,9 @@ const getFormatHistoryOption = (
         } else {
             throw `An error occurred while executing 'history.${type}' operation: The path for the name "${name}" could not be found`;
         }
+    }
+    if (!path && !name) {
+        obj.pathname = '';
     }
     return obj;
 };

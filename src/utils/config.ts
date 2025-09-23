@@ -30,6 +30,7 @@ export interface GlobalSwicoConfigType {
     alias?: Record<string, any>; //定义import映射
     proxy?: Array<Record<string, any>>; //devServer中用到的proxy代理
     https?: boolean; //是否使用https开发服务器
+    responseHeaders?: Record<string, any>;
     copy?: Array<string | { from: string; to: string }>; //复制指定文件(夹)到指定目录
     devtool?: string; //设置 sourcemap 生成方式
     externals?: any; //设置哪些模块不打包，转而在index.ejs中通过 <script> 或其他方式引入
@@ -55,7 +56,10 @@ export interface GlobalData {
             | 'router'
             | 'template'
         >; //公共通用
-        dev: Pick<GlobalSwicoConfigType, 'plugins' | 'proxy' | 'https' | 'devtool' | 'router'>; //开发环境专用
+        dev: Pick<
+            GlobalSwicoConfigType,
+            'plugins' | 'proxy' | 'https' | 'devtool' | 'router' | 'responseHeaders'
+        >; //开发环境专用
         prod: Pick<GlobalSwicoConfigType, 'plugins' | 'console' | 'copy' | 'devtool' | 'router'>; //生产环境专用
     };
 }
@@ -99,7 +103,14 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
                     configFileName = 'swico.ts';
                     break;
                 case 'dev':
-                    supportedFieldList = ['plugins', 'proxy', 'https', 'devtool', 'router'];
+                    supportedFieldList = [
+                        'plugins',
+                        'proxy',
+                        'https',
+                        'devtool',
+                        'router',
+                        'responseHeaders'
+                    ];
                     configFileName = 'swico.dev.ts';
                     break;
                 case 'prod':
@@ -428,6 +439,7 @@ export const initConfig: Omit<GlobalSwicoConfigType, 'template'> = {
     plugins: [],
     publicPath: '/',
     proxy: undefined,
+    responseHeaders: undefined,
     copy: [],
     router: {
         base: '/',
