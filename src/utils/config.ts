@@ -200,8 +200,8 @@ const initCliIndexFile = async (
         'utf8'
     );
 
-    //处理react hooks的引入路径，由从脚手架引入改为从.swico引入
     if (templateType === 'react') {
+        //处理react hooks的引入路径，由从脚手架引入改为从.swico引入
         const formatHooksPath = path
             .resolve(projectPath, './.swico/react-hooks')
             // @ts-ignore
@@ -209,6 +209,15 @@ const initCliIndexFile = async (
         replaceFileText = replaceFileText.replaceAll(
             'require("./project-path/.swico-react/react-hooks");',
             `require("${formatHooksPath}");`
+        );
+        //处理react Link组件的引入路径，由从脚手架引入改为从.swico引入
+        const formatLinkComponentPath = path
+            .resolve(projectPath, './.swico/Link')
+            // @ts-ignore
+            .replaceAll('\\', '/');
+        replaceFileText = replaceFileText.replaceAll(
+            'require("./project-path/.swico-react/Link");',
+            `require("${formatLinkComponentPath}");`
         );
     }
 
@@ -383,7 +392,13 @@ const initTemplateConfig = (
             path.resolve(__dirname, `../project-path/.swico-${templateType}`),
             path.resolve(projectPath, './.swico'),
             (fileName) =>
-                ['react-hooks.js', 'vue-hooks.js', 'loading.js', 'Container.vue'].includes(fileName)
+                [
+                    'react-hooks.js',
+                    'vue-hooks.js',
+                    'Link.js',
+                    'loading.js',
+                    'Container.vue'
+                ].includes(fileName)
         );
 
         //下面是一些复制完之后需要修改的操作

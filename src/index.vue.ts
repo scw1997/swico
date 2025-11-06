@@ -6,21 +6,8 @@ export { RouterView as Outlet } from 'vue-router';
 export { useLocation, useNav } from './project-path/.swico-vue/vue-hooks';
 export { history } from './mock-history';
 export type { GlobalSwicoConfigType };
-//二次封装link组件，只支持部分属性
-export const Link = defineComponent({
-    components: {
-        RouterLink
-    },
-    props: {
-        to: {
-            type: String
-        },
-        replace: {
-            type: Boolean
-        }
-    },
-    template: '<RouterLink :to="to" :replace="replace" ><slot></slot></RouterLink>'
-});
+
+export { default as Link } from './project-path/.swico-vue/Link';
 
 //swico 配置
 export interface DefineSwicoConfigType {

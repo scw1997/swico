@@ -1,19 +1,10 @@
 import { GlobalData, GlobalSwicoConfigType } from './utils/config';
-import { Link as RouterLink } from 'react-router';
-import React, { CSSProperties, FC, ReactNode } from 'react';
 export type CustomConfigType = GlobalData['customConfig'];
 
 export type { GlobalSwicoConfigType };
 
 //二次封装link组件，统一只支持部分属性
-export const Link: FC<{
-    replace?: boolean;
-    to: string;
-    style?: CSSProperties;
-    className?: string;
-    children: ReactNode;
-}> = ({ replace, to, style, className, children }) =>
-    React.createElement(RouterLink, { replace, to, style, className }, children);
+export { default as Link } from './project-path/.swico-react/Link';
 
 export { Outlet } from 'react-router';
 
