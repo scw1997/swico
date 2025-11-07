@@ -3,7 +3,7 @@ import { App, defineComponent } from 'vue';
 import { Router, RouterLink } from 'vue-router';
 export type CustomConfigType = GlobalData['customConfig'];
 export { RouterView as Outlet } from 'vue-router';
-export { useLocation, useNav } from './project-path/.swico-vue/vue-hooks';
+export { useLocation, useNav } from './project-path/.swico-vue/hooks';
 export { history } from './mock-history';
 export type { GlobalSwicoConfigType };
 

@@ -268,6 +268,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 // 兼容 支持vue运行时Options语法
                 vue: 'vue/dist/vue.esm-bundler.js',
                 'vue-router': path.dirname(require.resolve('vue-router')),
+                swico: path.join(projectPath, '/.swico/index'),
                 qs: path.dirname(require.resolve('qs')),
                 ...getCustomAliasConfig()
             }

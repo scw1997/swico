@@ -148,6 +148,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             alias: {
                 '@': path.join(projectPath, '/src'),
                 'react-router': path.dirname(require.resolve('react-router')),
+                swico: path.join(projectPath, '/.swico/index'),
                 qs: path.dirname(require.resolve('qs')),
                 ...getCustomAliasConfig()
             }

@@ -1,5 +1,5 @@
 import { defineComponent } from 'vue';
-import { useNav } from './vue-hooks';
+import { useNav } from './hooks';
 
 export default defineComponent({
     name: 'Link',

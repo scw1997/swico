@@ -162,7 +162,7 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
     //在开发端项目生成.swico配置文件
     await initTemplateConfig(routerConfig, templateType, env);
     //处理脚手架入口文件
-    await initCliIndexFile(templateType, env);
+    await initCliEntryFile(projectPath, templateType, env);
 
     const envPath = env === 'dev' ? '.dev/' : '.prod/';
 
@@ -182,57 +182,45 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
     };
 };
 
-//根据template处理脚手架入口文件,暴露必要的api
-const initCliIndexFile = async (
+//修正.swico中入口index.js内部部分模块的引入路径
+const initCliEntryFile = async (
+    projectPath: string,
     templateType: GlobalData['templateType'],
     env: GlobalData['env']
 ) => {
-    // 当前命令行选择的目录(即项目根路径)
-    const projectPath = process.cwd();
-    const targetPath = path.resolve(__dirname, '../index.js');
-    const targetTypesPath = path.resolve(__dirname, '../index.d.ts');
-    let replaceFileText = await fs.readFile(
-        path.resolve(__dirname, `../index.${templateType}.js`),
-        'utf8'
+    //获取.swico中入口index.js的路径和内容
+    const entryFilePath = path.resolve(projectPath, './.swico/index.js');
+    let replaceEntryText = await fs.readFile(entryFilePath, 'utf8');
+    //处理hooks的引入路径，由从swico npm包内引入改为从项目生成的.swico引入
+    const formatHooksPath = path
+        .resolve(projectPath, './.swico/hooks')
+        // @ts-ignore
+        .replaceAll('\\', '/');
+    replaceEntryText = replaceEntryText.replaceAll(
+        `require("./project-path/.swico-${templateType}/hooks");`,
+        `require("${formatHooksPath}");`
     );
-    const fileTypesText = await fs.readFile(
-        path.resolve(__dirname, `../index.${templateType}.d.ts`),
-        'utf8'
+    //处理Link组件的引入路径，由从swico npm包内引入改为从项目生成的.swico引入
+    const formatLinkComponentPath = path
+        .resolve(projectPath, './.swico/Link')
+        // @ts-ignore
+        .replaceAll('\\', '/');
+    replaceEntryText = replaceEntryText.replaceAll(
+        `require("./project-path/.swico-${templateType}/Link");`,
+        `require("${formatLinkComponentPath}");`
     );
 
-    if (templateType === 'react') {
-        //处理react hooks的引入路径，由从脚手架引入改为从.swico引入
-        const formatHooksPath = path
-            .resolve(projectPath, './.swico/react-hooks')
-            // @ts-ignore
-            .replaceAll('\\', '/');
-        replaceFileText = replaceFileText.replaceAll(
-            'require("./project-path/.swico-react/react-hooks");',
-            `require("${formatHooksPath}");`
-        );
-        //处理react Link组件的引入路径，由从脚手架引入改为从.swico引入
-        const formatLinkComponentPath = path
-            .resolve(projectPath, './.swico/Link')
-            // @ts-ignore
-            .replaceAll('\\', '/');
-        replaceFileText = replaceFileText.replaceAll(
-            'require("./project-path/.swico-react/Link");',
-            `require("${formatLinkComponentPath}");`
-        );
-    }
-
-    //处理history的引入路径，由从脚手架引入改为从.swico引入
+    //处理history的引入路径，由从swico npm包内引入改为从项目生成的.swico引入
     const formatHistoryPath = path
         .resolve(projectPath, `./.swico/.${env}/history`)
         // @ts-ignore
         .replaceAll('\\', '/');
-    replaceFileText = replaceFileText.replaceAll(
+    replaceEntryText = replaceEntryText.replaceAll(
         'require("./mock-history");',
         `require("${formatHistoryPath}");`
     );
 
-    await fs.writeFile(targetPath, replaceFileText);
-    await fs.writeFile(targetTypesPath, fileTypesText);
+    await fs.writeFile(entryFilePath, replaceEntryText);
 };
 
 //路由相关配置
@@ -380,52 +368,43 @@ const initTemplateConfig = (
         await copyDirFiles(
             path.resolve(__dirname, `../project-path/.swico-${templateType}/$env`),
             copyTargetPath,
-            (fileName) =>
-                !fileName.endsWith('.d.ts') &&
-                (templateType === 'vue'
-                    ? !['Container.js', 'vue-hooks.js'].includes(fileName)
-                    : !['react-hooks.js'].includes(fileName))
+            (fileName) => !fileName.endsWith('.d.ts') && !['hooks.js'].includes(fileName)
         );
 
         //将template路径中跟环境无关的配置文件复制到开发端固定路径
         await copyDirFiles(
             path.resolve(__dirname, `../project-path/.swico-${templateType}`),
             path.resolve(projectPath, './.swico'),
-            (fileName) =>
-                [
-                    'react-hooks.js',
-                    'vue-hooks.js',
-                    'Link.js',
-                    'loading.js',
-                    'Container.vue'
-                ].includes(fileName)
+            (fileName) => ['hooks.js', 'Link.js', 'loading.js', 'Container.js'].includes(fileName)
         );
+
+        //处理swico包在开发项目里的引入入口文件
+        //由于rspack alias已配置swico的引入路径映射到了开发项目的.swico/index.js文件，所以这里需要将对应模板的入口文件复制到开发项目的.swico/index.js中
+        const entryFilePath = path.resolve(projectPath, './.swico/index.js');
+        await fs.copyFile(path.resolve(__dirname, `../index.${templateType}.js`), entryFilePath);
 
         //下面是一些复制完之后需要修改的操作
 
         //处理路由相关
         await formatRouterConfig(routerConfig, templateType, env);
 
-        let replaceIndexText = await fs.readFile(
-            path.resolve(projectPath, `./.swico${envPath}index.js`),
-            'utf8'
-        );
-
         //修正.swico中hooks.js内部的引入
-        const hooksFilePath = path.resolve(projectPath, `./.swico/${templateType}-hooks.js`);
+        const hooksFilePath = path.resolve(projectPath, './.swico/hooks.js');
         let replaceHooksText = await fs.readFile(hooksFilePath, 'utf8');
         replaceHooksText = replaceHooksText.replaceAll('$env', `.${env}`);
         await fs.writeFile(hooksFilePath, replaceHooksText);
 
-        //修正.swico-index.js中对global.css/less/scss的引入路径
+        let replaceIndexText = await fs.readFile(
+            path.resolve(projectPath, `./.swico${envPath}index.js`),
+            'utf8'
+        );
+        //修正.swico/$env/index.js中对global.css/less/scss的引入路径
         replaceIndexText = handleGlobalStyleFile(replaceIndexText);
 
-        //修正.swico-index.js中Container组件引用路径，将ts换成vue（因为vue文件默认包内不支持引入）
         if (templateType === 'vue') {
-            replaceIndexText = replaceIndexText.replace('"../Container"', '"../Container.vue"');
             await updateIndexFileText(envPath, replaceIndexText);
         } else if (templateType === 'react') {
-            //修正.swico-index.js中对React Router 的loading组件引入路径
+            //修正.swico/$env/index.js中对React的loading组件引入路径
             const newReplaceIndexText = await handleLoadingFile(replaceIndexText, envPath);
             //更新index.js
             await updateIndexFileText(envPath, newReplaceIndexText);

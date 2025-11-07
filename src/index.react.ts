@@ -8,7 +8,7 @@ export { default as Link } from './project-path/.swico-react/Link';
 
 export { Outlet } from 'react-router';
 
-export { useLocation, useNav } from './project-path/.swico-react/react-hooks';
+export { useLocation, useNav } from './project-path/.swico-react/hooks';
 
 export { history } from './mock-history';
 

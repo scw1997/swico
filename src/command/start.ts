@@ -1,5 +1,5 @@
 import getStartConfig from '../config/rsbpack.dev';
-import { colorConfig, getPort, initIndexFile, toast } from '../utils/tools';
+import { colorConfig, getPort, toast } from '../utils/tools';
 import {
     getProjectConfig,
     handleGlobalStyleFile,
@@ -177,7 +177,7 @@ export default async function start() {
         toast.info('Initializing development config...');
     }
 
-    await initIndexFile();
+    // await initIndexFile();
     //获取可用端口（优先使用重启时的传递的port环境变量）
     const availablePort = SWICO_RESTART === 'true' ? Number(SWICO_PORT) : await getPort();
     // @ts-ignore

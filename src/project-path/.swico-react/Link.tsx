@@ -1,6 +1,6 @@
 import React, { CSSProperties, FC, ReactNode } from 'react';
 import { SwicoHistoryOptionType, SwicoHistoryType, UseNavType } from '../../typings/global-type';
-import { useNav } from './react-hooks';
+import { useNav } from './hooks';
 
 interface PropsType {
     replace?: boolean;

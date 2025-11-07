@@ -1,6 +1,6 @@
 import getBuildConfig from '../config/rspack.prod';
 import { getProjectConfig, GlobalData } from '../utils/config';
-import { initIndexFile, toast } from '../utils/tools';
+import { toast } from '../utils/tools';
 import packageJson from '../../package.json';
 import { rspack } from '@rspack/core';
 // 执行start本地启动
@@ -8,7 +8,6 @@ export default async function () {
     process.env.SWICO_ENV = 'prod';
     toast.info(`Swico v${packageJson.version}`);
     toast.info('Initializing production config...');
-    await initIndexFile();
     const projectConfig = await getProjectConfig('prod');
     const { entryPath, templatePath, projectPath, customConfig, templateType } = projectConfig;
     const buildConfig = await getBuildConfig({
