@@ -1,7 +1,7 @@
 import BundleAnalyzer from 'webpack-bundle-analyzer';
 import path from 'path';
 import fs from 'fs-extra';
-import { initConfig, GlobalData } from '../utils/config';
+import { initConfig, GlobalData } from '../main-config';
 import { merge } from 'webpack-merge';
 import { rspack } from '@rspack/core';
 

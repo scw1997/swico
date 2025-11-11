@@ -1,7 +1,8 @@
 import path from 'path';
-import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
+import { getFormatDefineVars, initConfig, GlobalData } from '../main-config';
 import { VueLoaderPlugin } from 'vue-loader';
-import { CssExtractRspackPlugin, DefinePlugin, HtmlRspackPlugin } from '@rspack/core';
+import { CssExtractRspackPlugin, DefinePlugin } from '@rspack/core';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 const vueStyleLoader = require.resolve('vue-style-loader');
 const cssLoader = require.resolve('css-loader');
 const lessLoader = require.resolve('less-loader');
@@ -24,14 +25,14 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
     };
     const publicPath = customBaseConfig?.publicPath ?? initConfig.publicPath;
     const routerBase = customBaseConfig?.router?.base ?? initConfig.router.base;
-    const basicPlugins = [];
-    //处理自定义变量设置
-    const defineConfigData = customBaseConfig?.define ?? {};
-    const formatObj = await getFormatDefineVars(defineConfigData);
-    if (Object.keys(formatObj).length !== 0) {
-        basicPlugins.push(new DefinePlugin(formatObj));
-    }
-
+    //处理自定义变量
+    //内置的一些变量
+    const initialDefineVarsConfig = {
+        SWICO_ENV: JSON.stringify(env),
+        SWICO_ROUTER_BASE: JSON.stringify(routerBase),
+        SWICO_PUBLIC_PATH: JSON.stringify(publicPath)
+    };
+    const customDefineVarsConfig = await getFormatDefineVars(customBaseConfig?.define ?? {});
     return {
         //入口文件路径
         entry: entryPath,
@@ -275,30 +276,29 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         },
         externals: customBaseConfig?.externals,
         plugins: [
-            ...basicPlugins,
             new CssExtractRspackPlugin({
                 filename: env === 'dev' ? 'css/[name].css' : 'css/[name].[contenthash].css',
                 ignoreOrder: true
             }),
             new VueLoaderPlugin(),
-            //正在运行 Vue 的 esm-bundler 构建，它希望这些编译时的功能标志通过 bundler 配置全局注入，以便在生产包中获得更好的摇树优化
+
             new DefinePlugin({
+                //正在运行 Vue 的 esm-bundler 构建，它希望这些编译时的功能标志通过 bundler 配置全局注入，以便在生产包中获得更好的摇树优化
                 __VUE_OPTIONS_API__: true, //启用选项式 API 支持
                 __VUE_PROD_DEVTOOLS__: false, //在生产环境中禁用开发者工具支持
-                __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false //禁用生产环境构建下激活 (hydration) 不匹配的详细警告
+                __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false, //禁用生产环境构建下激活 (hydration) 不匹配的详细警告
+                // 下面为Swico自定义配置变量
+                ...initialDefineVarsConfig,
+                ...customDefineVarsConfig
             }),
-            new HtmlRspackPlugin({
+            new HtmlWebpackPlugin({
                 //不使用默认html文件，使用自己定义的html模板并自动引入打包后的js/css
                 template: path.join(projectPath, '/src/index.ejs'),
                 filename: 'index.html', //打包后的文件名
                 minify: true,
-                templateParameters: {
-                    publicPath,
-                    routerBase
-                },
+                templateParameters: initialDefineVarsConfig,
                 hash: true //对html引用的js文件添加hash戳
             }),
-
             ...(customBaseConfig?.plugins ?? initConfig.plugins)
         ]
     };

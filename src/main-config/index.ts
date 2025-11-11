@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
-import { colorConfig, copyDirFiles, getFormatRouter, toast } from './tools';
+import { colorConfig, copyDirFiles, getFormatRouter, toast } from '../utils';
 
 export type ConfigRoutesItemType = {
     component?: string; //页面路径
@@ -306,19 +306,32 @@ const getGlobalStyleFilePath = () => {
     return { filePath, fileType };
 };
 
-export const handleLoadingFile = async (replaceIndexText, envPath) => {
-    // 当前命令行选择的目录(即项目根路径)
-    const projectPath = process.cwd();
-    //处理React Router 的loading组件
+export const handleLoadingFile = async (
+    projectPath,
+    templateType: GlobalData['templateType'],
+    replaceIndexText
+) => {
     //先判断开发端是否存在loading组件
     let newReplaceIndexText = replaceIndexText;
     try {
-        await fs.access(path.resolve(projectPath, './src/loading/index.tsx'), fs.constants.F_OK);
+        await fs.access(
+            path.resolve(
+                projectPath,
+                `./src/loading/${templateType === 'react' ? 'index.tsx' : 'Loading.vue'}`
+            ),
+            fs.constants.F_OK
+        );
         //存在则将template中引入的loading组件路径替换
-        newReplaceIndexText = newReplaceIndexText.replace('"../loading"', '"../../src/loading"');
+        newReplaceIndexText = newReplaceIndexText.replace(
+            '"../loading"',
+            `"../../src/${templateType === 'react' ? 'loading' : 'loading/Loading'}"`
+        );
     } catch (e) {
         //不存在也要替换成原值
-        newReplaceIndexText = newReplaceIndexText.replace('"../../src/loading"', '"../loading"');
+        newReplaceIndexText = newReplaceIndexText.replace(
+            `"../../src/${templateType === 'react' ? 'loading' : 'loading/Loading'}"`,
+            '"../loading"'
+        );
     }
     return newReplaceIndexText;
 };
@@ -375,7 +388,7 @@ const initTemplateConfig = (
         await copyDirFiles(
             path.resolve(__dirname, `../project-path/.swico-${templateType}`),
             path.resolve(projectPath, './.swico'),
-            (fileName) => ['hooks.js', 'Link.js', 'loading.js', 'Container.js'].includes(fileName)
+            (fileName) => ['hooks.js', 'Link.js', 'loading.js'].includes(fileName)
         );
 
         //处理swico包在开发项目里的引入入口文件
@@ -401,14 +414,15 @@ const initTemplateConfig = (
         //修正.swico/$env/index.js中对global.css/less/scss的引入路径
         replaceIndexText = handleGlobalStyleFile(replaceIndexText);
 
-        if (templateType === 'vue') {
-            await updateIndexFileText(envPath, replaceIndexText);
-        } else if (templateType === 'react') {
-            //修正.swico/$env/index.js中对React的loading组件引入路径
-            const newReplaceIndexText = await handleLoadingFile(replaceIndexText, envPath);
-            //更新index.js
-            await updateIndexFileText(envPath, newReplaceIndexText);
-        }
+        //修正.swico/$env/index.js中对loading组件引入路径
+        const newReplaceIndexText = await handleLoadingFile(
+            projectPath,
+            templateType,
+            replaceIndexText
+        );
+        //更新index.js
+        await updateIndexFileText(envPath, newReplaceIndexText);
+
         resolve(null);
     });
 };

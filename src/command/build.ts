@@ -1,6 +1,6 @@
-import getBuildConfig from '../config/rspack.prod';
-import { getProjectConfig, GlobalData } from '../utils/config';
-import { toast } from '../utils/tools';
+import getBuildConfig from '../rspack-config/rspack.prod';
+import { getProjectConfig, GlobalData } from '../main-config';
+import { toast } from '../utils';
 import packageJson from '../../package.json';
 import { rspack } from '@rspack/core';
 // 执行start本地启动

@@ -1,15 +1,15 @@
-import getStartConfig from '../config/rsbpack.dev';
-import { colorConfig, getPort, toast } from '../utils/tools';
+import getStartConfig from '../rspack-config/rsbpack.dev';
+import { colorConfig, getPort, toast } from '../utils';
 import {
     getProjectConfig,
     handleGlobalStyleFile,
     handleLoadingFile,
     updateIndexFileText
-} from '../utils/config';
+} from '../main-config';
 import chokidar from 'chokidar';
 import spawn from 'cross-spawn';
 import path from 'path';
-const { SWICO_PORT, SWICO_RESTART, SWICO_ROUTER_BASE } = process.env;
+const { SWICO_DEV_PORT, SWICO_DEV_RESTART, SWICO_DEV_ROUTER_BASE } = process.env;
 import packageJson from '../../package.json';
 import chalk from 'chalk';
 import { RspackDevServer } from '@rspack/dev-server';
@@ -21,7 +21,7 @@ let currentPort,
     currentRouterBase = '/';
 
 //监听ts全局声明文件和cli config文件修改
-const handleWatch = (projectPath, devServer, env) => {
+const handleWatch = (projectPath, devServer, env, templateType) => {
     const envPath = env === 'dev' ? '/.dev/' : '/.prod/';
 
     //监听配置文件修改，重启服务
@@ -77,7 +77,11 @@ const handleWatch = (projectPath, devServer, env) => {
                         await updateIndexFileText(envPath, replaceIndexText);
                         break;
                     case filePath === loadingFilePath:
-                        replaceIndexText = await handleLoadingFile(replaceIndexText, envPath);
+                        replaceIndexText = await handleLoadingFile(
+                            projectPath,
+                            templateType,
+                            replaceIndexText
+                        );
                         //更新index.js
                         await updateIndexFileText(envPath, replaceIndexText);
                 }
@@ -90,9 +94,9 @@ const restartServer = () => {
     const result = spawn.sync(
         'cross-env',
         [
-            'SWICO_RESTART=true',
-            `SWICO_PORT=${currentPort}`,
-            `SWICO_ROUTER_BASE=${currentRouterBase}`,
+            'SWICO_DEV_RESTART=true',
+            `SWICO_DEV_PORT=${currentPort}`,
+            `SWICO_DEV_ROUTER_BASE=${currentRouterBase}`,
             'swico',
             'start'
         ],
@@ -169,9 +173,9 @@ const createCompileListener = (compiler: MultiCompiler) => {
 
 // 执行start本地启动
 export default async function start() {
-    // console.log('env', SWICO_RESTART, SWICO_PORT, SWICO_ROUTER_BASE);
+    // console.log('env', SWICO_DEV_RESTART, SWICO_DEV_PORT, SWICO_DEV_ROUTER_BASE );
     process.env.SWICO_ENV = 'dev';
-    if (SWICO_RESTART !== 'true') {
+    if (SWICO_DEV_RESTART !== 'true') {
         console.log('\n');
         toast.info(`Swico v${packageJson.version}`);
         toast.info('Initializing development config...');
@@ -179,11 +183,11 @@ export default async function start() {
 
     // await initIndexFile();
     //获取可用端口（优先使用重启时的传递的port环境变量）
-    const availablePort = SWICO_RESTART === 'true' ? Number(SWICO_PORT) : await getPort();
+    const availablePort = SWICO_DEV_RESTART === 'true' ? Number(SWICO_DEV_PORT) : await getPort();
     // @ts-ignore
     const projectConfig = await getProjectConfig('dev');
 
-    const { projectPath, customConfig, env } = projectConfig;
+    const { projectPath, customConfig, env, templateType } = projectConfig;
     const newRouterBase =
         customConfig['dev']?.router?.base ?? customConfig['base']?.router?.base ?? '/';
     const startConfig = await getStartConfig(projectConfig);
@@ -201,15 +205,15 @@ export default async function start() {
     try {
         //启动
         await devServer.start();
-        process.env.SWICO_PORT = availablePort.toString();
+        process.env.SWICO_DEV_PORT = availablePort.toString();
         //监听编译细节
         createCompileListener(compiler);
         // 还原devServer 日志输出
         compiler.getInfrastructureLogger = oriLogger;
-        handleWatch(projectPath, devServer, env);
+        handleWatch(projectPath, devServer, env, templateType);
         if (
-            SWICO_RESTART !== 'true' ||
-            (SWICO_RESTART === 'true' && newRouterBase !== SWICO_ROUTER_BASE)
+            SWICO_DEV_RESTART !== 'true' ||
+            (SWICO_DEV_RESTART === 'true' && newRouterBase !== SWICO_DEV_ROUTER_BASE)
         ) {
             toast.info(
                 `Project is running at：${chalk.hex('#29abe0')(`${startConfig.devServer.server}://localhost:${availablePort}${newRouterBase}`)}`

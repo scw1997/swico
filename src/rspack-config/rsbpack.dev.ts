@@ -1,9 +1,9 @@
-import { initConfig, GlobalData } from '../utils/config';
+import { initConfig, GlobalData } from '../main-config';
 import path from 'path';
 import { merge } from 'webpack-merge';
 import EslintPlugin from 'eslint-rspack-plugin';
 import { TsCheckerRspackPlugin } from 'ts-checker-rspack-plugin';
-import { toast } from '../utils/tools';
+import { toast } from '../utils';
 
 export default async function (options: GlobalData) {
     const { projectPath, customConfig, templateType, entryPath, env } = options;

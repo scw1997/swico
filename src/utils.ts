@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import * as process from 'process';
-import { ConfigRouterType, ConfigRoutesItemType, GlobalData } from './config';
+import { ConfigRouterType, ConfigRoutesItemType, GlobalData } from './main-config';
 
 //复制文件夹
 export const copyDirFiles = async (src, dest, filter?: (fileName) => boolean) => {

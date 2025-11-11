@@ -1,4 +1,4 @@
-import { GlobalData, GlobalSwicoConfigType } from './utils/config';
+import { GlobalData, GlobalSwicoConfigType } from './main-config';
 import { App, defineComponent } from 'vue';
 import { Router, RouterLink } from 'vue-router';
 export type CustomConfigType = GlobalData['customConfig'];

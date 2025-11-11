@@ -1,6 +1,7 @@
 import path from 'path';
-import { getFormatDefineVars, initConfig, GlobalData } from '../utils/config';
+import { getFormatDefineVars, initConfig, GlobalData } from '../main-config';
 import { rspack } from '@rspack/core';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 const lessLoader = require.resolve('less-loader');
 const sassLoader = require.resolve('sass-loader');
 const postcssLoader = require.resolve('postcss-loader');
@@ -21,14 +22,14 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
     };
     const publicPath = customBaseConfig?.publicPath ?? initConfig.publicPath;
     const routerBase = customBaseConfig?.router?.base ?? initConfig.router.base;
-    const basicPlugins = [];
-    //处理自定义变量设置
-    const defineConfigData = customConfig?.base?.define ?? {};
-    const formatObj = await getFormatDefineVars(defineConfigData);
-    if (Object.keys(formatObj).length !== 0) {
-        basicPlugins.push(new rspack.DefinePlugin(formatObj));
-    }
-
+    //处理自定义变量
+    //内置的一些变量
+    const initialDefineVarsConfig = {
+        SWICO_ENV: JSON.stringify(env),
+        SWICO_ROUTER_BASE: JSON.stringify(routerBase),
+        SWICO_PUBLIC_PATH: JSON.stringify(publicPath)
+    };
+    const customDefineVarsConfig = await getFormatDefineVars(customBaseConfig?.define ?? {});
     return {
         //入口文件路径
         entry: entryPath,
@@ -155,19 +156,18 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
         },
         externals: customConfig.base.externals,
         plugins: [
-            ...basicPlugins,
-            new rspack.HtmlRspackPlugin({
+            new HtmlWebpackPlugin({
                 //不使用默认html文件，使用自己定义的html模板并自动引入打包后的js/css
                 template: path.join(projectPath, '/src/index.ejs'),
                 filename: 'index.html', //打包后的文件名
                 minify: true,
-                templateParameters: {
-                    publicPath,
-                    routerBase
-                },
+                templateParameters: initialDefineVarsConfig,
                 hash: true //对html引用的js文件添加hash戳
             }),
-
+            new rspack.DefinePlugin({
+                ...initialDefineVarsConfig,
+                ...customDefineVarsConfig
+            }),
             ...(customBaseConfig?.plugins ?? initConfig.plugins)
         ]
     };

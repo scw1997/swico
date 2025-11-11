@@ -1,4 +1,4 @@
-import { GlobalData, GlobalSwicoConfigType } from './utils/config';
+import { GlobalData, GlobalSwicoConfigType } from './main-config';
 import { UseLocationType, UseNavType } from './typings/global-type';
 export type CustomConfigType = GlobalData['customConfig'];
 
