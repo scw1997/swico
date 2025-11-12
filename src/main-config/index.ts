@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
-import { colorConfig, copyDirFiles, getFormatRouter, toast } from '../utils';
+import { colorConfig, toast, copyDirFiles } from '../utils';
 
 export type ConfigRoutesItemType = {
     component?: string; //页面路径
@@ -63,6 +63,42 @@ export interface GlobalData {
         prod: Pick<GlobalSwicoConfigType, 'plugins' | 'console' | 'copy' | 'devtool' | 'router'>; //生产环境专用
     };
 }
+
+//将swico路由配置格式化
+const getFormatRouter = (projectPath: string, routes: ConfigRouterType['routes'], templateType) => {
+    const _main = (item: ConfigRoutesItemType) => {
+        const { component, name, children, redirect, decorator } = item;
+
+        return decorator
+            ? {
+                  ...item,
+                  component: `()=>import('${projectPath}/src/pages/${decorator}${templateType === 'vue' ? '.vue' : ''}')`,
+                  children: [
+                      {
+                          path: '',
+                          component: component
+                              ? `()=>import('${projectPath}/src/pages/${component}${templateType === 'vue' ? '.vue' : ''}')`
+                              : undefined,
+                          name,
+                          redirect,
+                          children: children ? children?.map((item) => _main(item)) : undefined
+                      }
+                  ]
+              }
+            : {
+                  ...item,
+                  component: component
+                      ? `()=>import('${projectPath}/src/pages/${component}${templateType === 'vue' ? '.vue' : ''}')`
+                      : undefined,
+                  name,
+                  redirect,
+                  children: children ? children?.map((item) => _main(item)) : undefined
+              };
+    };
+    return routes.map((item) => {
+        return _main(item);
+    });
+};
 
 //获取开发者的自定义项目配置和相关参数
 export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> = async (env) => {
@@ -306,32 +342,16 @@ const getGlobalStyleFilePath = () => {
     return { filePath, fileType };
 };
 
-export const handleLoadingFile = async (
-    projectPath,
-    templateType: GlobalData['templateType'],
-    replaceIndexText
-) => {
+export const handleLoadingFile = async (projectPath, replaceIndexText) => {
     //先判断开发端是否存在loading组件
     let newReplaceIndexText = replaceIndexText;
     try {
-        await fs.access(
-            path.resolve(
-                projectPath,
-                `./src/loading/${templateType === 'react' ? 'index.tsx' : 'Loading.vue'}`
-            ),
-            fs.constants.F_OK
-        );
+        await fs.access(path.resolve(projectPath, './src/loading/index.tsx'), fs.constants.F_OK);
         //存在则将template中引入的loading组件路径替换
-        newReplaceIndexText = newReplaceIndexText.replace(
-            '"../loading"',
-            `"../../src/${templateType === 'react' ? 'loading' : 'loading/Loading'}"`
-        );
+        newReplaceIndexText = newReplaceIndexText.replace('"../loading"', '"../../src/loading"');
     } catch (e) {
         //不存在也要替换成原值
-        newReplaceIndexText = newReplaceIndexText.replace(
-            `"../../src/${templateType === 'react' ? 'loading' : 'loading/Loading'}"`,
-            '"../loading"'
-        );
+        newReplaceIndexText = newReplaceIndexText.replace('"../../src/loading', '"../loading"');
     }
     return newReplaceIndexText;
 };
@@ -414,14 +434,13 @@ const initTemplateConfig = (
         //修正.swico/$env/index.js中对global.css/less/scss的引入路径
         replaceIndexText = handleGlobalStyleFile(replaceIndexText);
 
-        //修正.swico/$env/index.js中对loading组件引入路径
-        const newReplaceIndexText = await handleLoadingFile(
-            projectPath,
-            templateType,
-            replaceIndexText
-        );
+        if (templateType === 'react') {
+            //修正.swico/$env/index.js中对loading组件引入路径
+            replaceIndexText = await handleLoadingFile(projectPath, replaceIndexText);
+        }
+
         //更新index.js
-        await updateIndexFileText(envPath, newReplaceIndexText);
+        await updateIndexFileText(envPath, replaceIndexText);
 
         resolve(null);
     });

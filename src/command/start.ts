@@ -21,7 +21,7 @@ let currentPort,
     currentRouterBase = '/';
 
 //监听ts全局声明文件和cli config文件修改
-const handleWatch = (projectPath, devServer, env, templateType) => {
+const handleWatch = (projectPath, devServer, env) => {
     const envPath = env === 'dev' ? '/.dev/' : '/.prod/';
 
     //监听配置文件修改，重启服务
@@ -77,11 +77,7 @@ const handleWatch = (projectPath, devServer, env, templateType) => {
                         await updateIndexFileText(envPath, replaceIndexText);
                         break;
                     case filePath === loadingFilePath:
-                        replaceIndexText = await handleLoadingFile(
-                            projectPath,
-                            templateType,
-                            replaceIndexText
-                        );
+                        replaceIndexText = await handleLoadingFile(projectPath, replaceIndexText);
                         //更新index.js
                         await updateIndexFileText(envPath, replaceIndexText);
                 }
@@ -180,8 +176,6 @@ export default async function start() {
         toast.info(`Swico v${packageJson.version}`);
         toast.info('Initializing development config...');
     }
-
-    // await initIndexFile();
     //获取可用端口（优先使用重启时的传递的port环境变量）
     const availablePort = SWICO_DEV_RESTART === 'true' ? Number(SWICO_DEV_PORT) : await getPort();
     // @ts-ignore
@@ -210,7 +204,7 @@ export default async function start() {
         createCompileListener(compiler);
         // 还原devServer 日志输出
         compiler.getInfrastructureLogger = oriLogger;
-        handleWatch(projectPath, devServer, env, templateType);
+        handleWatch(projectPath, devServer, env);
         if (
             SWICO_DEV_RESTART !== 'true' ||
             (SWICO_DEV_RESTART === 'true' && newRouterBase !== SWICO_DEV_ROUTER_BASE)

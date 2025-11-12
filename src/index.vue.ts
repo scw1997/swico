@@ -1,13 +1,18 @@
 import { GlobalData, GlobalSwicoConfigType } from './main-config';
 import { App, defineComponent } from 'vue';
 import { Router, RouterLink } from 'vue-router';
+
 export type CustomConfigType = GlobalData['customConfig'];
-export { RouterView as Outlet } from 'vue-router';
+export { RouterView } from 'vue-router';
 export { useLocation, useNav } from './project-path/.swico-vue/hooks';
 export { history } from './mock-history';
 export type { GlobalSwicoConfigType };
 
-export { default as Link } from './project-path/.swico-vue/Link';
+export const Outlet = defineComponent({
+    name: 'Outlet',
+    template:
+        '<RouterView v-slot="{ Component }"><template v-if="Component"><Suspense><component :is="Component"></component><template #fallback></template></Suspense></template></RouterView>'
+});
 
 //swico 配置
 export interface DefineSwicoConfigType {
