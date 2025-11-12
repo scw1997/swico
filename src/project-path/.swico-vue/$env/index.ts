@@ -29,4 +29,4 @@ app.use(router);
 //回调触发
 global?.onInit?.(app, router);
 
-app.mount('#root');
+app.mount('#swico-root');

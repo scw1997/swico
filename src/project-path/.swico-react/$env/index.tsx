@@ -86,5 +86,5 @@ const App: FC = () => {
     return <RouterProvider router={router} />;
 };
 
-const root = createRoot(document.getElementById('root'));
+const root = createRoot(document.getElementById('swico-root'));
 root.render(<App />);
