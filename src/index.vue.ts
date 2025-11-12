@@ -10,8 +10,7 @@ export type { GlobalSwicoConfigType };
 
 export const Outlet = defineComponent({
     name: 'Outlet',
-    template:
-        '<RouterView v-slot="{ Component }"><template v-if="Component"><Suspense><component :is="Component"></component><template #fallback></template></Suspense></template></RouterView>'
+    template: '<RouterView />'
 });
 
 //swico 配置
