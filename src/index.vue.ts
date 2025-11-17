@@ -13,6 +13,8 @@ export const Outlet = defineComponent({
     template: '<RouterView />'
 });
 
+export { default as Link } from './project-path/.swico-vue/Link';
+
 //swico 配置
 export interface DefineSwicoConfigType {
     (env: 'base', config: CustomConfigType['base']);
