@@ -9,7 +9,7 @@ import {
 } from 'react-router';
 import Loading from '../loading';
 import { getHistory, history } from './history';
-import '../../src/global';
+import global from '../../src/global';
 import Layout from '../../src/layout';
 import routes from './routes';
 import { routerBase, routerType } from './config';
@@ -86,5 +86,12 @@ const App: FC = () => {
     return <RouterProvider router={router} />;
 };
 
-const root = createRoot(document.getElementById('swico-root'));
+const rootEle = document.createElement('div');
+rootEle.id = 'swico-root';
+document.body.appendChild(rootEle);
+
+const root = createRoot(rootEle);
 root.render(<App />);
+
+//回调触发
+(global?.onInit as () => void)?.();
