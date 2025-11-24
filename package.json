@@ -4,16 +4,6 @@
   "description": "Simple, efficient, and practical front-end framework",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
-  "exports": {
-    ".": {
-      "default": "./src/index.js",
-      "types": "./src/index.d.ts"
-    },
-    "./react": {
-      "default": "./src/index.react.js",
-      "types": "./src/index.react.d.ts"
-    }
-  },
   "keywords": [
     "typescript",
     "javascript",
