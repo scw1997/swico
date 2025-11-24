@@ -233,17 +233,8 @@ const initCliEntryFile = async (
         // @ts-ignore
         .replaceAll('\\', '/');
     replaceEntryText = replaceEntryText.replaceAll(
-        `require("./project-path/.swico-${templateType}/hooks");`,
+        `require("./template-root/.swico-${templateType}/hooks");`,
         `require("${formatHooksPath}");`
-    );
-    //处理Link组件的引入路径，由从swico npm包内引入改为从项目生成的.swico引入
-    const formatLinkComponentPath = path
-        .resolve(projectPath, './.swico/Link')
-        // @ts-ignore
-        .replaceAll('\\', '/');
-    replaceEntryText = replaceEntryText.replaceAll(
-        `require("./project-path/.swico-${templateType}/Link");`,
-        `require("${formatLinkComponentPath}");`
     );
 
     //处理history的引入路径，由从swico npm包内引入改为从项目生成的.swico引入
@@ -274,23 +265,19 @@ const formatRouterConfig = (
         //处理路由配置
 
         const formatRouter = getFormatRouter(projectPath, routes, templateType);
-
-        const textData = `"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default  = ${JSON.stringify(formatRouter)};`;
-        let modifiedText = textData.replace(/"(\(\)=>import\('[^']+'\))"/g, '$1');
-
-        // 写入路由列表文件
-        await fs.writeFile(path.resolve(projectPath, `./.swico${envPath}routes.js`), modifiedText);
-
-        //读取template/config文件的内容，根据routerType和routerBase的值动态替换里面的部分文本，从而更换路由模式
-        const configFilePath = path.resolve(projectPath, `./.swico${envPath}config.js`);
-        let replaceConfigText = await fs.readFile(configFilePath, 'utf8');
+        const routerFilePath = path.resolve(projectPath, `./.swico${envPath}router.js`);
+        //获取路由配置文件内容
+        let routerFileText = await fs.readFile(routerFilePath, 'utf8');
+        //处理路由的routes数据格式
+        let formatRoutesTextData = `exports.routes = ${JSON.stringify(formatRouter)};`;
+        formatRoutesTextData = formatRoutesTextData.replace(/"(\(\)=>import\('[^']+'\))"/g, '$1');
+        routerFileText = routerFileText.replace('exports.routes = [];', formatRoutesTextData);
 
         if (base) {
             //处理routerBase
-            replaceConfigText = replaceConfigText.replace(
+            routerFileText = routerFileText.replace(
                 /exports\.routerBase\s*=\s*(.*)/gm,
+
                 function (match, p1) {
                     // p1 是匹配到的 xxx 部分
                     //对react模板的hash路由进行特殊处理，忽略base值
@@ -300,7 +287,7 @@ exports.default  = ${JSON.stringify(formatRouter)};`;
         }
         if (type) {
             //处理routerType
-            replaceConfigText = replaceConfigText.replace(
+            routerFileText = routerFileText.replace(
                 /exports\.routerType\s*=\s*(.*)/gm,
                 function (match, p1) {
                     // p1 是匹配到的 xxx 部分
@@ -309,8 +296,8 @@ exports.default  = ${JSON.stringify(formatRouter)};`;
             );
         }
 
-        //写入路由配置页面
-        await fs.writeFile(configFilePath, replaceConfigText);
+        //写入路由配置
+        await fs.writeFile(routerFilePath, routerFileText);
         resolve(null);
     });
 };
@@ -348,10 +335,16 @@ export const handleLoadingFile = async (projectPath, replaceIndexText) => {
     try {
         await fs.access(path.resolve(projectPath, './src/loading/index.tsx'), fs.constants.F_OK);
         //存在则将template中引入的loading组件路径替换
-        newReplaceIndexText = newReplaceIndexText.replace('"../loading"', '"../../src/loading"');
+        newReplaceIndexText = newReplaceIndexText.replace(
+            'const Loading = () => null;',
+            'const Loading = __importDefault(require("../../src/loading")).default;'
+        );
     } catch (e) {
         //不存在也要替换成原值
-        newReplaceIndexText = newReplaceIndexText.replace('"../../src/loading', '"../loading"');
+        newReplaceIndexText = newReplaceIndexText.replace(
+            '__importDefault(require("../../src/loading")).default;',
+            '() => null;'
+        );
     }
     return newReplaceIndexText;
 };
@@ -399,16 +392,16 @@ const initTemplateConfig = (
 
         //将template路径中跟环境相关的文件复制到开发端相应env路径
         await copyDirFiles(
-            path.resolve(__dirname, `../project-path/.swico-${templateType}/$env`),
+            path.resolve(__dirname, `../template-root/.swico-${templateType}/$env`),
             copyTargetPath,
             (fileName) => !fileName.endsWith('.d.ts') && !['hooks.js'].includes(fileName)
         );
 
         //将template路径中跟环境无关的配置文件复制到开发端固定路径
         await copyDirFiles(
-            path.resolve(__dirname, `../project-path/.swico-${templateType}`),
+            path.resolve(__dirname, `../template-root/.swico-${templateType}`),
             path.resolve(projectPath, './.swico'),
-            (fileName) => ['hooks.js', 'Link.js', 'loading.js'].includes(fileName)
+            (fileName) => ['hooks.js'].includes(fileName)
         );
 
         //处理swico包在开发项目里的引入入口文件

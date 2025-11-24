@@ -1,7 +1,7 @@
 import { useRoute, useRouter } from 'vue-router';
 import qs from 'qs';
 import { reactive, watchEffect } from 'vue';
-import { routerBase } from './$env/config';
+import { routerBase } from './$env/router';
 import { UseLocationType, UseNavType } from '../../typings/global-type';
 
 export const getFormatRouterBase = (routerBase) => {

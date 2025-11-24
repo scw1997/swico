@@ -21,12 +21,18 @@
     "outDir": "./dist", //输出文件目录
     "declaration": true, //生成声明文件
     "types": ["node"], //指定一个或多个包含类型声明文件的目录。
-    "jsx": "react" //指定JSX代码所使用的React实例。
+    "jsx": "react", //指定JSX代码所使用的React实例。
+    "paths": {
+      "react": ["node_modules/react"],
+      "vue": ["node_modules/vue"]
+    }
   },
   "include": [ //指定要编译的文件
     "src",
-    "src/project-path/.swico-vue/**/*", //不知道为啥tsc编译时会忽略这里路径的部分文件，所以这里要写上
-    "./package.json"
+    "vue/**/*",
+    "react/**/*",
+    "src/template-root/.swico-vue/**/*", //不知道为啥tsc编译时会忽略这里路径的部分文件，所以这里要写上
+    "./package.json",
   ],
   "exclude": ["node_modules"]//指定要排除的文件
 }

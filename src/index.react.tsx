@@ -1,14 +1,39 @@
 import { GlobalData, GlobalSwicoConfigType } from './main-config';
+import React, { CSSProperties, FC, ReactNode } from 'react';
+import { SwicoHistoryOptionType } from './typings/global-type';
+import { useLocation, useNav } from './template-root/.swico-react/hooks';
 export type CustomConfigType = GlobalData['customConfig'];
 
 export type { GlobalSwicoConfigType };
 
 //二次封装link组件，统一只支持部分属性
-export { default as Link } from './project-path/.swico-react/Link';
+interface PropsType {
+    replace?: boolean;
+    to: string | number | SwicoHistoryOptionType;
+    style?: CSSProperties;
+    className?: string;
+    children: ReactNode;
+}
+
+export const Link: FC<PropsType> = ({ replace, to, style, className, children }) => {
+    const nav = useNav();
+    return (
+        <a
+            onClick={() => {
+                // @ts-ignore
+                nav(to, { replace });
+            }}
+            style={style}
+            className={className}
+        >
+            {children}
+        </a>
+    );
+};
 
 export { Outlet } from 'react-router';
 
-export { useLocation, useNav } from './project-path/.swico-react/hooks';
+export { useLocation, useNav };
 
 export { history } from './mock-history';
 

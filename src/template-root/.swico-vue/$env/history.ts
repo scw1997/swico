@@ -1,6 +1,5 @@
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
-import { routerBase, routerType } from './config';
-import routes from './routes';
+import { routes, routerType, routerBase } from './router';
 import qs from 'qs';
 import { SwicoHistoryType } from '../../../typings/global-type';
 

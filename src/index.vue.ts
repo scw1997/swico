@@ -1,10 +1,10 @@
 import { GlobalData, GlobalSwicoConfigType } from './main-config';
 import { App, defineComponent } from 'vue';
 import { Router, RouterLink } from 'vue-router';
-
+import { useLocation, useNav } from './template-root/.swico-vue/hooks';
 export type CustomConfigType = GlobalData['customConfig'];
 export { RouterView } from 'vue-router';
-export { useLocation, useNav } from './project-path/.swico-vue/hooks';
+export { useLocation, useNav };
 export { history } from './mock-history';
 export type { GlobalSwicoConfigType };
 
@@ -13,7 +13,31 @@ export const Outlet = defineComponent({
     template: '<RouterView />'
 });
 
-export { default as Link } from './project-path/.swico-vue/Link';
+export const Link = defineComponent({
+    name: 'Link',
+    props: {
+        to: {
+            required: true
+        },
+        replace: {
+            type: Boolean
+        }
+    },
+    setup(props) {
+        const nav = useNav();
+        return { nav };
+    },
+
+    template: `<a
+        @click="
+            () => {
+                nav(to, { replace });
+            }
+        "
+    >
+        <slot></slot>
+    </a>`
+});
 
 //swico 配置
 export interface DefineSwicoConfigType {

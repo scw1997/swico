@@ -7,12 +7,11 @@ import {
     Outlet,
     RouterProvider
 } from 'react-router';
-import Loading from '../loading';
+const Loading = () => null;
 import { getHistory, history } from './history';
 import global from '../../src/global';
 import Layout from '../../src/layout';
-import routes from './routes';
-import { routerBase, routerType } from './config';
+import { routes, routerType, routerBase } from './router';
 
 class Container extends React.Component<{ children: ReactNode }> {
     state = {
@@ -87,7 +86,6 @@ const App: FC = () => {
 };
 
 const rootEle = document.createElement('div');
-rootEle.id = 'swico-root';
 document.body.appendChild(rootEle);
 
 const root = createRoot(rootEle);

@@ -16,8 +16,9 @@ import { RspackDevServer } from '@rspack/dev-server';
 import fs from 'fs-extra';
 import { Compiler, MultiCompiler, rspack } from '@rspack/core';
 
-// 当前开发服务器的端口号和routerBase值的缓存
+// 当前开发服务器的端口号，模板类型，routerBase值的缓存
 let currentPort,
+    currentTemplateType,
     currentRouterBase = '/';
 
 //监听ts全局声明文件和cli config文件修改

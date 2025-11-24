@@ -27,7 +27,6 @@ app.component('SwicoLayout', Layout);
 app.use(router);
 
 const rootEle = document.createElement('div');
-rootEle.id = 'swico-root';
 document.body.appendChild(rootEle);
 
 app.mount(rootEle);
