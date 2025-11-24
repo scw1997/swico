@@ -22,10 +22,6 @@
     "declaration": true, //生成声明文件
     "types": ["node"], //指定一个或多个包含类型声明文件的目录。
     "jsx": "react", //指定JSX代码所使用的React实例。
-    "paths": {
-      "react": ["node_modules/react"],
-      "vue": ["node_modules/vue"]
-    }
   },
   "include": [ //指定要编译的文件
     "src",
