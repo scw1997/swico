@@ -1,9 +1,23 @@
 {
   "name": "swico",
-  "version": "2.8.0-beta.9",
+  "version": "2.8.0-beta.10",
   "description": "Simple, efficient, and practical front-end framework",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "default": "./src/index.js",
+      "types": "./src/index.d.ts"
+    },
+    "./react": {
+      "default": "./src/index.react.js",
+      "types": "./src/index.react.d.ts"
+    },
+    "./vue": {
+      "default": "./src/index.vue.js",
+      "types": "./src/index.vue.d.ts"
+    }
+  },
   "keywords": [
     "typescript",
     "javascript",
