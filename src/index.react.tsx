@@ -7,7 +7,7 @@ export type CustomConfigType = GlobalData['customConfig'];
 export type { GlobalSwicoConfigType };
 
 //二次封装link组件，统一只支持部分属性
-interface PropsType {
+interface LinkPropsType {
     replace?: boolean;
     to: string | number | SwicoHistoryOptionType;
     style?: CSSProperties;
@@ -15,7 +15,7 @@ interface PropsType {
     children: ReactNode;
 }
 
-export const Link: FC<PropsType> = ({ replace, to, style, className, children }) => {
+export const Link: FC<LinkPropsType> = ({ replace, to, style, className, children }) => {
     const nav = useNav();
     return (
         <a

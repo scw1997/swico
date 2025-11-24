@@ -1,7 +1,8 @@
 import { GlobalData, GlobalSwicoConfigType } from './main-config';
-import { App, defineComponent } from 'vue';
+import { App, defineComponent, SlotsType } from 'vue';
 import { Router, RouterLink } from 'vue-router';
 import { useLocation, useNav } from './template-root/.swico-vue/hooks';
+import { SwicoHistoryOptionType } from './typings/global-type';
 export type CustomConfigType = GlobalData['customConfig'];
 export { RouterView } from 'vue-router';
 export { useLocation, useNav };
@@ -13,7 +14,17 @@ export const Outlet = defineComponent({
     template: '<RouterView />'
 });
 
-export const Link = defineComponent({
+interface LinkPropsType {
+    replace?: boolean;
+    to: string | number | SwicoHistoryOptionType;
+}
+
+export const Link = defineComponent<
+    LinkPropsType,
+    Record<string, any>,
+    any,
+    SlotsType<{ default: never }>
+>({
     name: 'Link',
     props: {
         to: {

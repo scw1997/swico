@@ -25,8 +25,6 @@
   },
   "include": [ //指定要编译的文件
     "src",
-    "vue/**/*",
-    "react/**/*",
     "src/template-root/.swico-vue/**/*", //不知道为啥tsc编译时会忽略这里路径的部分文件，所以这里要写上
     "./package.json",
   ],

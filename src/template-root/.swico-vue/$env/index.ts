@@ -26,9 +26,9 @@ const app = createApp(Container);
 app.component('SwicoLayout', Layout);
 app.use(router);
 
+//回调触发
+global?.onInit?.(app, router);
 const rootEle = document.createElement('div');
 document.body.appendChild(rootEle);
 
 app.mount(rootEle);
-//回调触发
-global?.onInit?.(app, router);

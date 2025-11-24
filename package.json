@@ -1,6 +1,6 @@
 {
   "name": "swico",
-  "version": "2.8.0-beta.10",
+  "version": "2.8.0-beta.12",
   "description": "Simple, efficient, and practical front-end framework",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
