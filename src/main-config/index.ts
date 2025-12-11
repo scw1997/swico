@@ -37,7 +37,7 @@ export interface GlobalSwicoConfigType {
     router?: ConfigRouterType; //路由相关
 }
 
-export interface GlobalData {
+export interface GlobalDataType {
     templateType?: GlobalSwicoConfigType['template']; //模板类型
     projectPath: string; //模板项目根路径
     entryPath: string; //入口文件路径
@@ -101,7 +101,9 @@ const getFormatRouter = (projectPath: string, routes: ConfigRouterType['routes']
 };
 
 //获取开发者的自定义项目配置和相关参数
-export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> = async (env) => {
+export const getProjectConfig: (env: GlobalDataType['env']) => Promise<GlobalDataType> = async (
+    env
+) => {
     // 当前命令行选择的目录(即项目根路径)
     const projectPath = process.cwd();
     //swico 配置文件路径
@@ -113,7 +115,7 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
         base: path.join(configDir, '/swico.ts')
     };
 
-    const customConfig = {} as GlobalData['customConfig'];
+    const customConfig = {} as GlobalDataType['customConfig'];
     //读取各环境配置文件并写入
     for (const key of Object.keys(configPath)) {
         const curConfigFilePath = configPath[key];
@@ -221,8 +223,8 @@ export const getProjectConfig: (env: GlobalData['env']) => Promise<GlobalData> =
 //修正.swico中入口index.js内部部分模块的引入路径
 const initCliEntryFile = async (
     projectPath: string,
-    templateType: GlobalData['templateType'],
-    env: GlobalData['env']
+    templateType: GlobalDataType['templateType'],
+    env: GlobalDataType['env']
 ) => {
     //获取.swico中入口index.js的路径和内容
     const entryFilePath = path.resolve(projectPath, './.swico/index.js');
@@ -253,8 +255,8 @@ const initCliEntryFile = async (
 //路由相关配置
 const formatRouterConfig = (
     { routes = [], type = 'browser', base = '/' }: ConfigRouterType,
-    templateType: GlobalData['templateType'],
-    env: GlobalData['env']
+    templateType: GlobalDataType['templateType'],
+    env: GlobalDataType['env']
 ) => {
     // 当前命令行选择的目录(即项目根路径)
     const projectPath = process.cwd();
@@ -380,8 +382,8 @@ export const updateIndexFileText = async (envPath, newFileText) => {
 //在开发端项目生成模板路由配置
 const initTemplateConfig = (
     routerConfig,
-    templateType: GlobalData['templateType'],
-    env: GlobalData['env']
+    templateType: GlobalDataType['templateType'],
+    env: GlobalDataType['env']
 ) => {
     // 当前命令行选择的目录(即项目根路径)
     const projectPath = process.cwd();

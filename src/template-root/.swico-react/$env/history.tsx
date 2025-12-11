@@ -66,7 +66,7 @@ export const interpolatePath = (pathTemplate: string, params: Record<string, any
 };
 
 //根据路径模板和路径值获取params对象
-const interpolatePathParams = (pathTemplate: string = '', path: string) => {
+export const interpolatePathParams = (pathTemplate: string = '', path: string) => {
     // 将模式中的参数占位符替换为正则表达式中的捕获组
     const regexPattern = pathTemplate.replace(/:(\w+)/g, '([^/]+)');
     // 编译正则表达式，并确保匹配路径的开头
@@ -94,7 +94,7 @@ const interpolatePathParams = (pathTemplate: string = '', path: string) => {
 };
 
 //保留ancPath的首部/，去掉尾部/
-export const formatAncPath = (ancPath: string) => {
+const formatAncPath = (ancPath: string) => {
     let newAncPath = ancPath.startsWith('/') ? ancPath : '/' + ancPath;
     newAncPath = newAncPath.endsWith('/') ? newAncPath.slice(0, -1) : newAncPath;
     return newAncPath;
@@ -191,7 +191,12 @@ export const getHistory = (router) => {
                     // eslint-disable-next-line no-case-declarations
                     const formatOption = getFormatHistoryOption(to, pathNameList, 'push');
 
-                    router.navigate(formatOption, { state: to.state });
+                    router.navigate(formatOption, {
+                        state: {
+                            navType: 'push',
+                            ...(to.state || {})
+                        }
+                    });
                     break;
                 default:
                     throw `An error occurred while executing history.push operation: unexpected type of 'to':${typeof to}`;
@@ -206,7 +211,13 @@ export const getHistory = (router) => {
                     // eslint-disable-next-line no-case-declarations
                     const formatOption = getFormatHistoryOption(to, pathNameList, 'replace');
 
-                    router.navigate(formatOption, { state: to.state, replace: true });
+                    router.navigate(formatOption, {
+                        state: {
+                            navType: 'replace',
+                            ...(to.state || {})
+                        },
+                        replace: true
+                    });
                     break;
                 default:
                     throw `An error occurred while executing history.replace operation: unexpected type of 'to':${typeof to}`;

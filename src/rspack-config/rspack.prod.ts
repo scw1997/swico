@@ -1,14 +1,14 @@
 import BundleAnalyzer from 'webpack-bundle-analyzer';
 import path from 'path';
 import fs from 'fs-extra';
-import { initConfig, GlobalData } from '../main-config';
+import { initConfig, GlobalDataType } from '../main-config';
 import { merge } from 'webpack-merge';
 import { rspack } from '@rspack/core';
 
 const BundleAnalyzerPlugin = BundleAnalyzer.BundleAnalyzerPlugin;
 const isAnalyze = process.env.ANALYZE === 'true';
 
-export default async function (options: GlobalData) {
+export default async function (options: GlobalDataType) {
     const { projectPath, customConfig, templateType } = options;
 
     //根据模板类型按需引入配置
@@ -19,7 +19,7 @@ export default async function (options: GlobalData) {
     const baseConfig = await getBaseConfig({
         ...options,
         env: 'prod'
-    } as GlobalData);
+    } as GlobalDataType);
     const consoleAvailable = customConfig.prod?.console ?? initConfig.console;
     //处理public文件夹（静态资源）
     const isPublicDirExist = await fs.exists(path.join(projectPath, '/public'));

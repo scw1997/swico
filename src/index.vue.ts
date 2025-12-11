@@ -1,13 +1,14 @@
-import { GlobalData, GlobalSwicoConfigType } from './main-config';
+import { GlobalDataType } from './main-config';
 import { App, defineComponent, SlotsType } from 'vue';
 import { Router, RouterLink } from 'vue-router';
 import { useLocation, useNav } from './template-root/.swico-vue/hooks';
 import { SwicoHistoryOptionType } from './typings/global-type';
-export type CustomConfigType = GlobalData['customConfig'];
+export type CustomConfigType = GlobalDataType['customConfig'];
 export { RouterView } from 'vue-router';
 export { useLocation, useNav };
 export { history } from './mock-history';
-export type { GlobalSwicoConfigType };
+export type * from './typings/global-type';
+export type * from './main-config';
 
 export const Outlet = defineComponent({
     name: 'Outlet',

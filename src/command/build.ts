@@ -1,5 +1,5 @@
 import getBuildConfig from '../rspack-config/rspack.prod';
-import { getProjectConfig, GlobalData } from '../main-config';
+import { getProjectConfig, GlobalDataType } from '../main-config';
 import { toast } from '../utils';
 import packageJson from '../../package.json';
 import { rspack } from '@rspack/core';

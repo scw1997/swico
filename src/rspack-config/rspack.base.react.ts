@@ -1,12 +1,12 @@
 import path from 'path';
-import { getFormatDefineVars, initConfig, GlobalData } from '../main-config';
+import { getFormatDefineVars, initConfig, GlobalDataType } from '../main-config';
 import { rspack } from '@rspack/core';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 const lessLoader = require.resolve('less-loader');
 const sassLoader = require.resolve('sass-loader');
 const postcssLoader = require.resolve('postcss-loader');
 
-export default async function ({ projectPath, entryPath, env, customConfig }: GlobalData) {
+export default async function ({ projectPath, entryPath, env, customConfig }: GlobalDataType) {
     //开发者的自定义配置
     const customBaseConfig = customConfig.base;
     //处理alias 自定义配置
@@ -27,7 +27,8 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
     const initialDefineVarsConfig = {
         SWICO_ENV: JSON.stringify(env),
         SWICO_ROUTER_BASE: JSON.stringify(routerBase),
-        SWICO_PUBLIC_PATH: JSON.stringify(publicPath)
+        SWICO_PUBLIC_PATH: JSON.stringify(publicPath),
+        SWICO_STATIC_PUBLIC_PATH: JSON.stringify(env === 'prod' ? publicPath : '/')
     };
     const customDefineVarsConfig = await getFormatDefineVars(customBaseConfig?.define ?? {});
     return {

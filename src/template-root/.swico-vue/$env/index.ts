@@ -6,16 +6,16 @@ import { getRouter } from './history';
 const Container = defineComponent({
     name: 'Container',
     setup(props) {
+        // 这个error信息暂时保留，目前没用上
         const error = ref<string | null>(null);
         onErrorCaptured((err) => {
             error.value = err.toString();
-            return false;
         });
 
         return { error };
     },
 
-    template: '<SwicoLayout v-if="!error"></SwicoLayout>'
+    template: '<SwicoLayout ></SwicoLayout>'
 });
 
 const router = getRouter();

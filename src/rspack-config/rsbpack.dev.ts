@@ -1,11 +1,11 @@
-import { initConfig, GlobalData } from '../main-config';
+import { initConfig, GlobalDataType } from '../main-config';
 import path from 'path';
 import { merge } from 'webpack-merge';
 import EslintPlugin from 'eslint-rspack-plugin';
 import { TsCheckerRspackPlugin } from 'ts-checker-rspack-plugin';
 import { toast } from '../utils';
 
-export default async function (options: GlobalData) {
+export default async function (options: GlobalDataType) {
     const { projectPath, customConfig, templateType, entryPath, env } = options;
     //根据模板类型按需引入配置
     const getBaseConfig = (
@@ -15,7 +15,7 @@ export default async function (options: GlobalData) {
     const baseConfig = await getBaseConfig({
         ...options,
         env: 'dev'
-    } as GlobalData);
+    } as GlobalDataType);
 
     //自定义的sourcemap生成方式
     const customDevtool = customConfig.dev.devtool ?? customConfig.base.devtool;

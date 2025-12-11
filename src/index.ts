@@ -1,8 +1,10 @@
-import { GlobalData, GlobalSwicoConfigType } from './main-config';
+import { GlobalDataType, GlobalSwicoConfigType } from './main-config';
 import { UseLocationType, UseNavType } from './typings/global-type';
 import { App } from 'vue';
 import { Router } from 'vue-router';
-export type CustomConfigType = GlobalData['customConfig'];
+export type CustomConfigType = GlobalDataType['customConfig'];
+export type * from './main-config';
+export type * from './typings/global-type';
 
 export type { GlobalSwicoConfigType };
 

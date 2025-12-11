@@ -54,13 +54,22 @@ export const useNav: UseNavType = () => {
             case 'number':
                 router.go(to);
                 break;
-            case 'object':
+            case 'object': {
                 if (options?.replace) {
                     router.replace(to);
                 } else {
-                    router.push({ ...to, state: { swicoState: to.state } });
+                    router.push({
+                        ...to,
+                        state: {
+                            swicoState: {
+                                navType: options?.replace ? 'replace' : 'push',
+                                ...(to.state || {})
+                            }
+                        }
+                    });
                 }
                 break;
+            }
             default:
                 throw `An error occurred while executing useNav() operation: unexpected type of 'to':${typeof to}`;
         }

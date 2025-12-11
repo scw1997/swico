@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
-import { routes, routerType, routerBase } from './router';
+import { routes, routerType, routerBase, RouteItem } from './router';
 import qs from 'qs';
 import { SwicoHistoryType } from '../../../typings/global-type';
 
@@ -29,8 +29,20 @@ export const getRouter = () => {
                 router.push(options);
             } else {
                 const { query, name, hash, params, path, state } = options;
-                // @ts-ignore
-                router.push({ name, path, query, hash, params, state: { swicoState: state } });
+                router.push({
+                    // @ts-ignore
+                    name,
+                    path,
+                    query,
+                    hash,
+                    params,
+                    state: {
+                        swicoState: {
+                            navType: 'push',
+                            ...(state || {})
+                        }
+                    }
+                });
             }
         },
         replace: (options) => {
@@ -38,8 +50,20 @@ export const getRouter = () => {
                 router.replace(options);
             } else {
                 const { query, name, hash, params, path, state } = options;
-                // @ts-ignore
-                router.replace({ name, path, query, hash, params, state: { swicoState: state } });
+                router.replace({
+                    // @ts-ignore
+                    name,
+                    path,
+                    query,
+                    hash,
+                    params,
+                    state: {
+                        swicoState: {
+                            navType: 'replace',
+                            ...(state || {})
+                        }
+                    }
+                });
             }
         },
         go: router.go,

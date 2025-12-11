@@ -85,11 +85,12 @@ const App: FC = () => {
     return <RouterProvider router={router} />;
 };
 
+//回调触发
+(global?.onInit as () => void)?.();
+
 const rootEle = document.createElement('div');
 document.body.appendChild(rootEle);
 
 const root = createRoot(rootEle);
-root.render(<App />);
 
-//回调触发
-(global?.onInit as () => void)?.();
+root.render(<App />);

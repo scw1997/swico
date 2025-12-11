@@ -1,10 +1,10 @@
-import { GlobalData, GlobalSwicoConfigType } from './main-config';
+import { GlobalDataType } from './main-config';
 import React, { CSSProperties, FC, ReactNode } from 'react';
 import { SwicoHistoryOptionType } from './typings/global-type';
 import { useLocation, useNav } from './template-root/.swico-react/hooks';
-export type CustomConfigType = GlobalData['customConfig'];
-
-export type { GlobalSwicoConfigType };
+export type CustomConfigType = GlobalDataType['customConfig'];
+export type * from './typings/global-type';
+export type * from './main-config';
 
 //二次封装link组件，统一只支持部分属性
 interface LinkPropsType {

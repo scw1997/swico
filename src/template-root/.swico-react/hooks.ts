@@ -41,6 +41,9 @@ const getFormatNavPath = (to: SwicoLocationType): string => {
     const search = query ? `?${qs.stringify(query)}` : '';
     const formatHash = hash ? (hash.startsWith('#') ? hash : `#${hash}`) : '';
     const formatPath = name ? pathNameList.find((item) => item.name === name)?.path : path;
+    if (name && !formatPath) {
+        throw `An error occurred while executing 'useNav()' operation: The path for the name "${name}" could not be found`;
+    }
     let newPath = formatPath ? interpolatePath(formatPath, params || {}) : '';
 
     newPath = newPath + search + formatHash;
@@ -59,7 +62,10 @@ export const useNav: UseNavType = () => {
                 navigate(to);
                 break;
             case 'object':
-                navigate(getFormatNavPath(to), { ...(options || {}), state: to.state });
+                navigate(getFormatNavPath(to), {
+                    ...(options || {}),
+                    state: { navType: options?.replace ? 'replace' : 'push', ...(to.state || {}) }
+                });
                 break;
             default:
                 throw `An error occurred while executing useNav() operation: unexpected type of 'to':${typeof to}`;
