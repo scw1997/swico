@@ -1,8 +1,6 @@
 import { initConfig, GlobalDataType, customLogger } from '../main-config';
 import { mergeRsbuildConfig, RsbuildConfig } from '@rsbuild/core';
 
-const isAnalyze = process.env.ANALYZE === 'true';
-
 export default async function (options: GlobalDataType) {
     const { projectPath, customConfig, templateType } = options;
 

@@ -3,6 +3,7 @@ import { getProjectConfig, GlobalDataType } from '../main-config';
 import { toast } from '../utils';
 import packageJson from '../../package.json';
 import { createRsbuild } from '@rsbuild/core';
+const isAnalyze = process.env.ANALYZE === 'true';
 // 执行start本地启动
 export default async function () {
     process.env.SWICO_ENV = 'prod';
@@ -18,6 +19,10 @@ export default async function () {
         templateType
     });
     const rsbuild = await createRsbuild({ config: buildConfig });
+    await rsbuild.build();
+    if (isAnalyze) {
+        await rsbuild.preview();
+    }
     //启动
     toast.info('Building...');
     const now = Date.now();

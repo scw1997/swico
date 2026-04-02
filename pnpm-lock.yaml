@@ -12,8 +12,8 @@ importers:
         specifier: ^1.2.2
         version: 1.2.2(@rsbuild/core@2.0.0-rc.0(@emnapi/core@1.5.0)(@emnapi/runtime@1.5.0)(core-js@3.47.0))
       '@rsbuild/plugin-react':
-        specifier: ^1.4.5
-        version: 1.4.5(@rsbuild/core@2.0.0-rc.0(@emnapi/core@1.5.0)(@emnapi/runtime@1.5.0)(core-js@3.47.0))
+        specifier: ^1.4.6
+        version: 1.4.6(@rsbuild/core@2.0.0-rc.0(@emnapi/core@1.5.0)(@emnapi/runtime@1.5.0)(core-js@3.47.0))
       '@rsbuild/plugin-vue':
         specifier: ^1.2.7
         version: 1.2.7(@rsbuild/core@2.0.0-rc.0(@emnapi/core@1.5.0)(@emnapi/runtime@1.5.0)(core-js@3.47.0))(vue@3.5.23(typescript@5.8.3))
@@ -271,10 +271,13 @@ packages:
       '@rsbuild/core':
         optional: true
 
-  '@rsbuild/plugin-react@1.4.5':
-    resolution: {integrity: sha512-eS2sXCedgGA/7bLu8yVtn48eE/GyPbXx4Q7OcutB01IQ1D2y8WSMBys4nwfrecy19utvw4NPn4gYDy52316+vg==}
+  '@rsbuild/plugin-react@1.4.6':
+    resolution: {integrity: sha512-LAT6xHlEyZKA0VjF/ph5d50iyG+WSmBx+7g98HNZUwb94VeeTMZFB8qVptTkbIRMss3BNKOXmHOu71Lhsh9oEw==}
     peerDependencies:
       '@rsbuild/core': ^1.0.0 || ^2.0.0-0
+    peerDependenciesMeta:
+      '@rsbuild/core':
+        optional: true
 
   '@rsbuild/plugin-vue@1.2.7':
     resolution: {integrity: sha512-epDSChyeR4U+gwq2vfTARV9hbfrmdFTdmhBWIcv7MFyckn3yxJhweJVwdx14Wf3d8s1p4XZzDpqmphDyvX443Q==}
@@ -1575,11 +1578,12 @@ snapshots:
     optionalDependencies:
       '@rsbuild/core': 2.0.0-rc.0(@emnapi/core@1.5.0)(@emnapi/runtime@1.5.0)(core-js@3.47.0)
 
-  '@rsbuild/plugin-react@1.4.5(@rsbuild/core@2.0.0-rc.0(@emnapi/core@1.5.0)(@emnapi/runtime@1.5.0)(core-js@3.47.0))':
+  '@rsbuild/plugin-react@1.4.6(@rsbuild/core@2.0.0-rc.0(@emnapi/core@1.5.0)(@emnapi/runtime@1.5.0)(core-js@3.47.0))':
     dependencies:
-      '@rsbuild/core': 2.0.0-rc.0(@emnapi/core@1.5.0)(@emnapi/runtime@1.5.0)(core-js@3.47.0)
       '@rspack/plugin-react-refresh': 1.6.1(react-refresh@0.18.0)
       react-refresh: 0.18.0
+    optionalDependencies:
+      '@rsbuild/core': 2.0.0-rc.0(@emnapi/core@1.5.0)(@emnapi/runtime@1.5.0)(core-js@3.47.0)
     transitivePeerDependencies:
       - webpack-hot-middleware
 
