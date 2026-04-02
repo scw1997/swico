@@ -1,57 +1,61 @@
-import { initConfig, GlobalDataType } from '../main-config';
+import { initConfig, GlobalDataType, customLogger } from '../main-config';
 import path from 'path';
-import { merge } from 'webpack-merge';
 import EslintPlugin from 'eslint-rspack-plugin';
 import { TsCheckerRspackPlugin } from 'ts-checker-rspack-plugin';
 import { toast } from '../utils';
+import { mergeRsbuildConfig, RsbuildConfig } from '@rsbuild/core';
+import { pluginBasicSsl } from '@rsbuild/plugin-basic-ssl';
 
 export default async function (options: GlobalDataType) {
     const { projectPath, customConfig, templateType, entryPath, env } = options;
     //根据模板类型按需引入配置
     const getBaseConfig = (
-        await import(templateType === 'vue' ? './rspack.base.vue' : './rspack.base.react')
+        await import(templateType === 'vue' ? './config.base.vue' : './config.base.react')
     ).default;
-
+    const publicPath = customConfig?.base?.publicPath ?? initConfig.publicPath;
     const baseConfig = await getBaseConfig({
         ...options,
         env: 'dev'
     } as GlobalDataType);
 
-    //自定义的sourcemap生成方式
+    //用户自定义的sourceMap生成方式
     const customDevtool = customConfig.dev.devtool ?? customConfig.base.devtool;
 
-    return merge(baseConfig, {
-        // @ts-ignore
+    return mergeRsbuildConfig(baseConfig, {
         mode: 'development',
-        stats: 'none', //不输出打包信息，自主捕获处理报错信息
-        devtool:
-            templateType === 'vue'
-                ? (customDevtool ?? 'cheap-module-source-map')
-                : (customDevtool ?? 'eval-cheap-module-source-map'), // development
-        devServer: {
-            //使用HTML5 History API时，index.html可能需要提供页面来代替任何404响应。
+        server: {
+            base: publicPath,
+            compress: true, //启动gzip压缩,
+            headers: customConfig?.dev?.responseHeaders ?? initConfig.responseHeaders,
             historyApiFallback: {
                 index: `${baseConfig.output.publicPath}index.html`
             },
-            client: {
-                logging: 'error', //浏览器控制台只输出报错信息
-                progress: false, //不显示进度条
-                //错误，警告不会覆盖页面
-                overlay: false
-            },
-            headers: customConfig?.dev?.responseHeaders ?? initConfig.responseHeaders,
             proxy: customConfig?.dev?.proxy ?? initConfig.proxy,
-            compress: true, //启动gzip压缩
-            hot: true, //是否开启热更新
-            open: false, //是否自动打开浏览器,
-            liveReload: false, //每次修改自动刷新页面
-            static: {
-                //提供静态文件服务的路径
-                directory: path.join(projectPath, '/public')
+            open: false //不自动打开浏览器
+        },
+        dev: {
+            client: {
+                overlay: false, //错误，警告不会覆盖页面
+                logLevel: 'error', //浏览器控制台只输出报错信息
+                hmr: true, //热更新
+                lazyCompilation: true, //按需编译
+                progress: false //不显示构建进度条
             },
-            server: customConfig.dev.https === true ? 'https' : 'http'
+
+            assetPrefix: publicPath //静态资源 URL 前缀,一般与publicPath一致
+        },
+        output: {
+            sourceMap: {
+                js:
+                    templateType === 'vue'
+                        ? (customDevtool ?? 'cheap-module-source-map')
+                        : (customDevtool ?? 'eval-cheap-module-source-map'),
+                css: false,
+                extract: false
+            }
         },
         plugins: [
+            ...(customConfig.dev.https === true ? [pluginBasicSsl()] : []),
             //ts类型检查
             new TsCheckerRspackPlugin({
                 logger: {
@@ -87,5 +91,5 @@ export default async function (options: GlobalDataType) {
             }),
             ...(customConfig.dev?.plugins ?? [])
         ]
-    });
+    }) as RsbuildConfig;
 }

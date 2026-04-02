@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import { colorConfig, toast, copyDirFiles } from '../utils';
+import { createLogger } from '@rsbuild/core';
 
 export type ConfigRoutesItemType = {
     component?: string; //页面路径
@@ -469,3 +470,13 @@ export const initConfig: Omit<GlobalSwicoConfigType, 'template'> = {
         routes: []
     }
 };
+export const customLogger = createLogger();
+
+customLogger.override({
+    info(message) {
+        //
+    },
+    warn(message) {
+        //
+    }
+});

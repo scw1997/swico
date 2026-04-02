@@ -1,8 +1,8 @@
-import getBuildConfig from '../rspack-config/rspack.prod';
+import getBuildConfig from '../rsbuild-config/config.prod';
 import { getProjectConfig, GlobalDataType } from '../main-config';
 import { toast } from '../utils';
 import packageJson from '../../package.json';
-import { rspack } from '@rspack/core';
+import { createRsbuild } from '@rsbuild/core';
 // 执行start本地启动
 export default async function () {
     process.env.SWICO_ENV = 'prod';
@@ -17,23 +17,18 @@ export default async function () {
         customConfig,
         templateType
     });
-    const compiler = rspack(buildConfig as any);
+    const rsbuild = await createRsbuild({ config: buildConfig });
+    //启动
     toast.info('Building...');
     const now = Date.now();
-    compiler.run((err, stats) => {
-        if (err) {
-            toast.error(err.stack || err.toString());
-            return;
-        }
+    rsbuild.onAfterBuild(({ stats }) => {
         if (stats.hasErrors()) {
-            // @ts-ignore
-            const info = stats.toJson();
+            const info = stats.toJson({ all: true });
             toast.error(info.errors.map((item) => item.stack || item.message));
             return;
         }
         if (stats.hasWarnings()) {
-            // @ts-ignore
-            const info = stats.toJson();
+            const info = stats.toJson({ all: true });
             toast.warning(info.warnings.map((item) => item.stack || item.message));
         }
 

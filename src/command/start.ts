@@ -1,5 +1,5 @@
-import getStartConfig from '../rspack-config/rsbpack.dev';
-import { colorConfig, getPort, toast } from '../utils';
+import getStartConfig from '../rsbuild-config/config.dev';
+import { toast } from '../utils';
 import {
     getProjectConfig,
     handleGlobalStyleFile,
@@ -9,20 +9,17 @@ import {
 import chokidar from 'chokidar';
 import spawn from 'cross-spawn';
 import path from 'path';
-const { SWICO_DEV_PORT, SWICO_DEV_RESTART, SWICO_DEV_ROUTER_BASE } = process.env;
 import packageJson from '../../package.json';
 import chalk from 'chalk';
-import { RspackDevServer } from '@rspack/dev-server';
 import fs from 'fs-extra';
-import { Compiler, MultiCompiler, rspack } from '@rspack/core';
+import { createRsbuild, RsbuildDevServer, RsbuildInstance } from '@rsbuild/core';
+const { SWICO_DEV_RESTART, SWICO_DEV_ROUTER_BASE } = process.env;
 
 // 当前开发服务器的端口号，模板类型，routerBase值的缓存
-let currentPort,
-    currentTemplateType,
-    currentRouterBase = '/';
+let currentRouterBase = '/';
 
 //监听ts全局声明文件和cli config文件修改
-const handleWatch = (projectPath, devServer, env) => {
+const handleWatch = (projectPath: string, devServer: RsbuildDevServer, env: 'dev' | 'prod') => {
     const envPath = env === 'dev' ? '/.dev/' : '/.prod/';
 
     //监听配置文件修改，重启服务
@@ -40,7 +37,7 @@ const handleWatch = (projectPath, devServer, env) => {
             toast.warning('Configuration files changed, restarting server...', {
                 inline: true
             });
-            await devServer.stop();
+            await devServer.close();
             await configFilesWatcher.close();
             restartServer();
         });
@@ -68,7 +65,7 @@ const handleWatch = (projectPath, devServer, env) => {
             if (['add', 'unlink'].includes(eventName)) {
                 switch (true) {
                     case filePath.endsWith('.d.ts'):
-                        await devServer.stop();
+                        await devServer.close();
                         await tsTypingsWatcher.close();
                         restartServer();
                         break;
@@ -90,13 +87,7 @@ const handleWatch = (projectPath, devServer, env) => {
 const restartServer = () => {
     const result = spawn.sync(
         'cross-env',
-        [
-            'SWICO_DEV_RESTART=true',
-            `SWICO_DEV_PORT=${currentPort}`,
-            `SWICO_DEV_ROUTER_BASE=${currentRouterBase}`,
-            'swico',
-            'start'
-        ],
+        ['SWICO_DEV_RESTART=true', `SWICO_DEV_ROUTER_BASE=${currentRouterBase}`, 'swico', 'start'],
         {
             stdio: 'inherit'
         }
@@ -107,36 +98,19 @@ const restartServer = () => {
     }
 };
 
-// 覆盖devServer初始输出信息的方法
-const getMockGetLogger = (compiler: Compiler) => {
-    const logger = compiler.getInfrastructureLogger('name');
-    const { log, debug, error, warn } = logger;
-    return (name) => {
-        return {
-            ...logger,
-            log,
-            debug,
-            error,
-            warn,
-            info: () => {}
-        };
-    };
-};
-
 const filterStyleFileList = [
     "Can't resolve '../../src/global.less'",
     "Can't resolve '../../src/global.css'",
     "Can't resolve '../../src/global.scss'",
     "Can't resolve '../../src/loading'"
 ];
-const createCompileListener = (compiler: MultiCompiler) => {
+const createCompileListener = (rsbuild: RsbuildInstance) => {
     let now = Date.now();
-    // @ts-ignore
-    compiler.hooks.beforeCompile.tap('beforeCompile', () => {
+    rsbuild.onBeforeDevCompile(() => {
         now = Date.now();
         toast.info('Compiling...');
     });
-    compiler.hooks.done.tap('done', (stats) => {
+    rsbuild.onAfterDevCompile(({ stats }) => {
         if (stats?.hasErrors()) {
             // @ts-ignore
             const info = stats?.toJson();
@@ -177,8 +151,6 @@ export default async function start() {
         toast.info(`Swico v${packageJson.version}`);
         toast.info('Initializing development config...');
     }
-    //获取可用端口（优先使用重启时的传递的port环境变量）
-    const availablePort = SWICO_DEV_RESTART === 'true' ? Number(SWICO_DEV_PORT) : await getPort();
     // @ts-ignore
     const projectConfig = await getProjectConfig('dev');
 
@@ -186,36 +158,23 @@ export default async function start() {
     const newRouterBase =
         customConfig['dev']?.router?.base ?? customConfig['base']?.router?.base ?? '/';
     const startConfig = await getStartConfig(projectConfig);
-    const compiler = rspack(startConfig as any);
+    const rsbuild = await createRsbuild({ config: startConfig as any });
 
-    // 覆盖devServer初始输出信息的方法
-    const oriLogger = compiler.getInfrastructureLogger;
-    // @ts-ignore
-    compiler.getInfrastructureLogger = getMockGetLogger(compiler);
-    //启动服务
-    const devServer = new RspackDevServer(
-        { ...startConfig.devServer, port: availablePort },
-        compiler
-    );
     try {
         //启动
-        await devServer.start();
-        process.env.SWICO_DEV_PORT = availablePort.toString();
+        const { server } = await rsbuild.startDevServer();
         //监听编译细节
-        createCompileListener(compiler);
-        // 还原devServer 日志输出
-        compiler.getInfrastructureLogger = oriLogger;
-        handleWatch(projectPath, devServer, env);
+        createCompileListener(rsbuild);
+        handleWatch(projectPath, server, env);
         if (
             SWICO_DEV_RESTART !== 'true' ||
             (SWICO_DEV_RESTART === 'true' && newRouterBase !== SWICO_DEV_ROUTER_BASE)
         ) {
             toast.info(
-                `Project is running at：${chalk.hex('#29abe0')(`${startConfig.devServer.server}://localhost:${availablePort}${newRouterBase}`)}`
+                `Project is running at：${chalk.hex('#29abe0')(`${customConfig.dev.https ? 'https' : 'http'}://localhost:${rsbuild.context.devServer.port}${newRouterBase}`)}`
             );
         }
         currentRouterBase = newRouterBase;
-        currentPort = availablePort;
     } catch (e) {
         const strErr = e.toString();
         // console.log('2222222', strErr);

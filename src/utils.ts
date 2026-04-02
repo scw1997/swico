@@ -1,4 +1,3 @@
-import portFinder from 'portfinder';
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
@@ -33,13 +32,6 @@ export const copyDirFiles = async (src, dest, filter?: (fileName) => boolean) =>
     await _copy(src, dest);
 };
 
-//获取随机可用的接口（解决devServer接口占用报错的问题）
-export const getPort = () => {
-    return portFinder.getPortPromise({
-        port: 3000, // minimum port
-        stopPort: 3333 //
-    });
-};
 export const colorConfig = {
     theme: '#7888FCFF',
     warning: '#fb8918',
