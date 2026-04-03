@@ -3,10 +3,13 @@ import { UseLocationType, UseNavType } from './typings/global-type';
 import { App } from 'vue';
 import { Router } from 'vue-router';
 export type CustomConfigType = GlobalDataType['customConfig'];
-export type * from './main-config';
+export type {
+    ConfigRoutesItemType,
+    GlobalSwicoConfigType,
+    GlobalDataType,
+    ConfigRouterType
+} from './main-config';
 export type * from './typings/global-type';
-
-export type { GlobalSwicoConfigType };
 
 export { history } from './mock-history';
 

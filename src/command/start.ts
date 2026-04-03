@@ -174,6 +174,15 @@ export default async function start() {
                 `Project is running at：${chalk.hex('#29abe0')(`${customConfig.dev.https ? 'https' : 'http'}://localhost:${rsbuild.context.devServer.port}${newRouterBase}`)}`
             );
         }
+        const proxyConfig = startConfig.server.proxy;
+        if (
+            proxyConfig &&
+            (Array.isArray(proxyConfig)
+                ? proxyConfig.length > 0
+                : Object.keys(proxyConfig).length > 0)
+        ) {
+            toast.info('Proxy service is enabled');
+        }
         currentRouterBase = newRouterBase;
     } catch (e) {
         const strErr = e.toString();

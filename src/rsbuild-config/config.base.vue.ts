@@ -2,6 +2,8 @@ import path from 'path';
 import { getFormatDefineVars, initConfig, GlobalDataType, customLogger } from '../main-config';
 import { pluginVue } from '@rsbuild/plugin-vue';
 import { RsbuildConfig } from '@rsbuild/core';
+import { pluginSass } from '@rsbuild/plugin-sass';
+import { pluginLess } from '@rsbuild/plugin-less';
 
 export default async function ({ projectPath, entryPath, env, customConfig }: GlobalDataType) {
     //开发者的自定义配置
@@ -104,6 +106,11 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             template: path.join(projectPath, '/src/index.ejs'),
             templateParameters: initialDefineVarsConfig
         },
-        plugins: [pluginVue(), ...(customBaseConfig?.plugins ?? initConfig.plugins)]
+        plugins: [
+            pluginVue(),
+            pluginSass(),
+            pluginLess(),
+            ...(customBaseConfig?.plugins ?? initConfig.plugins)
+        ]
     } as RsbuildConfig;
 }

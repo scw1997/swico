@@ -2,14 +2,15 @@ import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import { colorConfig, toast, copyDirFiles } from '../utils';
-import { createLogger } from '@rsbuild/core';
+import { createLogger, ProxyOptions, RsbuildPlugin, RsbuildPlugins, Rspack } from '@rsbuild/core';
+import { Falsy } from '@rsbuild/core/dist-types/types';
 
 export type ConfigRoutesItemType = {
     component?: string; //页面路径
     children?: ConfigRoutesItemType[]; //子路由
     path: string; //路由地址
     redirect?: string; // 重定向路由地址
-    name?: string;
+    name?: string; //路由唯一名称标识
     decorator?: string; //装饰组件
     custom?: any; //自定义数据
     [key: string]: any;
@@ -24,16 +25,21 @@ export type ConfigRouterType = {
 //swico所有可配置选项
 export interface GlobalSwicoConfigType {
     template: 'react' | 'vue'; //模板类型
-    plugins?: any[]; //webpack插件
+    plugins?: (
+        | RsbuildPlugin
+        | Falsy
+        | Promise<RsbuildPlugin | Falsy | RsbuildPlugins>
+        | RsbuildPlugins
+    )[];
     publicPath?: string; //非根路径部署所需要定义的base路径
     console?: boolean; //是否需要保留console
     define?: Record<string, any>; //定义代码中可直接使用的变量，属性值会默认被JSON.stringify()
     alias?: Record<string, any>; //定义import映射
-    proxy?: Array<Record<string, any>>; //devServer中用到的proxy代理
+    proxy?: ProxyOptions[] | Record<string, string | ProxyOptions>;
     https?: boolean; //是否使用https开发服务器
-    responseHeaders?: Record<string, any>;
-    copy?: Array<string | { from: string; to: string }>; //复制指定文件(夹)到指定目录
-    devtool?: string; //设置 sourcemap 生成方式
+    responseHeaders?: Record<string, any>; //设置统一请求响应头
+    copy?: Rspack.CopyRspackPluginOptions | Rspack.CopyRspackPluginOptions['patterns']; //复制指定文件(夹)到指定目录
+    devtool?: Rspack.Configuration['devtool']; //设置 sourcemap 生成方式
     externals?: any; //设置哪些模块不打包，转而在index.ejs中通过 <script> 或其他方式引入
     router?: ConfigRouterType; //路由相关
 }
@@ -80,7 +86,7 @@ const getFormatRouter = (projectPath: string, routes: ConfigRouterType['routes']
                           component: component
                               ? `()=>import('${projectPath}/src/pages/${component}${templateType === 'vue' ? '.vue' : ''}')`
                               : undefined,
-                          name,
+                          name: `decorator-outlet-${name}`,
                           redirect,
                           children: children ? children?.map((item) => _main(item)) : undefined
                       }

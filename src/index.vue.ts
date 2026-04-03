@@ -8,7 +8,12 @@ export { RouterView } from 'vue-router';
 export { useLocation, useNav };
 export { history } from './mock-history';
 export type * from './typings/global-type';
-export type * from './main-config';
+export type {
+    ConfigRoutesItemType,
+    GlobalSwicoConfigType,
+    GlobalDataType,
+    ConfigRouterType
+} from './main-config';
 
 export const Outlet = defineComponent({
     name: 'Outlet',

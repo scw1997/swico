@@ -1,5 +1,7 @@
 import { initConfig, GlobalDataType, customLogger } from '../main-config';
 import { mergeRsbuildConfig, RsbuildConfig } from '@rsbuild/core';
+import { RsdoctorRspackPlugin } from '@rsdoctor/rspack-plugin';
+const isAnalyze = process.env.ANALYZE === 'true';
 
 export default async function (options: GlobalDataType) {
     const { projectPath, customConfig, templateType } = options;
@@ -20,7 +22,7 @@ export default async function (options: GlobalDataType) {
     return mergeRsbuildConfig(baseConfig, {
         output: {
             //默认情况下，Rsbuild 已将 public 目录作为静态资源服务的文件夹，此处仅处理额外自定义配置
-            copy: copyConfig.length > 0 ? [...(copyConfig || [])] : [],
+            copy: copyConfig,
             sourceMap: {
                 js: customConfig.prod.devtool ?? customConfig.base.devtool ?? false,
                 css: false,
@@ -28,9 +30,21 @@ export default async function (options: GlobalDataType) {
             }
         },
         performance: {
-            removeConsole: !consoleAvailable
+            removeConsole: !consoleAvailable,
+            buildCache: true //开启构建缓存
         },
         mode: 'production',
+        tools: {
+            rspack: {
+                plugins: [
+                    // 构建产物分析采用rsdoctor插件
+                    isAnalyze &&
+                        new RsdoctorRspackPlugin({
+                            // 插件选项
+                        })
+                ]
+            }
+        },
         plugins: [...(customConfig.prod?.plugins ?? [])]
     }) as RsbuildConfig;
 }
