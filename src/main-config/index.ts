@@ -368,7 +368,7 @@ export const handleGlobalStyleFile = (replaceIndexText) => {
             `require("../../src/global.${styleFileType}");`,
             ''
         );
-        newReplaceIndexText = `require("../../src/global.${styleFileType}");\n${replaceIndexText}`;
+        newReplaceIndexText = `require("../../src/global.${styleFileType}");\n${newReplaceIndexText}`;
     } else {
         //不存在则取消引入
         newReplaceIndexText = newReplaceIndexText.replaceAll(
