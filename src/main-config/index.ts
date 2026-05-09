@@ -484,5 +484,8 @@ customLogger.override({
     },
     warn(message) {
         //
+    },
+    error(message) {
+        //
     }
 });

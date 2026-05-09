@@ -46,7 +46,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
                 ...customDefineVarsConfig
             }
         },
-        logLevel: 'error',
+        logLevel: 'silent',
         customLogger,
         output: {
             //构建产物的输出目录

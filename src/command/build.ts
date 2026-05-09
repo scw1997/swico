@@ -26,10 +26,10 @@ export default async function () {
             toast.error(info.errors.map((item) => item.stack || item.message));
             return;
         }
-        if (stats.hasWarnings()) {
-            const info = stats.toJson({ all: true });
-            toast.warning(info.warnings.map((item) => item.stack || item.message));
-        }
+        // if (stats.hasWarnings()) {
+        //     const info = stats.toJson({ all: true });
+        //     toast.warning(info.warnings.map((item) => item.stack || item.message));
+        // }
 
         const duration = Date.now() - now;
         toast.success(`Build complete in ${(duration / 1000).toFixed(2)}s`);
