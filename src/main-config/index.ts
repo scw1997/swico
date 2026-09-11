@@ -3,7 +3,7 @@ import path from 'path';
 import chalk from 'chalk';
 import { colorConfig, toast, copyDirFiles } from '../utils';
 import { createLogger, ProxyOptions, RsbuildPlugin, RsbuildPlugins, Rspack } from '@rsbuild/core';
-import { Falsy } from '@rsbuild/core/dist-types/types';
+import { Falsy } from '@rsbuild/core/dist/types';
 
 export type ConfigRoutesItemType = {
     component?: string; //页面路径
@@ -42,6 +42,8 @@ export interface GlobalSwicoConfigType {
     devtool?: Rspack.Configuration['devtool']; //设置 sourcemap 生成方式
     externals?: any; //设置哪些模块不打包，转而在index.ejs中通过 <script> 或其他方式引入
     router?: ConfigRouterType; //路由相关
+    port?: number; //开发服务器端口
+    reactCompiler?: boolean; //是否使用react编译器，仅限react模板
 }
 
 export interface GlobalDataType {
@@ -62,10 +64,11 @@ export interface GlobalDataType {
             | 'externals'
             | 'router'
             | 'template'
+            | 'reactCompiler'
         >; //公共通用
         dev: Pick<
             GlobalSwicoConfigType,
-            'plugins' | 'proxy' | 'https' | 'devtool' | 'router' | 'responseHeaders'
+            'plugins' | 'proxy' | 'https' | 'devtool' | 'router' | 'responseHeaders' | 'port'
         >; //开发环境专用
         prod: Pick<GlobalSwicoConfigType, 'plugins' | 'console' | 'copy' | 'devtool' | 'router'>; //生产环境专用
     };
@@ -466,6 +469,7 @@ export const getFormatDefineVars = async (defineVarsConfigData) => {
 export const initConfig: Omit<GlobalSwicoConfigType, 'template'> = {
     console: true,
     plugins: [],
+    port: 3000, //默认为3000，若占用则会自动递增
     publicPath: '/',
     proxy: undefined,
     responseHeaders: undefined,
@@ -474,7 +478,8 @@ export const initConfig: Omit<GlobalSwicoConfigType, 'template'> = {
         base: '/',
         type: 'browser',
         routes: []
-    }
+    },
+    reactCompiler: false
 };
 export const customLogger = createLogger();
 

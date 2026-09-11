@@ -21,6 +21,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
     };
     const publicPath = customBaseConfig?.publicPath ?? initConfig.publicPath;
     const routerBase = customBaseConfig?.router?.base ?? initConfig.router.base;
+    const reactCompiler = customBaseConfig?.reactCompiler ?? initConfig.reactCompiler;
     //处理自定义变量
     //内置的一些变量
     const initialDefineVarsConfig = {
@@ -101,7 +102,9 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
             templateParameters: initialDefineVarsConfig
         },
         plugins: [
-            pluginReact(),
+            pluginReact({
+                reactCompiler
+            }),
             pluginSass(),
             pluginLess(),
             ...(customBaseConfig?.plugins ?? initConfig.plugins)

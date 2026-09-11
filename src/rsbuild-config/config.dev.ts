@@ -28,7 +28,8 @@ export default async function (options: GlobalDataType) {
             compress: true, //启动gzip压缩,
             headers: customConfig?.dev?.responseHeaders ?? initConfig.responseHeaders,
             proxy: customConfig?.dev?.proxy ?? initConfig.proxy,
-            open: false //不自动打开浏览器
+            open: false, //不自动打开浏览器
+            port: customConfig?.dev?.port ?? initConfig.port
         },
         performance: {
             buildCache: true //开启构建缓存
@@ -74,16 +75,14 @@ export default async function (options: GlobalDataType) {
                 eslintPluginOptions: {
                     configType: 'flat',
                     context: path.join(projectPath, '/src'),
-                    //禁用报错则停止编译，将错误信息传给rsbuild统一格式化输出
-                    failOnError: false,
-                    failOnWarning: true,
+                    severity: {
+                        error: 'error',
+                        warning: 'off'
+                    },
                     extensions:
                         templateType === 'vue'
                             ? ['vue', 'ts', 'js', 'tsx', 'jsx', 'mjs', 'mts']
                             : ['tsx', 'ts', 'js', 'mjs', 'mts', 'jsx'],
-                    // emitError: false,
-
-                    emitWarning: false,
                     // 开启缓存
                     cache: true
                     // 指定缓存目录
