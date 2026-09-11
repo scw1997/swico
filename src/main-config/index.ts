@@ -146,7 +146,8 @@ export const getProjectConfig: (env: GlobalDataType['env']) => Promise<GlobalDat
                         'devtool',
                         'externals',
                         'router',
-                        'template'
+                        'template',
+                        'reactCompiler'
                     ];
                     configFileName = 'swico.ts';
                     break;
@@ -157,6 +158,7 @@ export const getProjectConfig: (env: GlobalDataType['env']) => Promise<GlobalDat
                         'https',
                         'devtool',
                         'router',
+                        'port',
                         'responseHeaders'
                     ];
                     configFileName = 'swico.dev.ts';
@@ -165,21 +167,33 @@ export const getProjectConfig: (env: GlobalDataType['env']) => Promise<GlobalDat
                     supportedFieldList = ['plugins', 'console', 'copy', 'devtool', 'router'];
                     configFileName = 'swico.prod.ts';
             }
-            const toastTitle = `Swico config file => ${chalk.hex(colorConfig.theme)(configFileName)}`;
+            const toastTitle = `Swico config file error => ${chalk.hex(colorConfig.theme)(configFileName)}`;
             const unSupportedField = configFields.find(
                 (field) => !supportedFieldList.includes(field)
             );
             if (configFields.length > 0 && unSupportedField) {
                 const msgText = `The Swico configuration file '${chalk.blue(
                     configFileName
-                )}' does not support the field '${chalk.red(unSupportedField)}' `;
+                )}' does not support the field '${chalk.blue(unSupportedField)}' `;
                 toast.error(msgText);
+                process.exit(1);
+            }
+            //对vue模板不支持reactCompiler进行提示
+            if (
+                key === 'base' &&
+                configObj['template'] === 'vue' &&
+                configFields.includes('reactCompiler')
+            ) {
+                toast.error(
+                    `'${chalk.blue('vue')}' template does not support the field '${chalk.blue('reactCompiler')}'`,
+                    { title: toastTitle }
+                );
                 process.exit(1);
             }
             //对不支持的template值进行提示
             if (key === 'base' && !['vue', 'react'].includes(configObj['template'])) {
                 toast.error(
-                    `The field '${chalk.blue('template')}' does not support the value '${chalk.red(configObj['template'])}',the value should be 'vue' or 'react' `,
+                    `The field '${chalk.blue('template')}' does not support the value '${chalk.blue(configObj['template'])}',the value should be 'vue' or 'react' `,
                     { title: toastTitle }
                 );
                 process.exit(1);
@@ -189,7 +203,7 @@ export const getProjectConfig: (env: GlobalDataType['env']) => Promise<GlobalDat
                 !['hash', 'browser'].includes(configObj['router']?.type ?? initConfig.router.type)
             ) {
                 toast.error(
-                    `The field '${chalk.blue('router.type')}' does not support the value '${chalk.red(configObj['router'].type)}',the value should be 'browser' or 'hash' `,
+                    `The field '${chalk.blue('router.type')}' does not support the value '${chalk.blue(configObj['router'].type)}',the value should be 'browser' or 'hash' `,
                     { title: toastTitle }
                 );
                 process.exit(1);
@@ -214,10 +228,10 @@ export const getProjectConfig: (env: GlobalDataType['env']) => Promise<GlobalDat
 
     const envPath = env === 'dev' ? '.dev/' : '.prod/';
 
-    //生成webpack入口文件
+    //生成rsbuild入口文件
     const entryPath = path.resolve(projectPath, `./.swico/${envPath}index.js`);
 
-    //webpack html template
+    //rsbuild html template
     const templatePath = path.join(projectPath, '/src/index.ejs');
 
     return {
@@ -417,7 +431,7 @@ const initTemplateConfig = (
         );
 
         //处理swico包在开发项目里的引入入口文件
-        //由于rspack alias已配置swico的引入路径映射到了开发项目的.swico/index.js文件，所以这里需要将对应模板的入口文件复制到开发项目的.swico/index.js中
+        //由于rsbuild alias已配置swico的引入路径映射到了开发项目的.swico/index.js文件，所以这里需要将对应模板的入口文件复制到开发项目的.swico/index.js中
         const entryFilePath = path.resolve(projectPath, './.swico/index.js');
         await fs.copyFile(path.resolve(__dirname, `../index.${templateType}.js`), entryFilePath);
 

@@ -13,10 +13,7 @@ import packageJson from '../../package.json';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import { createRsbuild, RsbuildDevServer, RsbuildInstance } from '@rsbuild/core';
-const { SWICO_DEV_RESTART, SWICO_DEV_ROUTER_BASE } = process.env;
-
-// 当前开发服务器的端口号，模板类型，routerBase值的缓存
-let currentRouterBase = '/';
+const { SWICO_DEV_RESTART } = process.env;
 
 //监听ts全局声明文件和cli config文件修改
 const handleWatch = (projectPath: string, devServer: RsbuildDevServer, env: 'dev' | 'prod') => {
@@ -85,13 +82,9 @@ const handleWatch = (projectPath: string, devServer: RsbuildDevServer, env: 'dev
 
 // 重启服务（因为需要重新读取配置文件，所以不能直接调用start）
 const restartServer = () => {
-    const result = spawn.sync(
-        'cross-env',
-        ['SWICO_DEV_RESTART=true', `SWICO_DEV_ROUTER_BASE=${currentRouterBase}`, 'swico', 'start'],
-        {
-            stdio: 'inherit'
-        }
-    );
+    const result = spawn.sync('cross-env', ['SWICO_DEV_RESTART=true', 'swico', 'start'], {
+        stdio: 'inherit'
+    });
     if (result.error) {
         toast.error(result.error.message);
         process.exit(1);
@@ -123,7 +116,7 @@ const createCompileListener = (rsbuild: RsbuildInstance) => {
             );
             return;
         }
-        // 对webpack warning只处理eslint报错，其余忽略且不提示
+        // 对rsbuild warning只处理eslint报错，其余忽略且不提示
         if (stats?.hasWarnings()) {
             // @ts-ignore
             const info = stats?.toJson();
@@ -144,7 +137,7 @@ const createCompileListener = (rsbuild: RsbuildInstance) => {
 
 // 执行start本地启动
 export default async function start() {
-    // console.log('env', SWICO_DEV_RESTART, SWICO_DEV_PORT, SWICO_DEV_ROUTER_BASE );
+    // console.log('env', SWICO_DEV_RESTART );
     process.env.SWICO_ENV = 'dev';
     if (SWICO_DEV_RESTART !== 'true') {
         console.log('\n');
@@ -166,14 +159,11 @@ export default async function start() {
         //监听编译细节
         createCompileListener(rsbuild);
         handleWatch(projectPath, server, env);
-        if (
-            SWICO_DEV_RESTART !== 'true' ||
-            (SWICO_DEV_RESTART === 'true' && newRouterBase !== SWICO_DEV_ROUTER_BASE)
-        ) {
-            toast.info(
-                `Project is running at：${chalk.hex('#29abe0')(`${customConfig.dev.https ? 'https' : 'http'}://localhost:${rsbuild.context.devServer.port}${newRouterBase}`)}`
-            );
-        }
+
+        toast.info(
+            `Project is running at：${chalk.hex('#29abe0')(`${customConfig.dev.https ? 'https' : 'http'}://localhost:${rsbuild.context.devServer.port}${newRouterBase}`)}`
+        );
+
         const proxyConfig = startConfig.server.proxy;
         if (
             proxyConfig &&
@@ -183,7 +173,6 @@ export default async function start() {
         ) {
             toast.info('Proxy service is enabled');
         }
-        currentRouterBase = newRouterBase;
     } catch (e) {
         const strErr = e.toString();
         // console.log('2222222', strErr);

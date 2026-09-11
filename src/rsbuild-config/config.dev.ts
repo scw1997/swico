@@ -62,6 +62,10 @@ export default async function (options: GlobalDataType) {
                     logger: {
                         log: () => {},
                         error: (message) => {
+                            if (templateType === 'vue' && message.includes('Extensions changed')) {
+                                // 忽略vue文件扩展名变化的错误（由Layout文件引起）
+                                return;
+                            }
                             toast.error(message, { title: 'TypeScript errors' });
                         }
                     },
