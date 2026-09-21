@@ -110,7 +110,7 @@ const getFormatRouter = (projectPath: string, routes: ConfigRouterType['routes']
     });
 };
 
-//获取开发者的自定义项目配置和相关参数
+//获取开发者的项目的自定义配置和相关参数
 export const getProjectConfig: (env: GlobalDataType['env']) => Promise<GlobalDataType> = async (
     env
 ) => {
@@ -223,8 +223,6 @@ export const getProjectConfig: (env: GlobalDataType['env']) => Promise<GlobalDat
 
     //在开发端项目生成.swico配置文件
     await initTemplateConfig(routerConfig, templateType, env);
-    //处理脚手架入口文件
-    await initCliEntryFile(projectPath, templateType, env);
 
     const envPath = env === 'dev' ? '.dev/' : '.prod/';
 
@@ -244,40 +242,8 @@ export const getProjectConfig: (env: GlobalDataType['env']) => Promise<GlobalDat
     };
 };
 
-//修正.swico中入口index.js内部部分模块的引入路径
-const initCliEntryFile = async (
-    projectPath: string,
-    templateType: GlobalDataType['templateType'],
-    env: GlobalDataType['env']
-) => {
-    //获取.swico中入口index.js的路径和内容
-    const entryFilePath = path.resolve(projectPath, './.swico/index.js');
-    let replaceEntryText = await fs.readFile(entryFilePath, 'utf8');
-    //处理hooks的引入路径，由从swico npm包内引入改为从项目生成的.swico引入
-    const formatHooksPath = path
-        .resolve(projectPath, './.swico/hooks')
-        // @ts-ignore
-        .replaceAll('\\', '/');
-    replaceEntryText = replaceEntryText.replaceAll(
-        `require("./template-root/.swico-${templateType}/hooks");`,
-        `require("${formatHooksPath}");`
-    );
-
-    //处理history的引入路径，由从swico npm包内引入改为从项目生成的.swico引入
-    const formatHistoryPath = path
-        .resolve(projectPath, `./.swico/.${env}/history`)
-        // @ts-ignore
-        .replaceAll('\\', '/');
-    replaceEntryText = replaceEntryText.replaceAll(
-        'require("./mock-history");',
-        `require("${formatHistoryPath}");`
-    );
-
-    await fs.writeFile(entryFilePath, replaceEntryText);
-};
-
-//路由相关配置
-const formatRouterConfig = (
+//路由相关处理
+const handleAndCopyRouterFile = (
     { routes = [], type = 'browser', base = '/' }: ConfigRouterType,
     templateType: GlobalDataType['templateType'],
     env: GlobalDataType['env']
@@ -291,9 +257,14 @@ const formatRouterConfig = (
         //处理路由配置
 
         const formatRouter = getFormatRouter(projectPath, routes, templateType);
-        const routerFilePath = path.resolve(projectPath, `./.swico${envPath}router.js`);
+        const oriRouterFilePath = path.resolve(
+            __dirname,
+            `../template-root/.swico-${templateType}/$env/router.js`
+        );
+        const targetRouterFilePath = path.resolve(projectPath, `./.swico${envPath}router.js`);
+
         //获取路由配置文件内容
-        let routerFileText = await fs.readFile(routerFilePath, 'utf8');
+        let routerFileText = await fs.readFile(oriRouterFilePath, 'utf8');
         //处理路由的routes数据格式
         let formatRoutesTextData = `exports.routes = ${JSON.stringify(formatRouter)};`;
         formatRoutesTextData = formatRoutesTextData.replace(/"(\(\)=>import\('[^']+'\))"/g, '$1');
@@ -323,7 +294,7 @@ const formatRouterConfig = (
         }
 
         //写入路由配置
-        await fs.writeFile(routerFilePath, routerFileText);
+        await fs.writeFile(targetRouterFilePath, routerFileText);
         resolve(null);
     });
 };
@@ -396,70 +367,80 @@ export const handleGlobalStyleFile = (replaceIndexText) => {
     return newReplaceIndexText;
 };
 
-// 更新开发环境下swico.dev.index.js内容
-export const updateIndexFileText = async (envPath, newFileText) => {
-    // 当前命令行选择的目录(即项目根路径)
-    const projectPath = process.cwd();
-    await fs.writeFile(path.resolve(projectPath, `./.swico${envPath}index.js`), newFileText);
-};
-
 //在开发端项目生成模板路由配置
 const initTemplateConfig = (
     routerConfig,
     templateType: GlobalDataType['templateType'],
     env: GlobalDataType['env']
 ) => {
-    // 当前命令行选择的目录(即项目根路径)
-    const projectPath = process.cwd();
-    const envPath = env === 'dev' ? '/.dev/' : '/.prod/';
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-        const copyTargetPath = path.resolve(projectPath, `./.swico${envPath}`);
+        // 当前命令行选择的目录(即项目根路径)
+        const projectPath = process.cwd();
+        const envPath = env === 'dev' ? '/.dev/' : '/.prod/';
 
-        //将template路径中跟环境相关的文件复制到开发端相应env路径
-        await copyDirFiles(
-            path.resolve(__dirname, `../template-root/.swico-${templateType}/$env`),
-            copyTargetPath,
-            (fileName) => !fileName.endsWith('.d.ts') && !['hooks.js'].includes(fileName)
-        );
-
-        //将template路径中跟环境无关的配置文件复制到开发端固定路径
-        await copyDirFiles(
-            path.resolve(__dirname, `../template-root/.swico-${templateType}`),
-            path.resolve(projectPath, './.swico'),
-            (fileName) => ['hooks.js'].includes(fileName)
-        );
-
-        //处理swico包在开发项目里的引入入口文件
+        //1.处理swico包在项目里的模块导出文件并复制到项目根路径.swico/index.js
         //由于rsbuild alias已配置swico的引入路径映射到了开发项目的.swico/index.js文件，所以这里需要将对应模板的入口文件复制到开发项目的.swico/index.js中
-        const entryFilePath = path.resolve(projectPath, './.swico/index.js');
-        await fs.copyFile(path.resolve(__dirname, `../index.${templateType}.js`), entryFilePath);
+        const oriEntryFilePath = path.resolve(__dirname, `../index.${templateType}.js`);
+        const targetEntryFilePath = path.resolve(projectPath, './.swico/index.js');
+        let replaceEntryText = await fs.readFile(oriEntryFilePath, 'utf8');
 
-        //下面是一些复制完之后需要修改的操作
-
-        //处理路由相关
-        await formatRouterConfig(routerConfig, templateType, env);
-
-        //修正.swico中hooks.js内部的引入
-        const hooksFilePath = path.resolve(projectPath, './.swico/hooks.js');
-        let replaceHooksText = await fs.readFile(hooksFilePath, 'utf8');
-        replaceHooksText = replaceHooksText.replaceAll('$env', `.${env}`);
-        await fs.writeFile(hooksFilePath, replaceHooksText);
-
-        let replaceIndexText = await fs.readFile(
-            path.resolve(projectPath, `./.swico${envPath}index.js`),
-            'utf8'
+        //1.1 处理hooks的引入路径，由从swico npm包内引入改为从项目生成的.swico引入
+        const formatHooksPath = path
+            .resolve(projectPath, './.swico/hooks')
+            // @ts-ignore
+            .replaceAll('\\', '/');
+        replaceEntryText = replaceEntryText.replaceAll(
+            `require("./template-root/.swico-${templateType}/hooks");`,
+            `require("${formatHooksPath}");`
         );
-        //修正.swico/$env/index.js中对global.css/less/scss的引入路径
-        replaceIndexText = handleGlobalStyleFile(replaceIndexText);
+        //1.2   处理history的引入路径，由从swico npm包内引入改为从项目生成的.swico引入
+        const formatHistoryPath = path
+            .resolve(projectPath, `./.swico/.${env}/history`)
+            // @ts-ignore
+            .replaceAll('\\', '/');
+        replaceEntryText = replaceEntryText.replaceAll(
+            'require("./mock-history");',
+            `require("${formatHistoryPath}");`
+        );
 
+        await fs.writeFile(targetEntryFilePath, replaceEntryText);
+
+        //2.处理router.js并复制到项目根路径.swico/$env/router.js中
+        await handleAndCopyRouterFile(routerConfig, templateType, env);
+
+        //3.修正hooks.js内部的引入路径并复制到项目根路径.swico/$env/hooks.js中
+        const oriHooksFilePath = path.resolve(
+            __dirname,
+            `../template-root/.swico-${templateType}/$env/hooks.js`
+        );
+        const targetHooksFilePath = path.resolve(projectPath, './.swico/hooks.js');
+        let replaceHooksText = await fs.readFile(oriHooksFilePath, 'utf8');
+        replaceHooksText = replaceHooksText.replaceAll('$env', `.${env}`);
+        await fs.writeFile(targetHooksFilePath, replaceHooksText);
+
+        //4. 复制history.js到项目根路径.swico/$env/history.js中(内容不用修改)
+        const oriHistoryFilePath = path.resolve(
+            __dirname,
+            `../template-root/.swico-${templateType}/$env/history`
+        );
+        const targetHistoryFilePath = path.resolve(projectPath, `./.swico${envPath}history`);
+        await fs.copyFile(oriHistoryFilePath, targetHistoryFilePath);
+
+        //5.修正index.js内部的引入路径并复制到项目根路径.swico/$env/index.js中
+        const oriIndexFilePath = path.resolve(
+            __dirname,
+            `../template-root/.swico-${templateType}/hooks.js`
+        );
+        const targetIndexFilePath = path.resolve(projectPath, `./.swico${envPath}index.js`);
+        let replaceIndexText = await fs.readFile(oriIndexFilePath, 'utf8');
+        //4.1 修正global.css/less/scss的引入路径
+        replaceIndexText = handleGlobalStyleFile(replaceIndexText);
+        //4.2 修正.swico/$env/index.js中对loading组件引入路径
         if (templateType === 'react') {
-            //修正.swico/$env/index.js中对loading组件引入路径
             replaceIndexText = await handleLoadingFile(projectPath, replaceIndexText);
         }
-
-        //更新index.js
-        await updateIndexFileText(envPath, replaceIndexText);
+        await fs.writeFile(targetIndexFilePath, replaceIndexText);
 
         resolve(null);
     });

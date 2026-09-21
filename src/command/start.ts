@@ -1,11 +1,6 @@
 import getStartConfig from '../rsbuild-config/config.dev';
 import { toast } from '../utils';
-import {
-    getProjectConfig,
-    handleGlobalStyleFile,
-    handleLoadingFile,
-    updateIndexFileText
-} from '../main-config';
+import { getProjectConfig, handleGlobalStyleFile, handleLoadingFile } from '../main-config';
 import chokidar from 'chokidar';
 import spawn from 'cross-spawn';
 import path from 'path';
@@ -14,6 +9,13 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import { createRsbuild, RsbuildDevServer, RsbuildInstance } from '@rsbuild/core';
 const { SWICO_DEV_RESTART } = process.env;
+
+// 更新开发环境下swico.dev.index.js内容
+export const updateIndexFileText = async (envPath, newFileText) => {
+    // 当前命令行选择的目录(即项目根路径)
+    const projectPath = process.cwd();
+    await fs.writeFile(path.resolve(projectPath, `./.swico${envPath}index.js`), newFileText);
+};
 
 //监听ts全局声明文件和cli config文件修改
 const handleWatch = (projectPath: string, devServer: RsbuildDevServer, env: 'dev' | 'prod') => {
