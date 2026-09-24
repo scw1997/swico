@@ -14,7 +14,7 @@ const { SWICO_DEV_RESTART } = process.env;
 export const updateIndexFileText = async (envPath, newFileText) => {
     // 当前命令行选择的目录(即项目根路径)
     const projectPath = process.cwd();
-    await fs.writeFile(path.resolve(projectPath, `./.swico${envPath}index.js`), newFileText);
+    await fs.outputFile(path.resolve(projectPath, `./.swico${envPath}index.js`), newFileText);
 };
 
 //监听ts全局声明文件和cli config文件修改

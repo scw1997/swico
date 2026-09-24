@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
-import { colorConfig, toast, copyDirFiles } from '../utils';
+import { colorConfig, toast } from '../utils';
 import { createLogger, ProxyOptions, RsbuildPlugin, RsbuildPlugins, Rspack } from '@rsbuild/core';
 import { Falsy } from '@rsbuild/core/dist/types';
 
@@ -294,7 +294,7 @@ const handleAndCopyRouterFile = (
         }
 
         //写入路由配置
-        await fs.writeFile(targetRouterFilePath, routerFileText);
+        await fs.outputFile(targetRouterFilePath, routerFileText);
         resolve(null);
     });
 };
@@ -394,9 +394,9 @@ const initTemplateConfig = (
             `require("./template-root/.swico-${templateType}/hooks");`,
             `require("${formatHooksPath}");`
         );
-        //1.2   处理history的引入路径，由从swico npm包内引入改为从项目生成的.swico引入
+        //1.2  处理history的引入路径，由从swico npm包内引入改为从项目生成的.swico引入
         const formatHistoryPath = path
-            .resolve(projectPath, `./.swico/.${env}/history`)
+            .resolve(projectPath, `./.swico/.${env}/history.js`)
             // @ts-ignore
             .replaceAll('\\', '/');
         replaceEntryText = replaceEntryText.replaceAll(
@@ -404,33 +404,33 @@ const initTemplateConfig = (
             `require("${formatHistoryPath}");`
         );
 
-        await fs.writeFile(targetEntryFilePath, replaceEntryText);
+        await fs.outputFile(targetEntryFilePath, replaceEntryText);
 
         //2.处理router.js并复制到项目根路径.swico/$env/router.js中
         await handleAndCopyRouterFile(routerConfig, templateType, env);
 
-        //3.修正hooks.js内部的引入路径并复制到项目根路径.swico/$env/hooks.js中
+        //3.修正hooks.js内部的引入路径并复制到项目根路径.swico/hooks.js中
         const oriHooksFilePath = path.resolve(
             __dirname,
-            `../template-root/.swico-${templateType}/$env/hooks.js`
+            `../template-root/.swico-${templateType}/hooks.js`
         );
         const targetHooksFilePath = path.resolve(projectPath, './.swico/hooks.js');
         let replaceHooksText = await fs.readFile(oriHooksFilePath, 'utf8');
         replaceHooksText = replaceHooksText.replaceAll('$env', `.${env}`);
-        await fs.writeFile(targetHooksFilePath, replaceHooksText);
+        await fs.outputFile(targetHooksFilePath, replaceHooksText);
 
         //4. 复制history.js到项目根路径.swico/$env/history.js中(内容不用修改)
         const oriHistoryFilePath = path.resolve(
             __dirname,
-            `../template-root/.swico-${templateType}/$env/history`
+            `../template-root/.swico-${templateType}/$env/history.js`
         );
-        const targetHistoryFilePath = path.resolve(projectPath, `./.swico${envPath}history`);
+        const targetHistoryFilePath = path.resolve(projectPath, `./.swico${envPath}history.js`);
         await fs.copyFile(oriHistoryFilePath, targetHistoryFilePath);
 
         //5.修正index.js内部的引入路径并复制到项目根路径.swico/$env/index.js中
         const oriIndexFilePath = path.resolve(
             __dirname,
-            `../template-root/.swico-${templateType}/hooks.js`
+            `../template-root/.swico-${templateType}/$env/index.js`
         );
         const targetIndexFilePath = path.resolve(projectPath, `./.swico${envPath}index.js`);
         let replaceIndexText = await fs.readFile(oriIndexFilePath, 'utf8');
@@ -440,7 +440,7 @@ const initTemplateConfig = (
         if (templateType === 'react') {
             replaceIndexText = await handleLoadingFile(projectPath, replaceIndexText);
         }
-        await fs.writeFile(targetIndexFilePath, replaceIndexText);
+        await fs.outputFile(targetIndexFilePath, replaceIndexText);
 
         resolve(null);
     });
