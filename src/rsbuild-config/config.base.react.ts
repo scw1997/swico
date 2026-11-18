@@ -27,8 +27,7 @@ export default async function ({ projectPath, entryPath, env, customConfig }: Gl
     const initialDefineVarsConfig = {
         SWICO_ENV: JSON.stringify(env),
         SWICO_ROUTER_BASE: JSON.stringify(routerBase),
-        SWICO_PUBLIC_PATH: JSON.stringify(publicPath),
-        SWICO_STATIC_PUBLIC_PATH: JSON.stringify(env === 'prod' ? publicPath : '/')
+        SWICO_PUBLIC_PATH: JSON.stringify(publicPath)
     };
     const customDefineVarsConfig = await getFormatDefineVars(customBaseConfig?.define ?? {});
     return {

@@ -1,6 +1,6 @@
 {
     "name": "swico",
-    "version": "3.2.0",
+    "version": "3.3.0",
     "description": "Simple, efficient, and practical front-end framework",
     "main": "./src/index.js",
     "types": "./src/index.d.ts",
@@ -35,7 +35,6 @@
         "compile": "tsc && ts-node ./src/task.ts",
         "publish:offical": "npm run compile && cd ./dist && npm publish",
         "publish:beta": "npm run compile && cd ./dist && npm publish --tag=beta",
-        "publish:alpha": "npm run compile && cd ./dist && npm publish --tag=alpha",
         "lint:fix": "eslint --fix src/**/*.{js,jsx,ts,tsx} "
     },
     "repository": {
@@ -46,6 +45,7 @@
     "license": "ISC",
     "dependencies": {
         "@esctn/vue-tsc-api": "~1.0.1",
+        "vue-tsc": "3.0.3",
         "@rsbuild/plugin-basic-ssl": "~1.2.3",
         "@rsbuild/plugin-eslint": "~2.0.2",
         "@rsbuild/plugin-less": "~2.0.1",
@@ -76,8 +76,8 @@
         "prettier": "3.5.3",
         "react": "~19.2.6",
         "react-dom": "~19.2.6",
-        "typescript": "5.8.3",
         "typescript-eslint": "8.59.2",
+        "typescript": "5.8.3",
         "vue": "~3.5.34"
     },
     "engines": {
